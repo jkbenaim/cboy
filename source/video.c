@@ -423,7 +423,7 @@ void vid_waitForNextFrame()
 {
 #ifdef USE_SDL
 #ifndef __APPLE__
-//   SDL_Delay(1000 / 60.0);
+  SDL_Delay(1000 / 60.0);
 #endif
 #endif
   return;
