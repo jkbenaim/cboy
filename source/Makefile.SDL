@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS= -O0 -pg -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL
+CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL
 
 all: cboy
 
