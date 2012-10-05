@@ -1,0 +1,25 @@
+video mode flow:
+  { mode 2 for 80  clocks
+    mode 3 for 172 clocks
+    mode 0 for 204 clocks } repeats 144 times
+  mode 1 for 4560 clocks
+  grand total: 70224 clocks
+
+
+MBC5 rumble:
+  toggled with bit 3 of the RAM bank register.
+  0=off, 1=on
+
+Pokemon Gold/Silver problem:
+  compare at/near 3A:410C is failing
+
+Graphics priority:
+  (bottom)
+    Objects with low priority in OAM attributes
+    Background
+    Window
+    Objects
+    Background with priority in CGB bg attributes
+  (top)
+  
+  Note: LCDC.0 can make the background and window sit behind everything.

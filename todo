@@ -1,0 +1,11 @@
+TODO
+
+Before release:
+  * Make save files have correct filenames (since 2012-04-11)
+  * Sprite priority (since 2012-06-02)
+  * HDMA (since 2012-06-02)
+  * Double-speed mode (since 2012-06-02)
+
+Eventually:
+  * Audio
+
