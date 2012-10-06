@@ -130,6 +130,8 @@ wait_for_vblank:
   pop hl
   ret
 
+; This palette data was shamelessly stolen from BGB.
+; Many thanks to Beware.
 dmg_palette_bgp:
   .db $BD,$77,$94,$52,$6B,$2D,$42,$08
 dmg_palette_obp0:
