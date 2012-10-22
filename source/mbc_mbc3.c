@@ -97,6 +97,7 @@ void mbc_mbc3_write_rom_bank_select() {
 //   printf("%02X ", memByte );
   size_t offset;
   memByte &= 0x7F;
+  cart.cart_bank_num = memByte;
   if( memByte == 0 )
     offset = (size_t)16384;
   else
