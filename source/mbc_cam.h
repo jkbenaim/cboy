@@ -24,7 +24,7 @@ void mbc_cam_read_bank_0( void );
 void mbc_cam_read_bank_n( void );
 void mbc_cam_write_ram_enable( void );
 void mbc_cam_write_rom_bank_select( void );
-void mbc_cam_write_ram_bank_select( void );
+void mbc_cam_extram_bank_select( void );
 void mbc_cam_write_mode_select( void );
 void mbc_cam_read_extram( void );
 void mbc_cam_write_extram( void );
