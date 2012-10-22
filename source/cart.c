@@ -206,7 +206,6 @@ void cart_reset_mbc()
     case 0x1C:  // MBC5+RUMBLE
     case 0x1D:  // MBC5+RUMBLE+RAM
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
-    case 0x22:
       mbc_mbc5_install();
       break;
     case 0xFC:	// POCKET CAMERA
