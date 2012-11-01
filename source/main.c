@@ -16,10 +16,12 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#ifdef ARM9
-#include <nds.h>
-#include <fat.h>
-#endif // ARM9
+#ifdef __ANDROID__
+#include <jni.h>
+#include <time.h>
+#include <android/log.h>
+#include <android/bitmap.h>
+#endif // __ANDROID__
 
 #include <stdlib.h>
 #include "types.h"
@@ -32,6 +34,11 @@
 
 int stop = 0;
 
+#ifdef __ANDROID__
+#define  LOG_TAG    "libcboy"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#endif // __ANDROID__
 
 #ifdef USE_SDL
 int main ( int argc, char* argv[] ) {
@@ -66,62 +73,41 @@ int main ( int argc, char* argv[] ) {
 }
 #endif // USE_SDL
 
-#ifdef ARM9
-int main ( void ) {
-//set the mode for 2 text layers and two extended background layers
-        videoSetMode(MODE_5_2D); 
+#ifdef __ANDROID__
+JNIEXPORT void JNICALL Java_com_example_plasma_PlasmaView_renderPlasma(JNIEnv * env, jobject  obj, jobject bitmap,  jlong  time_ms)
+{
+    AndroidBitmapInfo  info;
+    void*              pixels;
+    int                ret;
+    static int         init;
 
-        //set the first two banks as background memory and the third as sub background memory
-        //D is not used..if you need a bigger background then you will need to map
-        //more vram banks consecutivly (VRAM A-D are all 0x20000 bytes in size)
-        vramSetPrimaryBanks(    VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_BG_0x06020000, 
-                VRAM_C_SUB_BG , VRAM_D_LCD); 
-        
-        
+    if (!init) {
+        mem_init();
+        cpu_init();
+        cart_init( "/sdcard/roms/bootrom.bin", "/sdcard/roms/pkmnsilv.gbc" );
+        vid_init();
+        input_init();
+        init = 1;
+    }
 
-        consoleDemoInit();
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
 
-//      iprintf("\n\n\tHello DS devers\n");
-//      iprintf("\twww.drunkencoders.com\n");
-//      iprintf("\t16 bit bitmap demo");
+    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
+        LOGE("Bitmap format is not RGB_565 !");
+        return;
+    }
 
-        // set up our bitmap background
-        bg = bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 0,0);
-        u16* backBuffer = (u16*)bgGetGfxPtr(bg)/* + 256*256*/;
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
 
-
-  iprintf( " ----------------------- \n" );
-  iprintf( " --- Welcome to cboy --- \n" );
-  iprintf( " ---    (c) 2012     --- \n" );
-  iprintf( " ----------------------- \n" );
-  
-  // init libfat
-  if( !fatInitDefault() )
-  {
-    iprintf("FAT init failed.\n");
-    for(;;){}
-  }
-  else
-  {
-    iprintf("FAT init succeded.\n");
-  }
-  
-  mem_init();
-  cpu_init();
-  cart_init( "gb/cgb_rom.bin", "gb/pkmnsilv.gbc" );
-  vid_init();
-  input_init();
-  int frames=0;
-  while(!stop)
-  {
     input_handle();
     cpu_do_one_frame();
-    vid_frame();
-    iprintf(".");
-  }
-  
-  cart_cleanup();
-  
-  return 0;
+    vid_frame( &info, pixels );
+
+    AndroidBitmap_unlockPixels(env, bitmap);
 }
-#endif // ARM9
+#endif // __ANDROID__

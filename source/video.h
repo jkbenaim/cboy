@@ -18,13 +18,16 @@
 #ifdef USE_SDL
 #include <SDL/SDL.h>
 #endif // USE_SDL
+#ifdef __ANDROID__
+#include <android/bitmap.h>
+#endif // __ANDROID__
 #include "types.h"
 
 // Sprite attribute flags
-#define	SPRITE_PRIORITY		0x80  // 0=Sprite above BG, 1=Sprite behind BG color 1-3
-#define	SPRITE_YFLIP		0x40  // 0=Normal, 1=Vertically mirrored
-#define SPRITE_XFLIP		0x20  // 0=Normal, 1=Horizontally mirrored
-#define SPRITE_DMG_PAL		0x10  // 0=OBP0, 1=OBP1
+#define	SPRITE_PRIORITY		0x80    // 0=Sprite above BG, 1=Sprite behind BG color 1-3
+#define	SPRITE_YFLIP		0x40    // 0=Normal, 1=Vertically mirrored
+#define SPRITE_XFLIP		0x20    // 0=Normal, 1=Horizontally mirrored
+#define SPRITE_DMG_PAL		0x10    // 0=OBP0, 1=OBP1
 #define SPRITE_VRAM_BANK	0x08	// 0=Bank 0, 1=Bank 1 (CGB only)
 #define SPRITE_CGB_PAL_MASK	0x07	// OBP0-7 (CGB only)
 
@@ -39,10 +42,12 @@
 void vid_init( void );
 void vid_waitForNextFrame();
 void vid_render_line();
+#ifdef USE_SDL
 void vid_frame();
+#endif
+#ifdef __ANDROID__
+void vid_frame( AndroidBitmapInfo* info, void* pixels );
+#endif
 extern pixel_t palette[4];
 extern pixel_t pixmem[160*144];
 
-#ifdef ARM9
-extern int bg;
-#endif // ARM9

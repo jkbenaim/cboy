@@ -26,18 +26,10 @@
 #define _ASSERT_H_
 
 #include <stdlib.h> // for exit
+#include <stdio.h> // for printf
 
 #ifndef NDEBUG
 
-#ifdef ARM9
-#define assert(msg, cond) { \
-if(!(cond)) \
-{ \
-iprintf("Assertion failed: %s\n", msg); \
-for(;;){}; \
-} \
-}
-#else
 #define assert(msg, cond) { \
 if(!(cond)) \
 { \
@@ -45,7 +37,6 @@ printf("Assertion failed: %s\n", msg); \
 exit(1); \
 } \
 }
-#endif // ARM9
 
 #else  // NDEBUG
 #define assert(msg, cond)

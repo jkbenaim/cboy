@@ -23,28 +23,16 @@
 #ifdef USE_SDL
 #include <SDL/SDL.h>
 #endif
+#ifdef __ANDROID__
+#include <android/bitmap.h>
+#endif // __ANDROID__
 #include "assert.h"
-
-#ifdef ARM9
-int bg;
-#endif // ARM9
 
 pixel_t pixmem[160*144];
 
 #ifdef USE_SDL
 SDL_Surface *screen;
 #endif
-
-
-#ifdef USE_SDL
-u32 cgb2rgb( int color )
-{
-  int r = ((color & 0x001F) >> 0      ) << 3;
-  int g = ((color & 0x03E0) >> 5      ) << 3;
-  int b = ((color & 0x7C00) >> 10     ) << 3;
-  return SDL_MapRGB( screen->format, r, g, b );
-}
-#endif  // USE_SDL
 
 void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
   
@@ -429,10 +417,30 @@ void vid_waitForNextFrame()
   return;
 }
 
+#ifdef USE_SDL
+inline u32 rgb555_to_SDL( int color )
+{
+  int r = ((color & 0x001F) >> 0      ) << 3;
+  int g = ((color & 0x03E0) >> 5      ) << 3;
+  int b = ((color & 0x7C00) >> 10     ) << 3;
+  return SDL_MapRGB( screen->format, r, g, b );
+}
+#endif  // USE_SDL
+
+inline uint16_t rgb555_to_rgb565( pixel_t in )
+{
+  uint16_t out;
+  const int r = ((in & 0x001F) >> 0      ) << 0;
+  const int g = ((in & 0x03E0) >> 5      ) << 1;
+  const int b = ((in & 0x7C00) >> 10     ) << 0;
+  out = (r<<11) + (g<<5) + b;
+  return out;
+}
+
+#ifdef USE_SDL
 void vid_frame()
 {
     // TODO
-#ifdef USE_SDL
   int x,y;
   u32 *surfPixels = screen->pixels;
   int width = screen->w;
@@ -441,12 +449,32 @@ void vid_frame()
   {
     for( x=0; x<160; ++x )
     {
-      surfPixels[dstStartOfLine + x] = cgb2rgb( pixmem[srcStartOfLine + x] );
+      surfPixels[dstStartOfLine + x] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
     }
     srcStartOfLine += 160;
     dstStartOfLine += width;
   }
     
   SDL_UpdateRect( screen, 0, 0, 0, 0 );
-#endif // USE_SDL
 }
+#endif // USE_SDL
+
+#ifdef __ANDROID__
+void vid_frame( AndroidBitmapInfo* info, void* pixels )
+{
+    // TODO
+  int x,y;
+  const int width = info->width;
+  int srcStartOfLine=0, dstStartOfLine=0;
+  for( y=0; y<144; ++y )
+  {
+    for( x=0; x<160; ++x )
+    {
+      ((uint16_t*)pixels)[dstStartOfLine + x] = rgb555_to_rgb565( pixmem[srcStartOfLine + x] );
+    }
+    srcStartOfLine += 160;
+    dstStartOfLine += width;
+  }
+}
+#endif // __ANDROID__
+

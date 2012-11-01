@@ -135,11 +135,14 @@ int input_event_filter(const SDL_Event *event)
   
   return 0;
 }
+#endif // USE_SDL
 
 void input_init()
 {
+#ifdef USE_SDL
   // set up event filtering
   SDL_SetEventFilter( input_event_filter );
+#endif // USE_SDL
   state.joyp = 0xFF;
   state.joyp_buttons = 0xFF;
   state.joyp_directions = 0xFF;
@@ -148,17 +151,8 @@ void input_init()
 
 void input_handle()
 {
+#ifdef USE_SDL
   // Pump events through the filter.
   SDL_PumpEvents();
-}
 #endif // USE_SDL
-
-#ifdef ARM9
-void input_init()
-{
 }
-
-void input_handle()
-{
-}
-#endif // ARM9
