@@ -79,7 +79,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
   
   // fill pixel array with span
   pixel_t pixels[8];	// pixel 7 at the left, pixel 0 at the right
-  u8 lowBits, highBits;
+  int lowBits, highBits;
   if( vramBank == 0 )
   {
     lowBits = vram_bank_zero[vramAddr];
@@ -90,13 +90,29 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
     lowBits = vram_bank_one[vramAddr];
     highBits = vram_bank_one[vramAddr + 1];
   }
-  
+    
+  // OLD
+//   int p;
+//   pixel_t color;
+//   for( p=0; p<8; ++p )
+//   {
+//     color = (BIT(highBits, p) << 1)
+//        + (BIT(lowBits, p));
+//     pixels[p] = myPalette[color];
+//   }
+
+  // NEW
   int p;
-  pixel_t color;
   for( p=0; p<8; ++p )
   {
-    color = (BIT(highBits, p) << 1)
-	  + (BIT(lowBits, p));
+    int color;
+    int mask;
+    color = 0;
+    mask = 1<<p;
+    if( lowBits & mask )
+      color = 1;
+    if( highBits & mask )
+      color += 2;
     pixels[p] = myPalette[color];
   }
   
@@ -166,7 +182,7 @@ void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, 
   // fill pixel array with span
   pixel_t pixels[8];	// pixel 7 at the left, pixel 0 at the right
   pixel_t colors[8];
-  u8 lowBits, highBits;
+  int lowBits, highBits;
   if( vramBank == 0 )
   {
     lowBits = vram_bank_zero[vramAddr];
@@ -178,13 +194,29 @@ void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, 
     highBits = vram_bank_one[vramAddr + 1];
   }
     
-  
+  // OLD
+//   int p;
+//   pixel_t color;
+//   for( p=0; p<8; ++p )
+//   {
+//     color = (BIT(highBits, p) << 1)
+// 	  + (BIT(lowBits, p));
+//     colors[p] = color;
+//     pixels[p] = myPalette[color];
+//   }
+
+  // NEW
   int p;
-  pixel_t color;
   for( p=0; p<8; ++p )
   {
-    color = (BIT(highBits, p) << 1)
-	  + (BIT(lowBits, p));
+    int color;
+    int mask;
+    color = 0;
+    mask = 1<<p;
+    if( lowBits & mask )
+      color = 1;
+    if( highBits & mask )
+      color += 2;
     colors[p] = color;
     pixels[p] = myPalette[color];
   }

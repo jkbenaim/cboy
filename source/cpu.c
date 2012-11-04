@@ -3533,7 +3533,7 @@ void cpu_do_one_instruction()
     state.halt = 0;
   }
   
-  u8 pendingInterrupts = state.ime & state.ie & state.iflag;
+  int pendingInterrupts = state.ime & state.ie & state.iflag;
   if( pendingInterrupts != 0x00 )
   {
 //     printf("ICHECK, ime: %02X, iflag: %02X, ie: %02X, pendingInterrupts: %02X\n", state.ime, state.iflag, state.ie, pendingInterrupts);
@@ -3624,10 +3624,15 @@ void cpu_do_one_instruction()
   
   // Update vid_cycles counter.
   state.vid_cycles += instr_time * 4;
+  state.line_progress += instr_time * 4;
   
   // Update LY.
   state.last_ly = state.ly;
-  state.ly = state.vid_cycles / CYCLES_LINE;
+  if( state.line_progress >= CYCLES_LINE )
+  {
+    state.line_progress -= CYCLES_LINE;
+    state.ly++;
+  }
   
   // Check LYC.
   if( state.ly == state.lyc )
@@ -3638,10 +3643,6 @@ void cpu_do_one_instruction()
   }
   else
     state.stat &= 0xFB;
-  
-  
-  // Update line_progress.
-  int line_progress = state.vid_cycles % CYCLES_LINE;
   
   // Update vid_mode.
   if( state.ly >= 144 ) {
@@ -3658,7 +3659,7 @@ void cpu_do_one_instruction()
   }
   else
   {
-    if(line_progress < (CYCLES_MODE_2))
+    if(state.line_progress < (CYCLES_MODE_2))
     {
       // We're in the OAM period (mode 2)
       state.old_vid_mode = state.vid_mode;
@@ -3671,7 +3672,7 @@ void cpu_do_one_instruction()
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x20) )
         state.iflag |= IMASK_LCD_STAT;
     }
-    else if(line_progress < (CYCLES_MODE_2 + CYCLES_MODE_3))
+    else if(state.line_progress < (CYCLES_MODE_2 + CYCLES_MODE_3))
     {
       // We're in the VRAM/OAM period (mode 3)
       state.old_vid_mode = state.vid_mode;
@@ -3708,10 +3709,13 @@ void cpu_do_one_instruction()
   // Update the master clock from which all timers are derived.
   // Incrememnted at 1048576 Hz (1/4 of a real gameboy).
   state.lastMasterClock = state.masterClock;
-  state.masterClock = (state.masterClock + instr_time) % 1048576;
+  int mc = state.masterClock + instr_time;
+  if( mc >= 1048576 )
+    mc -= 1048576;
+  state.masterClock = mc;
   
   // Update DIV.
-  if( (state.masterClock % 64) < (state.lastMasterClock % 64) )
+  if( (state.masterClock & 0x1F) < (state.lastMasterClock & 0x1F) )
     state.div++;
   
   // Update TIMA.
