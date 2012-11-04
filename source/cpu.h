@@ -106,6 +106,7 @@ struct state_s {
   u8 scy;
   u8 scx;
   u8 ly;
+  int line_progress;
   u8 lyc;
   u8 last_ly;
   u8 bgp;
@@ -113,9 +114,9 @@ struct state_s {
   u8 wx,wy;
   u8 last_line_rendered;
   int bootRomEnabled;	// 0 = disabled, 1 = enabled
-  u8 ime;		// set to IME_ENABLED or IME_DISABLED
-  u8 ie, iflag;
-  u8 halt;		// 0 = not halted, 1 = halted
+  int ime;		// set to IME_ENABLED or IME_DISABLED
+  int ie, iflag;
+  int halt;		// 0 = not halted, 1 = halted
   u8 op;
   
   // sound stuff
