@@ -3628,11 +3628,14 @@ void cpu_do_one_instruction()
   
   // Update LY.
   state.last_ly = state.ly;
+  
   if( state.line_progress >= CYCLES_LINE )
   {
     state.line_progress -= CYCLES_LINE;
     state.ly++;
   }
+  if( state.ly > 0x9A )
+    state.ly = 0;
   
   // Check LYC.
   if( state.ly == state.lyc )
