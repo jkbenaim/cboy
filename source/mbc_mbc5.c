@@ -140,6 +140,19 @@ void mbc_mbc5_write_rom_bank_select_high() {
 void mbc_mbc5_write_ram_bank_select() {
   int bank = memByte & 0x0F;
   cart.extram = mbc5_extram + bank*8192;
+  
+  // handle rumble
+  switch( cart.mbc_type )
+  {
+    case 0x1C:  // MBC5+RUMBLE
+    case 0x1D:  // MBC5+RUMBLE+RAM
+    case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
+      if( memByte & 0x08 )
+        printf( "rumble ON, power: %d\n", memByte >> 4 );
+      break;
+    default:
+      break;
+  }
 }
 
 // read A000-BFFF
