@@ -34,7 +34,7 @@ pixel_t pixmem[160*144];
 SDL_Surface *screen;
 #endif
 
-void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
+void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip ) {
   
   // Is this span off the left of the screen?
   if(x<-7)
@@ -115,12 +115,23 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
   if( x > (160-8) )
     spanEnd = 159 - x;
   
-  // Draw the span.
-  for( p=spanStart; p<=spanEnd; ++p )
-  {
-    assert( "Pixmem address not less than start of pixmem", (lineStart + x + p) >= 0 );
-    pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+  // xFlip?
+  if( xFlip ) {
+  // Draw the span from right to left.
+    for( p=spanStart; p<=spanEnd; ++p )
+      pixmem[ lineStart + x + p ] = pixels[ p ];
+  } else {
+    // No
+  // Draw the span from left to right.
+    for( p=spanStart; p<=spanEnd; ++p )
+      pixmem[ lineStart + x + p ] = pixels[ 7-p ];
   }
+  
+//   // Draw the span.
+//   for( p=spanStart; p<=spanEnd; ++p )
+//   {
+//     pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+//   }
   
 }
 
@@ -285,7 +296,8 @@ void vid_render_line()
       else
 	pal = attributes & 0x07;	// cgb mode
       
-      vid_drawOpaqueSpan( pal, spanAddress, i*8 - (state.scx%8), state.ly, vramBank );
+      int xFlip = (attributes&BG_XFLIP)?1:0;
+      vid_drawOpaqueSpan( pal, spanAddress, i*8 - (state.scx%8), state.ly, vramBank, xFlip );
     }
   
   // Render the window.
@@ -335,7 +347,8 @@ void vid_render_line()
       else
 	pal = attributes & 0x07;	// cgb mode
       
-      vid_drawOpaqueSpan( pal, spanAddress, i*8 + state.wx - 7, state.ly, vramBank );
+      int xFlip = (attributes&BG_XFLIP)?1:0;
+      vid_drawOpaqueSpan( pal, spanAddress, i*8 + state.wx - 7, state.ly, vramBank, xFlip );
     }
   }
   
