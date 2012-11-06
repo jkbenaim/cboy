@@ -90,18 +90,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank ) {
     lowBits = vram_bank_one[vramAddr];
     highBits = vram_bank_one[vramAddr + 1];
   }
-    
-  // OLD
-//   int p;
-//   pixel_t color;
-//   for( p=0; p<8; ++p )
-//   {
-//     color = (BIT(highBits, p) << 1)
-//        + (BIT(lowBits, p));
-//     pixels[p] = myPalette[color];
-//   }
 
-  // NEW
   int p;
   for( p=0; p<8; ++p )
   {
@@ -193,19 +182,7 @@ void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, 
     lowBits = vram_bank_one[vramAddr];
     highBits = vram_bank_one[vramAddr + 1];
   }
-    
-  // OLD
-//   int p;
-//   pixel_t color;
-//   for( p=0; p<8; ++p )
-//   {
-//     color = (BIT(highBits, p) << 1)
-// 	  + (BIT(lowBits, p));
-//     colors[p] = color;
-//     pixels[p] = myPalette[color];
-//   }
 
-  // NEW
   int p;
   for( p=0; p<8; ++p )
   {
