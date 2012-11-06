@@ -335,17 +335,10 @@ void vid_render_line()
       u8 attributes = vram_bank_one[tileAddress];
       
       // Set the VRAM bank.
-      if( state.caps == 0x04 )
-	vramBank = 0;
-      else
-	vramBank = (attributes & BG_VRAM_BANK)?1:0;
+      vramBank = 0;     // windows are always VRAM bank 0
       
       // Set the palette.
-      u8 pal;
-      if( state.caps == 0x04 )
-	pal = 0;	// dmg mode
-      else
-	pal = attributes & 0x07;	// cgb mode
+      u8 pal = 0;	// windows are always palette 0
       
       int xFlip = (attributes&BG_XFLIP)?1:0;
       vid_drawOpaqueSpan( pal, spanAddress, i*8 + state.wx - 7, state.ly, vramBank, xFlip );
