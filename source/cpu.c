@@ -3568,6 +3568,16 @@ void cpu_do_one_instruction()
       WRITE_WORD();
       state.pc = 0x0050;
     }
+    else if( pendingInterrupts & IMASK_SERIAL )
+    {
+//       printf("SERIAL, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
+      state.iflag &= ~IMASK_SERIAL;
+      state.sp -= 2;
+      address = state.sp;
+      memWord = state.pc;
+      WRITE_WORD();
+      state.pc = 0x0058;
+    }
     else if( pendingInterrupts & IMASK_JOYPAD )
     {
 //       printf("JOYPAD, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
@@ -3773,28 +3783,28 @@ void cpu_do_one_instruction()
   }
   
   // SERIAL
-  // None of this actually works yet.
-//   state.serialClocksSinceBitSent += instr_time;
-//   if( (state.sc & (SC_SHIFT_CLOCK|SC_TRANSFER)) == (SC_SHIFT_CLOCK|SC_TRANSFER) )
-//   {
-//     // The internal clock is enabled.
-//     if( state.serialClocksSinceBitSent >= 8192 )
-//     {
-//       printf("hi\n");
-//       state.serialClocksSinceBitSent = 0;
-//       state.sb = state.sb >> 1;
-//       state.sb |= 0x80;
-//       state.serialBitsSent++;
-//       if( state.serialBitsSent == 8 )
-//       {
-// 	state.serialBitsSent = 0;
-// 	state.iflag |= IMASK_SERIAL;
-// 	state.sc &= ~SC_TRANSFER;
-//       }
-// 	
-//       printf("%02X\n", state.sb);
-//     }
-//   }
+  if( state.sc & SC_TRANSFER )
+    state.serialClocksUntilNextSend -= instr_time * 4;
+  
+  if( state.serialClocksUntilNextSend <= 0 )
+  {
+    state.sb = (state.sb << 1) + 1;
+    state.serialBitsSent++;
+    if( state.sc & SC_CLOCK_SPEED )
+    {
+      // fast transfer
+      state.serialClocksUntilNextSend = 16; // 262144Hz or 524288Hz
+    } else {
+      // slow transfer
+      state.serialClocksUntilNextSend = 512; // 8192Hz or 16384Hz
+    }
+    if( state.serialBitsSent >= 8 )
+    {
+      state.serialBitsSent = 0;
+      state.sc &= SC_TRANSFER;
+      state.iflag |= IMASK_SERIAL;
+    }
+  }
     
   
   // JOYPAD

@@ -416,9 +416,16 @@ void write_special() {
       break;
     case ADDR_SC:
 //       printf("SC written: %02X\n", memByte);
-//       state.sc = memByte;
-//       state.serialBitsSent = 0;
-//       state.serialClocksSinceBitSent = 0;
+      state.sc = memByte;
+      state.serialBitsSent = 0;
+      if( state.sc & SC_CLOCK_SPEED )
+      {
+        // fast transfer
+        state.serialClocksUntilNextSend = 16; // 262144Hz or 524288Hz
+      } else {
+        // slow transfer
+        state.serialClocksUntilNextSend = 512; // 8192Hz or 16384Hz
+      }
       break;
     case ADDR_CBOY:
       printf("CBOY: %02X\n", memByte);

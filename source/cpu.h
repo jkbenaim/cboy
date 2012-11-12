@@ -99,7 +99,7 @@ struct state_s {
   int lastMasterClock; 
   u8 div, tima, tma, tac;	// timers
   int serialBitsSent;	// bits sent over link
-  int serialClocksSinceBitSent;
+  int serialClocksUntilNextSend;
   u8 sb, sc;
   u8 lcdc;
   u8 stat;
