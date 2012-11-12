@@ -3801,7 +3801,7 @@ void cpu_do_one_instruction()
     if( state.serialBitsSent >= 8 )
     {
       state.serialBitsSent = 0;
-      state.sc &= SC_TRANSFER;
+      state.sc &= ~SC_TRANSFER;
       state.iflag |= IMASK_SERIAL;
     }
   }
