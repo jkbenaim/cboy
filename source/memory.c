@@ -203,12 +203,12 @@ void read_special() {
 //       printf("OMG JOYP READ\n");
       break;
     case ADDR_SB:
-//       printf("SB read\n");
-//       memByte = state.sb;
+      memByte = state.sb;
+//       printf("SB read: %02X\n", state.sb);
       break;
     case ADDR_SC:
-//       printf("SC read\n");
-//       memByte = state.sc;
+      memByte = state.sc;
+//       printf("SC read: %02X\n", state.sc);
       break;
     case ADDR_DIV:
       memByte = state.div;
@@ -411,8 +411,8 @@ void write_special() {
 	state.joyp_select = INPUT_SELECT_DIRECTIONS;
       break;
     case ADDR_SB:
-//       printf("SB written: %02X\n", memByte);
-//       state.sb = memByte;
+      state.sb = memByte;
+//       printf("SB written: %02X\n", state.sb);
       break;
     case ADDR_SC:
 //       printf("SC written: %02X\n", memByte);

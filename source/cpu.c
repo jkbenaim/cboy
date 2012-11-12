@@ -3783,7 +3783,7 @@ void cpu_do_one_instruction()
   }
   
   // SERIAL
-  if( state.sc & SC_TRANSFER )
+  if( (state.sc & SC_TRANSFER) && (state.sc & SC_SHIFT_CLOCK))
     state.serialClocksUntilNextSend -= instr_time * 4;
   
   if( state.serialClocksUntilNextSend <= 0 )
