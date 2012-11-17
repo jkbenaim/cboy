@@ -4,8 +4,8 @@ CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL
 
 all: cboy
 
-cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o video.o
-	$(CC) $(CFLAGS) `sdl-config --libs` cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o video.o -o cboy
+cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o
+	$(CC) $(CFLAGS) `sdl-config --libs` cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o -o cboy
 
 clean:
 	rm -f cboy gbinfo *.o
@@ -25,7 +25,7 @@ profile: cboy run
 cart.o: Makefile cart.c cart.h memory.h mbc.h mbc_boot.h cartdesc.h cpu.h
 	$(CC) $(CFLAGS) -c cart.c
 
-cpu.o: Makefile cpu.c cpu.h memory.h assert.h endian.h
+cpu.o: Makefile cpu.c cpu.h memory.h assert.h endian.h serial.h
 	$(CC) $(CFLAGS) -c cpu.c
 
 input.o: Makefile input.c types.h main.h memory.h input.h cpu.h
@@ -60,6 +60,9 @@ mbc_none.o: Makefile mbc_none.c memory.h cart.h mbc_none.h
 
 memory.o: Makefile memory.c types.h memory.h cpu.h video.h input.h cart.h mbc.h assert.h
 	$(CC) $(CFLAGS) -c memory.c
+
+serial.o: Makefile serial.c types.h memory.h cpu.h serial.h
+	$(CC) $(CFLAGS) -c serial.c
 
 video.o: Makefile video.c types.h video.h memory.h cpu.h assert.h
 	$(CC) $(CFLAGS) -c video.c

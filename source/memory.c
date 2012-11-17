@@ -418,6 +418,7 @@ void write_special() {
 //       printf("SC written: %02X\n", memByte);
       state.sc = memByte;
       state.serialBitsSent = 0;
+      state.serialBitsSent = 0;
       if( state.sc & SC_CLOCK_SPEED )
       {
         // fast transfer

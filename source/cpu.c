@@ -22,6 +22,7 @@
 #include "memory.h"
 #include "assert.h"
 #include "video.h"
+#include "serial.h"
 
 struct state_s state;
 int branched= 0;
@@ -3783,12 +3784,33 @@ void cpu_do_one_instruction()
   }
   
   // SERIAL
+  // update the timeout clock
+  static int reset = 0;
+  if( state.serialTimeoutClock <= 262144 )      // 250ms
+    state.serialTimeoutClock += instr_time;
+  if( state.serialTimeoutClock >= 262144 )      // 250ms
+  {
+    reset = 1;
+    state.serialBitsSent = 0;
+    state.serialTimeoutClock -= 262144;
+  }
+  
+  // adjust the shift clock
   if( (state.sc & SC_TRANSFER) && (state.sc & SC_SHIFT_CLOCK))
     state.serialClocksUntilNextSend -= instr_time * 4;
   
   if( state.serialClocksUntilNextSend <= 0 )
   {
-    state.sb = (state.sb << 1) + 1;
+    int in;
+    if( state.sb & 0x80 )
+      in = serial_receive_bit( 1, reset );
+    else
+      in = serial_receive_bit( 0, reset );
+      
+    reset = 0;
+    
+//     printf( "in: %d (%d)\n", in, state.serialBitsSent );
+    state.sb = (state.sb << 1) + in;
     state.serialBitsSent++;
     if( state.sc & SC_CLOCK_SPEED )
     {
@@ -3802,6 +3824,7 @@ void cpu_do_one_instruction()
     {
       state.serialBitsSent = 0;
       state.sc &= ~SC_TRANSFER;
+//       state.sc &= ~SC_SHIFT_CLOCK;
       state.iflag |= IMASK_SERIAL;
     }
   }
