@@ -1,11 +1,11 @@
 
 CC=gcc
-CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL
+CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
 
 all: cboy
 
 cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o
-	$(CC) $(CFLAGS) `sdl-config --libs` cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o -o cboy
+	$(CC) $(CFLAGS) cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o `sdl-config --libs` -o cboy
 
 clean:
 	rm -f cboy gbinfo *.o
