@@ -412,7 +412,7 @@ void vid_init()
   SDL_WM_SetCaption( "cboy", "cboy" );
   
   // create window
-  screen = SDL_SetVideoMode( 160, 144, 0, 0 );
+  screen = SDL_SetVideoMode( 320, 288, 0, 0 );
 #endif  // USE_SDL
   
 //   int x,y;
@@ -464,10 +464,13 @@ void vid_frame()
   {
     for( x=0; x<160; ++x )
     {
-      surfPixels[dstStartOfLine + x] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 0] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 1] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 0 + width] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 1 + width] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
     }
     srcStartOfLine += 160;
-    dstStartOfLine += width;
+    dstStartOfLine += width*2;
   }
     
   SDL_UpdateRect( screen, 0, 0, 0, 0 );
