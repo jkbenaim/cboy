@@ -452,18 +452,72 @@ void write_special() {
       break;
     case ADDR_NR10:
       state.nr10 = memByte;
+//       printf( "wrote NR10, %02X\n", memByte );
       break;
     case ADDR_NR11:
       state.nr11 = memByte;
+//       int waveDuty = memByte>>6;
+//       int soundLength = memByte&0x3F;
+//       printf( "wrote NR11, %02X (wave pattern duty: ", memByte );
+//       switch( waveDuty )
+//       {
+// 	case 0:
+// 	  printf( "12.5%%" );
+// 	  break;
+// 	case 1:
+// 	  printf( "25%%" );
+// 	  break;
+// 	case 2:
+// 	  printf( "50%%" );
+// 	  break;
+// 	case 3:
+// 	  printf( "75%%" );
+// 	  break;
+// 	default:
+// 	  printf( "unknown" );
+// 	  break;
+//       }
+//       printf( ", sound length: " );
+//       float soundLengthCalculated = (64.0 - (float)soundLength) / 256.0;
+//       printf( "%f seconds", soundLengthCalculated );
+//       printf( ")\n" );
       break;
     case ADDR_NR12:
       state.nr12 = memByte;
+//       int iVolume = memByte >> 4;
+//       int direction = memByte & 0x08;
+//       int sweepNum = memByte & 0x07;
+//       printf( "wrote NR12, %02X (iVolume: ", memByte );
+//       printf( "%d", iVolume );
+//       printf( ", direction: " );
+//       if( direction )
+// 	printf( "increasing" );
+//       else
+// 	printf( "decreasing" );
+//       printf( ", sweepNum: " );
+//       printf( "%d", sweepNum );
+//       printf( ")\n" );
       break;
     case ADDR_NR13:
       state.nr13 = memByte;
+//       printf( "wrote NR13, %02X (lower bits of frequency)\n", memByte );
       break;
     case ADDR_NR14:
       state.nr14 = memByte;
+//       int restart = memByte & 0x80;
+//       int counter = (memByte & 0x40) >> 6;
+//       int frequency = ((int)(memByte & 0x07) << 8) + (int)state.nr13;
+//       float frequencyHz = 131072.0/(2048.0 - (float)frequency);
+//       printf( "wrote NR14, %02X (restart: ", memByte );
+//       if( restart )
+// 	printf( "yes" );
+//       else
+// 	printf( "no" );
+//       printf( ", counter: " );
+//       printf( "%d", counter );
+//       printf( ", frequency: " );
+//       printf( "%f", frequencyHz );
+//       printf( "Hz)\n" );
       break;
     case ADDR_NR20:
       state.nr20 = memByte;
@@ -509,12 +563,32 @@ void write_special() {
       break;
     case ADDR_NR50:
       state.nr50 = memByte;
+//       int leftEnabled = memByte & 0x08;
+//       int leftVolume = memByte & 0x07;
+//       int rightEnabled = memByte & 0x80;
+//       int rightVolume = (memByte & 0x70) >> 4;
+//       printf( "wrote NR50, (left: " );
+//       if( leftEnabled )
+// 	printf( "%d", leftVolume );
+//       else
+// 	printf( "off" );
+//       printf( ", right: " );
+//       if( rightEnabled )
+// 	printf( "%d", rightVolume );
+//       else
+// 	printf( "off" );
+//       printf(")\n" );
       break;
     case ADDR_NR51:
       state.nr51 = memByte;
+//       printf( "wrote NR51, %02X (panning)\n", memByte );
       break;
     case ADDR_NR52:
       state.nr52 = memByte;
+      if( memByte & 0x80 )
+	printf( "wrote NR52 (sound powered up)\n" );
+      else
+	printf( "wrote NR52 (sound powered down)\n" );
       break;
     case ADDR_WAVERAM_0:
     case ADDR_WAVERAM_1:
