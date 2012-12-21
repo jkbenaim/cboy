@@ -18,7 +18,6 @@
 
 #ifdef __ANDROID__
 #include <jni.h>
-#include <time.h>
 #include <android/log.h>
 #include <android/bitmap.h>
 #endif // __ANDROID__
@@ -74,7 +73,7 @@ int main ( int argc, char* argv[] ) {
 #endif // USE_SDL
 
 #ifdef __ANDROID__
-JNIEXPORT void JNICALL Java_com_example_plasma_PlasmaView_renderPlasma(JNIEnv * env, jobject  obj, jobject bitmap,  jlong  time_ms)
+JNIEXPORT void JNICALL Java_org_trashfolder_cboy_CboyView_cboyFrame(JNIEnv * env, jobject  obj, jobject bitmap)
 {
     AndroidBitmapInfo  info;
     void*              pixels;
@@ -84,7 +83,7 @@ JNIEXPORT void JNICALL Java_com_example_plasma_PlasmaView_renderPlasma(JNIEnv * 
     if (!init) {
         mem_init();
         cpu_init();
-        cart_init( "/sdcard/roms/bootrom.bin", "/sdcard/roms/pkmnsilv.gbc" );
+        cart_init( "/storage/emulated/0/roms/cgb_rom.bin", "/storage/emulated/0/roms/camera.gb" );
         vid_init();
         input_init();
         init = 1;
