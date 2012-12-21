@@ -141,7 +141,6 @@ void mbc_cam_read_extram() {
   }
 }
 
-// int pics_taken = 0;
 // write A000-BFFF
 void mbc_cam_write_extram() {
   if( cam_mode == 0 )
@@ -159,8 +158,60 @@ void mbc_cam_write_extram() {
         switch( memByte )
         {
           case 0x03:
+            {
             // really take that picture
-//             printf( "Picture taken! [%d]\n", pics_taken++ );
+            static int pics_taken = 0;
+            pics_taken++;
+            if(pics_taken <= 140)
+            {
+              // the game takes 140 pictures on bootup.
+              // no idea why.
+              // i don't act on these.
+            } else {
+              printf( "Picture taken! [%d]\n", pics_taken );
+              // write a checkerboard pattern to photo ram
+              int tile_x, tile_y;
+              int row_in_tile;
+              int ram_address_offset = 0x0100;
+              int value_to_write_hi=0, value_to_write_lo=0;
+              for( tile_y = 0; tile_y < 14 ; tile_y++ )
+              for( tile_x = 0; tile_x < 16 ; tile_x++ )
+              {
+                switch( (tile_x + tile_y + pics_taken) % 6 ) {
+                  case 0:
+                    value_to_write_hi = 0x00;
+                    value_to_write_lo = 0x00;
+                    break;
+                  case 1:
+                    value_to_write_hi = 0x00;
+                    value_to_write_lo = 0xff;
+                    break;
+                  case 2:
+                    value_to_write_hi = 0xff;
+                    value_to_write_lo = 0x00;
+                    break;
+                  case 3:
+                    value_to_write_hi = 0xff;
+                    value_to_write_lo = 0xff;
+                    break;
+                  case 4:
+                    value_to_write_hi = 0xff;
+                    value_to_write_lo = 0x00;
+                    break;
+                  case 5:
+                    value_to_write_hi = 0x00;
+                    value_to_write_lo = 0xff;
+                    break;
+                }
+                for( row_in_tile = 0; row_in_tile < 8 ; row_in_tile++ )
+                {
+                  cam_extram[ram_address_offset + 0] = (u8)value_to_write_lo;
+                  cam_extram[ram_address_offset + 1] = (u8)value_to_write_hi;
+                  ram_address_offset +=2;
+                }
+              }
+            }
+            }
             break;
           default:
             break;
