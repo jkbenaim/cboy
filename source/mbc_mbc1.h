@@ -19,6 +19,8 @@
 #ifndef _MBC_MBC1_H_
 #define _MBC_MBC1_H_
 extern void mbc_mbc1_install( void );
+void mbc_mbc1_read_ff( void );
+void mbc_mbc1_dummy( void );
 void mbc_mbc1_read_bank_0( void );
 void mbc_mbc1_read_bank_n( void );
 void mbc_mbc1_write_ram_enable( void );

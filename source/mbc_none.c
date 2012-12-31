@@ -24,24 +24,38 @@
 
 void mbc_none_install()
 {
+  cart.cleanup = &mbc_none_cleanup;
+  
   int i;
-  
   // cart bank zero
-  for( i=0x0; i<=(0x3F); ++i ) {
-    readmem[i]   = mbc_none_read_bank_0;
-    writemem[i]  = mbc_none_write_bank_0;
+  for( i=0x00; i<=0x3F; ++i ) {
+    readmem[i] = mbc_none_read_bank_0;
   }
-  
   // cart bank n
-  for( i=0x40; i<=(0x7F); ++i ) {
-    readmem[i]   = mbc_none_read_bank_n;
-    writemem[i]  = mbc_none_write_bank_n;
+  for( i=0x40; i<=0x7F; ++i ) {
+    readmem[i] = mbc_none_read_bank_n;
+  }
+  // write 0000-7FFF: nothing
+  for( i=0x00; i<=0x7F; ++i ) {
+    writemem[i] = mbc_none_dummy;
   }
   
-  // extram
-  for( i=0xA0; i<=(0xBF); ++i ) {
-    readmem[i]   = mbc_none_read_extram;
-    writemem[i]  = mbc_none_write_extram;
+  // read A000-BFFF: read extram
+  // calculate the last address where extram is installed
+  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
+  for( i=0xA0; i<extram_end; ++i ) {
+    readmem[i] = mbc_none_read_extram;
+  }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    readmem[i] = mbc_none_read_ff;
+  }
+  
+  // write A000-BFFF: write extram
+  for( i=0xA0; i<extram_end; ++i ) {
+    writemem[i] = mbc_none_write_extram;
+  }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    writemem[i] = mbc_none_dummy;
   }
   
   // set up cart params
@@ -49,29 +63,34 @@ void mbc_none_install()
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
 }
 
+void mbc_none_read_ff()
+{
+  memByte = 0xff;
+}
+
+void mbc_none_dummy()
+{
+}
+
 void mbc_none_read_bank_0()
 {
   memByte = cart.cartrom_bank_zero[address];
 }
-
-void mbc_none_write_bank_0() {
-  // do nothing
-}
-
 
 // cart bank n
 void mbc_none_read_bank_n() {
   memByte = cart.cartrom_bank_n[address&0x3fff];
 }
 
-void mbc_none_write_bank_n() {
-  // do nothing
-}
-
 
 // extram
 void mbc_none_read_extram() {
+  memByte = cart.extram_bank[address&0x1fff];
 }
 
 void mbc_none_write_extram() {
+  cart.extram_bank[address&0x1fff] = memByte;
+}
+
+void mbc_none_cleanup() {
 }

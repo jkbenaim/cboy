@@ -23,21 +23,22 @@
 
 struct cart_s {
   int mbc_type;
-  size_t cartromsize;
   int cartrom_num_banks;
-  size_t bootromsize;
-  int reg_ram_enable; // (byte&0x0F == 0x0A) ? enable RAM : disable RAM
   int reg_rom_bank_low;	// low bits of ROM bank
   int reg_rom_bank_high;  // high bits of ROM bank
-  int reg_mode;	// 0: ROM mode, 1: RAM mode
   u8* cartrom;
+  size_t cartromsize;
   u8* bootrom;
+  size_t bootromsize;
   u8* extram;
-  u8 cart_bank_num;
+  size_t extram_size;
+  u8* extram_bank;
   u8 extram_bank_num;
+  int extram_num_banks;
+  int battery_backed;
+  u8 cart_bank_num;
   u8* cartrom_bank_zero;
   u8* cartrom_bank_n;
-  u8* extram_bank;
   void (*cleanup)(void);
   char savename[256];
 };

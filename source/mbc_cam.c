@@ -16,16 +16,20 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-// TODO: actually save the cart ram to disk.
-
 #include "memory.h"
 #include "cart.h"
 #include "mbc_cam.h"
 #include <stdio.h>
 
-u8 cam_extram[131072];
+#ifdef __ANDROID__
+#include <jni.h>
+#include <android/log.h>
+#include <android/bitmap.h>
+#define  LOG_TAG    "libcboy"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#endif // __ANDROID__
 
-u8 cam_ram_bank;
 int cam_mode;   // 0=RAM accessible, 1=CAM registers accessible
 
 void mbc_cam_install()
@@ -69,14 +73,9 @@ void mbc_cam_install()
   // set up cart params
   cart.cartrom_bank_zero = cart.cartrom;
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
-  cam_ram_bank = 0x00;
+  cart.extram_bank_num = 0x00;
+  cart.extram_bank = cart.extram;
   cam_mode = 0;
-  cart.extram = cam_extram;
-  
-  // clear extram
-  int index;
-  for( index=0; index<131072; index++ )
-    cam_extram[index] = 0x41;
 }
 
 void mbc_cam_dummy()
@@ -118,7 +117,7 @@ void mbc_cam_extram_bank_select() {
     // access RAM like normal
     cam_mode = 0;
     int bank = memByte & 0x0F;
-    cart.extram = cam_extram + bank*8192;
+    cart.extram_bank = cart.extram + bank*8192;
   }
   
 }
@@ -132,7 +131,7 @@ void mbc_cam_read_extram() {
   if( cam_mode == 0 )
   {
     // access RAM like normal
-    memByte = cart.extram[address&0x1fff];
+    memByte = cart.extram_bank[address&0x1fff];
   }
   else
   {
@@ -146,7 +145,7 @@ void mbc_cam_write_extram() {
   if( cam_mode == 0 )
   {
     // access RAM like normal
-    cart.extram[address&0x1fff] = memByte;
+    cart.extram_bank[address&0x1fff] = memByte;
   }
   else
   {
@@ -169,6 +168,9 @@ void mbc_cam_write_extram() {
               // i don't act on these.
             } else {
               printf( "Picture taken! [%d]\n", pics_taken );
+#ifdef __ANDROID__
+              mbc_cam_getCameraImage();
+#else
               // write a checkerboard pattern to photo ram
               int tile_x, tile_y;
               int row_in_tile;
@@ -205,11 +207,12 @@ void mbc_cam_write_extram() {
                 }
                 for( row_in_tile = 0; row_in_tile < 8 ; row_in_tile++ )
                 {
-                  cam_extram[ram_address_offset + 0] = (u8)value_to_write_lo;
-                  cam_extram[ram_address_offset + 1] = (u8)value_to_write_hi;
+                  cart.extram[ram_address_offset + 0] = (u8)value_to_write_lo;
+                  cart.extram[ram_address_offset + 1] = (u8)value_to_write_hi;
                   ram_address_offset +=2;
                 }
               }
+#endif // __ANDROID__
             }
             }
             break;
@@ -222,3 +225,10 @@ void mbc_cam_write_extram() {
     }
   }
 }
+
+#ifdef __ANDROID__
+void mbc_cam_getCameraImage() {
+  LOGI( "picture taken!" );
+}
+#endif // __ANDROID__
+

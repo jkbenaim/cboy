@@ -21,9 +21,6 @@
 #include "mbc_mbc1.h"
 #include <stdio.h>
 
-u8 mbc1_extram[32768]; //overkill
-
-
 u8 mbc1_bank_low; // bits 0-4
 u8 mbc1_bank_high;  // bit 5-6 (stored in bits 0-1)
 u8 mbc1_ram_bank;
@@ -60,12 +57,21 @@ void mbc_mbc1_install()
   }
   
   // read A000-BFFF: read extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  // calculate the last address where extram is installed
+  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
+  for( i=0xA0; i<extram_end; ++i ) {
     readmem[i] = mbc_mbc1_read_extram;
   }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    readmem[i] = mbc_mbc1_read_ff;
+  }
+  
   // write A000-BFFF: write extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  for( i=0xA0; i<extram_end; ++i ) {
     writemem[i] = mbc_mbc1_write_extram;
+  }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    writemem[i] = mbc_mbc1_dummy;
   }
   
   // set up cart params
@@ -75,7 +81,6 @@ void mbc_mbc1_install()
   mbc1_bank_high = 0x00;
   mbc1_ram_bank = 0x00;
   mbc1_mode_select = 0x00;
-  cart.extram = mbc1_extram;
   cart.extram_bank = cart.extram;
 }
 
@@ -134,6 +139,15 @@ void mbc_mbc1_write_ram_enable() {
       writemem[i] = mbc_mbc1_write_extram_disabled;
     }
   }
+}
+
+void mbc_mbc1_read_ff()
+{
+  memByte = 0xff;
+}
+
+void mbc_mbc1_dummy()
+{
 }
 
 // write 2000-3FFF

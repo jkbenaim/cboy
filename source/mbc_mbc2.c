@@ -21,8 +21,6 @@
 #include "mbc_mbc2.h"
 #include <stdio.h>
 
-u8 mbc2_extram[512];
-
 void mbc_mbc2_install()
 {
   int i;
@@ -45,22 +43,36 @@ void mbc_mbc2_install()
   }
   // write 4000-5FFF: ram bank select
   for( i=0x40; i<=0x7F; ++i ) {
-    writemem[i] = mbc_mbc2_do_nothing;
+    writemem[i] = mbc_mbc2_dummy;
   }
   
   // read A000-BFFF: read extram
   for( i=0xA0; i<=0xA1; ++i ) {
     readmem[i] = mbc_mbc2_read_extram;
   }
+  for( i=0xA2; i<=0xBF; ++i ) {
+    readmem[i] = mbc_mbc2_read_ff;
+  }
   // write A000-BFFF: write extram
   for( i=0xA0; i<=0xA1; ++i ) {
     writemem[i] = mbc_mbc2_write_extram;
+  }
+  for( i=0xA2; i<=0xBF; ++i ) {
+    writemem[i] = mbc_mbc2_dummy;
   }
   
   // set up cart params
   cart.cartrom_bank_zero = cart.cartrom;
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
-  cart.extram = mbc2_extram;
+}
+
+void mbc_mbc2_read_ff()
+{
+  memByte = 0xff;
+}
+
+void mbc_mbc2_dummy()
+{
 }
 
 void mbc_mbc2_read_bank_0()
@@ -85,9 +97,6 @@ void mbc_mbc2_write_rom_bank_select() {
     offset = (size_t)memByte*16384 % cart.cartromsize;
   
   cart.cartrom_bank_n = cart.cartrom + offset;
-}
-
-void mbc_mbc2_do_nothing() {
 }
 
 // read A000-A1FF

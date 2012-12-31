@@ -28,4 +28,7 @@ void mbc_cam_extram_bank_select( void );
 void mbc_cam_write_mode_select( void );
 void mbc_cam_read_extram( void );
 void mbc_cam_write_extram( void );
+#ifdef __ANDROID__
+void mbc_cam_getCameraImage();
+#endif // __ANDROID__
 #endif // _MBC_CAM_H_

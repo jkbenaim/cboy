@@ -19,6 +19,8 @@
 #ifndef _MBC_MBC3_H_
 #define _MBC_MBC3_H_
 extern void mbc_mbc3_install( void );
+void mbc_mbc3_read_ff( void );
+void mbc_mbc3_dummy( void );
 void mbc_mbc3_read_bank_0( void );
 void mbc_mbc3_read_bank_n( void );
 void mbc_mbc3_write_ram_enable();

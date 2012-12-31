@@ -19,6 +19,7 @@
 #ifndef _MBC_MBC5_H_
 #define _MBC_MBC5_H_
 extern void mbc_mbc5_install( void );
+void mbc_mbc5_read_ff( void );
 void mbc_mbc5_dummy( void );
 void mbc_mbc5_read_bank_0( void );
 void mbc_mbc5_read_bank_n( void );

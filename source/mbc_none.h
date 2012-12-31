@@ -19,11 +19,13 @@
 #ifndef _MBC_NONE_H_
 #define _MBC_NONE_H_
 extern void mbc_none_install( void );
-extern void mbc_none_read_bank_0( void );
-extern void mbc_none_write_bank_0( void );
-extern void mbc_none_read_bank_n( void );
-extern void mbc_none_write_bank_n( void );
-extern void mbc_none_read_extram( void );
-extern void mbc_none_write_extram( void );
-
+void mbc_none_read_ff( void );
+void mbc_none_dummy( void );
+void mbc_none_read_bank_0( void );
+void mbc_none_write_bank_0( void );
+void mbc_none_read_bank_n( void );
+void mbc_none_write_bank_n( void );
+void mbc_none_read_extram( void );
+void mbc_none_write_extram( void );
+void mbc_none_cleanup( void );
 #endif // _MBC_NONE_H_

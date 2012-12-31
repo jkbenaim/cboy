@@ -22,18 +22,9 @@
 #include <stdio.h>
 #include "assert.h"
 
-u8 mbc5_extram[8192*16];
-
 void mbc_mbc5_install()
 {
   cart.cleanup = &mbc_mbc5_cleanup;
-  FILE *f;
-  f = fopen( cart.savename, "r" );
-  if( f != NULL )
-  {
-    fread( mbc5_extram, 8192*16, 1, f );
-    fclose( f );
-  }
   
   int i;
   // cart bank zero
@@ -67,20 +58,35 @@ void mbc_mbc5_install()
   }
   
   // read A000-BFFF: read extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  // calculate the last address where extram is installed
+  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
+  for( i=0xA0; i<extram_end; ++i ) {
     readmem[i] = mbc_mbc5_read_extram;
   }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    readmem[i] = mbc_mbc5_read_ff;
+  }
+  
   // write A000-BFFF: write extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  for( i=0xA0; i<extram_end; ++i ) {
     writemem[i] = mbc_mbc5_write_extram;
+  }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    writemem[i] = mbc_mbc5_dummy;
   }
   
   // set up cart params
   cart.cartrom_bank_zero = cart.cartrom;
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
-  cart.extram = mbc5_extram;
   cart.reg_rom_bank_low = 1;
   cart.reg_rom_bank_high = 0;
+  cart.extram_bank = cart.extram;
+  cart.extram_bank_num = 0;
+}
+
+void mbc_mbc5_read_ff()
+{
+  memByte = 0xff;
 }
 
 void mbc_mbc5_dummy()
@@ -138,8 +144,11 @@ void mbc_mbc5_write_rom_bank_select_high() {
 
 // write 4000-5FFF
 void mbc_mbc5_write_ram_bank_select() {
-  int bank = memByte & 0x0F;
-  cart.extram = mbc5_extram + bank*8192;
+  if( cart.extram_size == 32768 )
+  {
+    int bank = memByte & 0x03;
+    cart.extram_bank = cart.extram + bank*8192;
+  }
   
   // handle rumble
   switch( cart.mbc_type )
@@ -157,20 +166,13 @@ void mbc_mbc5_write_ram_bank_select() {
 
 // read A000-BFFF
 void mbc_mbc5_read_extram() {
-  memByte = cart.extram[address&0x1fff];
+  memByte = cart.extram_bank[address&0x1fff];
 }
 
 // write A000-BFFF
 void mbc_mbc5_write_extram() {
-  cart.extram[address&0x1fff] = memByte;
+  cart.extram_bank[address&0x1fff] = memByte;
 }
 
 void mbc_mbc5_cleanup() {
-  FILE *f;
-  f = fopen( cart.savename, "w" );
-  if( f != NULL )
-  {
-    fwrite( mbc5_extram, 8192*16, 1, f );
-    fclose(f);
-  }
 }

@@ -19,11 +19,12 @@
 #ifndef _MBC_MBC2_H_
 #define _MBC_MBC2_H_
 extern void mbc_mbc2_install( void );
+void mbc_mbc2_read_ff( void );
+void mbc_mbc2_dummy( void );
 void mbc_mbc2_read_bank_0( void );
 void mbc_mbc2_read_bank_n( void );
 void mbc_mbc2_write_ram_enable();
 void mbc_mbc2_write_rom_bank_select();
 void mbc_mbc2_read_extram();
 void mbc_mbc2_write_extram();
-void mbc_mbc2_do_nothing();
 #endif // _MBC_MBC2_H_

@@ -23,18 +23,9 @@
 #include "assert.h"
 #include <time.h>
 
-u8 mbc3_extram[32768]; //overkill
-
 void mbc_mbc3_install()
 {
   cart.cleanup = &mbc_mbc3_cleanup;
-  FILE *f;
-  f = fopen( cart.savename, "r" );
-  if( f != NULL )
-  {
-    fread( mbc3_extram, 32768, 1, f );
-    fclose( f );
-  }
   
   int i;
   // cart bank zero
@@ -64,19 +55,36 @@ void mbc_mbc3_install()
   }
   
   // read A000-BFFF: read extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  // calculate the last address where extram is installed
+  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
+  for( i=0xA0; i<extram_end; ++i ) {
     readmem[i] = mbc_mbc3_read_extram;
   }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    readmem[i] = mbc_mbc3_read_ff;
+  }
+  
   // write A000-BFFF: write extram
-  for( i=0xA0; i<=0xBF; ++i ) {
+  for( i=0xA0; i<extram_end; ++i ) {
     writemem[i] = mbc_mbc3_write_extram;
+  }
+  for( i=extram_end; i<=0xBF; ++i ) {
+    writemem[i] = mbc_mbc3_dummy;
   }
   
   // set up cart params
   cart.cartrom_bank_zero = cart.cartrom;
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
-  cart.extram = mbc3_extram;
-  cart.extram_bank = mbc3_extram;
+  cart.extram_bank = cart.extram;
+}
+
+void mbc_mbc3_read_ff()
+{
+  memByte = 0xff;
+}
+
+void mbc_mbc3_dummy()
+{
 }
 
 void mbc_mbc3_read_bank_0()
@@ -116,16 +124,25 @@ void mbc_mbc3_write_ram_bank_select() {
     case 0x01:
     case 0x02:
     case 0x03:
-//       printf("Switching to RAM bank %02X \n", memByte );
+      printf("Switching to RAM bank %02X \n", memByte );
       cart.extram_bank_num = memByte;
       cart.extram_bank = cart.extram + memByte*8192;
       // read A000-BFFF: read extram
-      for( i=0xA0; i<=0xBF; ++i ) {
-	readmem[i] = mbc_mbc3_read_extram;
+      // calculate the last address where extram is installed
+      int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
+      for( i=0xA0; i<extram_end; ++i ) {
+        readmem[i] = mbc_mbc3_read_extram;
       }
+      for( i=extram_end; i<=0xBF; ++i ) {
+        readmem[i] = mbc_mbc3_read_ff;
+      }
+      
       // write A000-BFFF: write extram
-      for( i=0xA0; i<=0xBF; ++i ) {
-	writemem[i] = mbc_mbc3_write_extram;
+      for( i=0xA0; i<extram_end; ++i ) {
+        writemem[i] = mbc_mbc3_write_extram;
+      }
+      for( i=extram_end; i<=0xBF; ++i ) {
+        writemem[i] = mbc_mbc3_dummy;
       }
       break;
     case 0x08:	// seconds
@@ -174,11 +191,4 @@ void mbc_mbc3_write_rtc() {
 }
 
 void mbc_mbc3_cleanup() {
-  FILE *f;
-  f = fopen( cart.savename, "w" );
-  if( f != NULL )
-  {
-    fwrite( mbc3_extram, 32768, 1, f );
-    fclose(f);
-  }
 }

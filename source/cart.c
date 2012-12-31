@@ -71,10 +71,78 @@ void cart_init( char* bootromName, char* cartromName ) {
   
   cart.cleanup = &cart_default_cleanup;
   
+  // cart_init_cartrom also sets cart.savename
   cart_init_cartrom( cartromName );
   cart_init_bootrom( bootromName );
   
+  // set the MBC type for later use
   cart.mbc_type = cart.cartrom[0x147];
+  
+  // determine the emulated extram size
+  switch( cart.cartrom[0x149] )
+  {
+    case 0:
+      cart.extram_size = 0;
+      break;
+    case 1:
+      cart.extram_size = 2048;
+      break;
+    case 2:
+      cart.extram_size = 8192;
+      break;
+    case 3:
+      cart.extram_size = 32768;
+      break;
+    case 4:
+      cart.extram_size = 131072;
+      break;
+  }
+  // exception: MBC2 always has extram
+  switch( cart.mbc_type )
+  {
+    case 0x05:  // MBC2
+    case 0x06:  // MBC2+BATTERY
+      cart.extram_size = 512;
+      break;
+  }
+  
+  // allocate memory for extram
+  if( (cart.extram = (u8 *)malloc(cart.extram_size)) == NULL )
+  {
+    fprintf( stderr, "Extram malloc failed.\n" );
+    exit(1);
+  }
+  
+  // determine whether the extram (if any) is battery-backed
+  switch( cart.mbc_type )
+  {
+    case 0x03:  // MBC1+RAM+BATTERY
+    case 0x06:  // MBC2+BATTERY
+    case 0x0F:  // MBC3+TIMER+BATTERY
+    case 0x10:  // MBC3+TIMERY+RAM+BATTERY
+    case 0x13:  // MBC3+RAM+BATTERY
+    case 0x1B:  // MBC5+RAM+BATTERY
+    case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
+    case 0x22:  // MBC7+RAM+BATTERY
+    case 0xFC:  // POCKET CAMERA
+      cart.battery_backed = 1;
+      break;
+    default:
+      cart.battery_backed = 0;
+      break;
+  }
+  
+  // load extram from file if battery backed
+  if( cart.battery_backed && (cart.extram_size > 0) )
+  {
+    FILE *f;
+    f = fopen( cart.savename, "r" );
+    if( f != NULL )
+    {
+      fread( cart.extram, cart.extram_size, 1, f );
+      fclose( f );
+    }
+  }
   
   cart_reset_mbc();
   
@@ -179,9 +247,12 @@ void cart_reset_mbc()
     return;
   }
   
+  // install MBC driver
   switch( cart.mbc_type )
   {
     case 0x00:  // ROM ONLY
+//     case 0x08:  // ROM+RAM           // no known games use these
+//     case 0x09:  // ROM+RAM+BATTERY
       mbc_none_install();
       break;
     case 0x01:  // MBC1
@@ -223,9 +294,28 @@ void cart_reset_mbc()
   
 void cart_cleanup()
 {
+  // call the mbc handler's cleanup function
   cart.cleanup();
+  
+  // save the extram to disk
+  if( cart.battery_backed && (cart.extram_size > 0) )
+  {
+    FILE *f;
+    f = fopen( cart.savename, "w" );
+    if( f != NULL )
+    {
+      fwrite( cart.extram, cart.extram_size, 1, f );
+      fclose(f);
+    }
+  }
+  
+  // free cartrom, bootrom, and extram
   free( cart.cartrom );
+  cart.cartrom = NULL;
   free( cart.bootrom );
+  cart.bootrom = NULL;
+  free( cart.extram );
+  cart.extram = NULL;
 }
 
 void cart_default_cleanup()
