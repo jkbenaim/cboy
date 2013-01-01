@@ -73,40 +73,12 @@ int main ( int argc, char* argv[] ) {
 #endif // USE_SDL
 
 #ifdef __ANDROID__
-JNIEXPORT void JNICALL Java_org_trashfolder_cboy_CboyView_cboyFrame(JNIEnv * env, jobject  obj, jobject bitmap)
+JNIEXPORT void JNICALL Java_org_trashfolder_cboy_CboyView_cboyInit(JNIEnv * env, jobject  obj)
 {
-    AndroidBitmapInfo  info;
-    void*              pixels;
-    int                ret;
-    static int         init;
-
-    if (!init) {
-        mem_init();
-        cpu_init();
-        cart_init( "/storage/emulated/0/roms/cgb_rom.bin", "/storage/emulated/0/roms/camera.gb" );
-        vid_init();
-        input_init();
-        init = 1;
-    }
-
-    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
-        return;
-    }
-
-    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-        LOGE("Bitmap format is not RGB_565 !");
-        return;
-    }
-
-    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
-        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
-    }
-
-    input_handle();
-    cpu_do_one_frame();
-    vid_frame( &info, pixels );
-
-    AndroidBitmap_unlockPixels(env, bitmap);
+    mem_init();
+    cpu_init();
+    cart_init( "/storage/emulated/0/roms/cgb_rom.bin", "/storage/emulated/0/roms/camera.gb" );
+    vid_init();
+    input_init();
 }
 #endif // __ANDROID__
