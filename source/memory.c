@@ -585,10 +585,10 @@ void write_special() {
       break;
     case ADDR_NR52:
       state.nr52 = memByte;
-      if( memByte & 0x80 )
-	printf( "wrote NR52 (sound powered up)\n" );
-      else
-	printf( "wrote NR52 (sound powered down)\n" );
+//       if( memByte & 0x80 )
+// 	printf( "wrote NR52 (sound powered up)\n" );
+//       else
+// 	printf( "wrote NR52 (sound powered down)\n" );
       break;
     case ADDR_WAVERAM_0:
     case ADDR_WAVERAM_1:
@@ -698,7 +698,7 @@ void write_special() {
 	// general-purpose DMA
 	int source = state.hdma_source & 0xFFF0;
 	int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
-	printf("HDMA: source=%04X, dest=%04X\n", source, dest);
+// 	printf("HDMA: source=%04X, dest=%04X\n", source, dest);
 	
 	int i;
 	for(i=0; i<(state.hdma5+1)*16; ++i)
