@@ -124,7 +124,7 @@ void mbc_mbc3_write_ram_bank_select() {
     case 0x01:
     case 0x02:
     case 0x03:
-      printf("Switching to RAM bank %02X \n", memByte );
+//       printf("Switching to RAM bank %02X \n", memByte );
       cart.extram_bank_num = memByte;
       cart.extram_bank = cart.extram + memByte*8192;
       // read A000-BFFF: read extram
