@@ -29,9 +29,9 @@
 // u8 ram[0x1];
 u8 vram_bank_zero[0x4000];	// 8000-9FFF
 u8 vram_bank_one[0x4000];	// 8000-9FFF
-u8 ram[0x2000];			// A000-BFFF (8 banks of 4KB each)
-u8 wram_bank_zero[0x1000];	// C000-CFFF
-u8 wram_bank_n[0x1000];		// D000-DFFF
+u8 wram[0x8000];
+u8 *wram_bank_zero;	        // C000-CFFF
+u8 *wram_bank_n;		// D000-DFFF
 u8 oam[0xA0];			// FE00-FE9F
 u8 hram[0x7F];			// FF80-FFFE
 
@@ -56,12 +56,14 @@ void mem_init( void ) {
   // extram is set up by mbc handler
   
   // wram bank zero
+  wram_bank_zero = wram;
   for( i=0xC0; i<=(0xCF); ++i ) {
     readmem[i]   = read_wram_bank_zero;
     writemem[i]  = write_wram_bank_zero;
   }
   
   // wram bank n
+  wram_bank_n = wram + 0x1000;
   for( i=0xD0; i<=(0xDF); ++i ) {
     readmem[i]   = read_wram_bank_n;
     writemem[i]  = write_wram_bank_n;
@@ -100,7 +102,7 @@ void write_nothing() {
 }
 
 
-// vram
+// vram bank switch
 void select_vram_bank( u8 num ) {
   int i;
   if( (num & 0x01) == 0 )
@@ -383,8 +385,8 @@ void read_special() {
       memByte = state.obpd[ state.obpi & 0x3F ];
       break;
     case ADDR_SVBK:
-      // TODO
-//       printf("Read SVBK\n");
+      printf("Read SVBK\n");
+      memByte = state.svbk;
       break;
     case ADDR_IE:
       memByte = state.ie;
@@ -740,8 +742,17 @@ void write_special() {
 	state.obpi = 0x80 + ((state.obpi + 1) & 0x3F);
       break;
     case ADDR_SVBK:
-      // TODO
-//       printf("Wrote SVBK: %02X\n", memByte);
+      // this selects the WRAM bank in CGB mode
+      printf("Wrote SVBK: %02X\n", memByte);
+      
+      // we're in CGB mode
+      state.svbk = memByte & 0x07;
+      
+      if(state.svbk == 0)
+        wram_bank_n = wram + 0x1000;
+      else
+        wram_bank_n = wram + 0x1000 * state.svbk;
+      
       break;
     case ADDR_IE:
       state.ie = memByte;
