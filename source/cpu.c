@@ -3452,6 +3452,7 @@ void cpu_init() {
   state.bgp = 0;
   state.bootRomEnabled = 1;
   state.caps = 0x80;
+  state.svbk = 1;
   
   state.pc = 0x0000;
   state.sp = 0xFFFE;

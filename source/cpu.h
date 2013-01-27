@@ -132,6 +132,7 @@ struct state_s {
   u8 obpd[0x40];
   u8 vbk;
   u8 caps;
+  u8 svbk;
 #ifdef __BIG_ENDIAN__
   union {
     struct {
