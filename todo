@@ -1,11 +1,9 @@
 TODO
 
 Before release:
-  * Make save files have correct filenames (since 2012-04-11)
   * Sprite priority (since 2012-06-02)
   * HDMA could use a look (since 2012-06-02)
   * Double-speed mode (since 2012-06-02)
-  * Fix save RAM. The emulated size is wrong in certain cases, save files are the wrong size, some MBCs don't save at all, etc. FIX IT. (since 2012-11-23)
 
 Eventually:
   * Audio
