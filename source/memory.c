@@ -385,7 +385,7 @@ void read_special() {
       memByte = state.obpd[ state.obpi & 0x3F ];
       break;
     case ADDR_SVBK:
-      printf("Read SVBK\n");
+//       printf("Read SVBK\n");
       memByte = state.svbk;
       break;
     case ADDR_IE:
@@ -743,7 +743,7 @@ void write_special() {
       break;
     case ADDR_SVBK:
       // this selects the WRAM bank in CGB mode
-      printf("Wrote SVBK: %02X\n", memByte);
+//       printf("Wrote SVBK: %02X\n", memByte);
       
       // we're in CGB mode
       state.svbk = memByte & 0x07;
