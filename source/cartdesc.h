@@ -58,7 +58,7 @@ char *cartdesc_carttype[0x100] =
   /* 1F */ "Unknown",
   /* 20 */ "Unknown",
   /* 21 */ "Unknown",
-  /* 22 */ "Unknown",
+  /* 22 */ "MBC7+TILT+RAM+BATTERY",
   /* 23 */ "Unknown",
   /* 24 */ "Unknown",
   /* 25 */ "Unknown",

@@ -4,8 +4,8 @@ CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOUR
 
 all: cboy
 
-cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o
-	$(CC) $(CFLAGS) cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o `sdl-config --libs` -o cboy
+cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o
+	$(CC) $(CFLAGS) cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o serial.o video.o `sdl-config --libs` -o cboy
 
 clean:
 	rm -f cboy gbinfo *.o
@@ -48,6 +48,9 @@ mbc_mbc3.o: Makefile mbc_mbc3.c memory.h cart.h mbc_mbc3.h assert.h
 
 mbc_mbc5.o: Makefile mbc_mbc5.c memory.h cart.h mbc_mbc5.h assert.h
 	$(CC) $(CFLAGS) -c mbc_mbc5.c
+
+mbc_mbc7.o: Makefile mbc_mbc7.c memory.h cart.h mbc_mbc7.h assert.h
+	$(CC) $(CFLAGS) -c mbc_mbc7.c
 
 mbc_boot.o: Makefile mbc_boot.c memory.h cart.h mbc_boot.h
 	$(CC) $(CFLAGS) -c mbc_boot.c

@@ -16,18 +16,17 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#include "mbc_boot.h"
-#include "mbc_none.h"
-#include "mbc_cam.h"
-#include "mbc_mbc1.h"
-#include "mbc_mbc2.h"
-#include "mbc_mbc3.h"
-#include "mbc_mbc5.h"
-#include "mbc_mbc7.h"
-
-#ifdef _MBC_H_
-#define _MBC_H_
-
-extern void mbc_romSize2numBanks( u8 romSize );
-
-#endif // _MBC_H_
+#ifndef _MBC_MBC7_H_
+#define _MBC_MBC7_H_
+extern void mbc_mbc7_install( void );
+void mbc_mbc7_read_ff( void );
+void mbc_mbc7_dummy( void );
+void mbc_mbc7_read_bank_0( void );
+void mbc_mbc7_read_bank_n( void );
+void mbc_mbc7_write_ram_enable();
+void mbc_mbc7_write_rom_bank_select();
+void mbc_mbc7_write_ram_bank_select();
+void mbc_mbc7_read_extram();
+void mbc_mbc7_write_extram();
+void mbc_mbc7_cleanup();
+#endif // _MBC_MBC7_H_

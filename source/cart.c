@@ -97,12 +97,15 @@ void cart_init( char* bootromName, char* cartromName ) {
       cart.extram_size = 131072;
       break;
   }
-  // exception: MBC2 always has extram
+  // exception: MBC2 and MBC7 always have extram
   switch( cart.mbc_type )
   {
     case 0x05:  // MBC2
     case 0x06:  // MBC2+BATTERY
       cart.extram_size = 512;
+      break;
+    case 0x22: // MBC7+?
+      cart.extram_size = 32768;
       break;
   }
   
@@ -278,6 +281,9 @@ void cart_reset_mbc()
     case 0x1D:  // MBC5+RUMBLE+RAM
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
       mbc_mbc5_install();
+      break;
+    case 0x22:  // MBC7+?
+      mbc_mbc7_install();
       break;
     case 0xFC:	// POCKET CAMERA
       mbc_cam_install();
