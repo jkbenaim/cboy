@@ -242,6 +242,17 @@ extern struct state_s state;
 #define IME_DISABLED	0x00
 #define IME_ENABLED	0xFF
 
+/*
+ * Interrupt queue message names
+ */
+typedef enum {
+  INTERRUPT_VBLANK = 1,
+  INTERRUPT_LCD_STAT,
+  INTERRUPT_TIMER,
+  INTERRUPT_SERIAL,
+  INTERRUPT_JOYPAD
+} InterruptMessage_t;
+
 // ops
 void UNDEF(void);
 void UNDEF_CB(void);
@@ -399,7 +410,7 @@ void CB_RES_B_HL(void);	// CB 86,8E,96,9E,A6,AE,B6,BE
 void CB_SET_B_R(void);	// CB C0-FF (except (HL))
 void CB_SET_B_HL(void);	// CB C6,CE,D6,DE,E6,EE,F6,FE
 
-void cpu_init( void );
+int cpu_init( void );
 void cpu_do_one_instruction( void );
 void cpu_do_one_frame( void );
 u8* cpu_getReg( int );

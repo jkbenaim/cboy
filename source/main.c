@@ -54,7 +54,11 @@ int main ( int argc, char* argv[] ) {
   }
   
   mem_init();
-  cpu_init();
+  if( ! cpu_init() )
+  {
+    fprintf( stderr, "cpu init failed\n" );
+    return 1;
+  }
   cart_init( argv[1], argv[2] );
   vid_init();
   input_init();

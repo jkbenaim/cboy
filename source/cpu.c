@@ -23,11 +23,9 @@
 #include "assert.h"
 #include "video.h"
 #include "serial.h"
-#include "pqueue.h"
 
 struct state_s state;
 int branched= 0;
-pqueue_root *interruptQueue;
 
 // int stop = 0;
 
@@ -3474,9 +3472,7 @@ int cpu_init() {
   RESET_N();
   RESET_Z();
   
-  if( ! pqueue_init(interruptQueue) )
-    return 1;
-  return 0;
+  return 1;
 }
 
 u8 cpu_get_flags_register( void )
