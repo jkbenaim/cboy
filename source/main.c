@@ -30,6 +30,7 @@
 #include "video.h"
 #include "cart.h"
 #include "main.h"
+#include "audio.h"
 
 int stop = 0;
 
@@ -43,7 +44,7 @@ int stop = 0;
 int main ( int argc, char* argv[] ) {
   printf( " ----------------------- \n" );
   printf( " --- Welcome to cboy --- \n" );
-  printf( " ---    (c) 2012     --- \n" );
+  printf( " ---    (c) 2013     --- \n" );
   printf( " ----------------------- \n" );
   
   if(argc < 3)
@@ -54,6 +55,7 @@ int main ( int argc, char* argv[] ) {
   }
   
   mem_init();
+//   audio_init();
   if( ! cpu_init() )
   {
     fprintf( stderr, "cpu init failed\n" );
@@ -71,6 +73,7 @@ int main ( int argc, char* argv[] ) {
   }
   
   cart_cleanup();
+//   audio_cleanup();
   
   return 0;
 }

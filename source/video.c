@@ -37,12 +37,13 @@
 #endif // __ANDROID__
 
 pixel_t pixmem[160*144];
+pixel_t colormem[160*144];
 
 #ifdef USE_SDL
 SDL_Surface *screen;
 #endif
 
-void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip ) {
+void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip, int updateColormem ) {
   
   // Is this span off the left of the screen?
   if(x<-7)
@@ -87,6 +88,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int x
   
   // fill pixel array with span
   pixel_t pixels[8];	// pixel 7 at the left, pixel 0 at the right
+  pixel_t colors[8];
   int lowBits, highBits;
   if( vramBank == 0 )
   {
@@ -111,6 +113,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int x
     if( highBits & mask )
       color += 2;
     pixels[p] = myPalette[color];
+    colors[p] = color;
   }
   
   // Is the span partially offscreen?
@@ -124,26 +127,42 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int x
     spanEnd = 159 - x;
   
   // xFlip?
-  if( xFlip ) {
-  // Draw the span from right to left.
-    for( p=spanStart; p<=spanEnd; ++p )
-      pixmem[ lineStart + x + p ] = pixels[ p ];
-  } else {
-    // No
-  // Draw the span from left to right.
-    for( p=spanStart; p<=spanEnd; ++p )
-      pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+  if( xFlip )
+  {
+    // Flip the span.
+    pixel_t temp_pixels[8];
+    pixel_t temp_colors[8];
+    
+    int i;
+    for(i=0; i<8; ++i)
+    {
+      // Copy pixels to a temporary place, in reverse order.
+      temp_pixels[i] = pixels[7-i];
+      temp_colors[i] = colors[7-i];
+    }
+    for(i=0; i<8; ++i)
+    {
+      pixels[i] = temp_pixels[i];
+      colors[i] = temp_colors[i];
+    }
   }
   
-//   // Draw the span.
-//   for( p=spanStart; p<=spanEnd; ++p )
-//   {
-//     pixmem[ lineStart + x + p ] = pixels[ 7-p ];
-//   }
+  // Draw the span from left to right.
+  for( p=spanStart; p<=spanEnd; ++p )
+  {
+    pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+  }
+  if( updateColormem )
+  {
+    for( p=spanStart; p<=spanEnd; ++p )
+    {
+      colormem[ lineStart + x + p ] = colors[ 7-p ];
+    }
+  }
   
 }
 
-void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip ) {
+void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip, int priority ) {
   
   // Is this span off the left of the screen?
   if(x<-7)
@@ -228,20 +247,43 @@ void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, 
     spanEnd = 159 - x;
   
   // xFlip?
-  if( xFlip ) {
-  // Draw the span from right to left.
-    for( p=spanStart; p<=spanEnd; ++p )
+  if( xFlip )
+  {
+    // Flip the span.
+    pixel_t temp_pixels[8];
+    pixel_t temp_colors[8];
+    
+    int i;
+    for(i=0; i<8; ++i)
     {
-      if( colors[p] != 0 )
-	pixmem[ lineStart + x + p ] = pixels[ p ];
+      // Copy pixels to a temporary place, in reverse order.
+      temp_pixels[i] = pixels[7-i];
+      temp_colors[i] = colors[7-i];
     }
-  } else {
-    // No
-  // Draw the span from left to right.
-    for( p=spanStart; p<=spanEnd; ++p )
+    for(i=0; i<8; ++i)
     {
-      if( colors[7-p] != 0 )
-	pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+      pixels[i] = temp_pixels[i];
+      colors[i] = temp_colors[i];
+    }
+  }
+  
+  
+  // Draw the span from left to right.
+  for( p=spanStart; p<=spanEnd; ++p )
+  {
+    if( colors[7-p] != 0 )
+    {
+      if( priority )
+      {
+        if( colormem[ lineStart + x + p ] == 0 )
+        {
+          pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+        } else {
+//           pixmem[ lineStart + x + p ] = 0x001f; // red
+        }
+      } else {
+        pixmem[ lineStart + x + p ] = pixels[ 7-p ];
+      }
     }
   }
   
@@ -287,9 +329,15 @@ void vid_render_line()
 	  tileDataAddress = tile*16;
       }
       
-      spanAddress = tileDataAddress + (backLineInTile * 2);
       
       u8 attributes = vram_bank_one[tileAddress];
+      int xFlip = (attributes&BG_XFLIP)?1:0;
+      int yFlip = (attributes&BG_YFLIP)?1:0;
+      
+      if( yFlip )
+        spanAddress = tileDataAddress + ((7-backLineInTile) * 2);
+      else
+        spanAddress = tileDataAddress + (backLineInTile * 2);
       
       // Set the VRAM bank.
       if( state.caps == 0x04 )
@@ -304,8 +352,7 @@ void vid_render_line()
       else
 	pal = attributes & 0x07;	// cgb mode
       
-      int xFlip = (attributes&BG_XFLIP)?1:0;
-      vid_drawOpaqueSpan( pal, spanAddress, i*8 - (state.scx%8), state.ly, vramBank, xFlip );
+      vid_drawOpaqueSpan( pal, spanAddress, i*8 - (state.scx%8), state.ly, vramBank, xFlip, 1 );
     }
   
   // Render the window.
@@ -338,9 +385,14 @@ void vid_render_line()
 	  tileDataAddress = tile*16;
       }
       
-      spanAddress = tileDataAddress + (windowLineInTile * 2);
-      
       u8 attributes = vram_bank_one[tileAddress];
+      int xFlip = (attributes&BG_XFLIP)?1:0;
+      int yFlip = (attributes&BG_YFLIP)?1:0;
+      
+      if( yFlip )
+        spanAddress = tileDataAddress + ((7-windowLineInTile) * 2);
+      else
+        spanAddress = tileDataAddress + (windowLineInTile * 2);
       
       // Set the VRAM bank.
       if( state.caps == 0x04 )
@@ -355,8 +407,7 @@ void vid_render_line()
       else
         pal = attributes & 0x07;        // cgb mode
       
-      int xFlip = (attributes&BG_XFLIP)?1:0;
-      vid_drawOpaqueSpan( pal, spanAddress, i*8 + state.wx - 7, state.ly, vramBank, xFlip );
+      vid_drawOpaqueSpan( pal, spanAddress, i*8 + state.wx - 7, state.ly, vramBank, xFlip, 1 );
     }
   }
   
@@ -403,12 +454,15 @@ void vid_render_line()
 	vramBank = 0;	// dmg mode
       else
 	vramBank = (attributes & SPRITE_VRAM_BANK)?1:0;	// cgb mode
+
+      // Set the priority. 0=sprite above background, 1=sprite behind bg color 1-3
+      int priority = attributes & SPRITE_PRIORITY;
       
       // Calculate the span address, relative to 0x8000.
       spanAddress = (tileNum * 16) + (lineOfSpriteToRender*2);
       
       int xFlip = attributes & SPRITE_XFLIP;
-      vid_drawTransparentSpan( pal, spanAddress, x-8, state.ly, vramBank, xFlip );
+      vid_drawTransparentSpan( pal, spanAddress, x-8, state.ly, vramBank, xFlip, priority );
     }
       
       
@@ -427,6 +481,7 @@ void vid_init()
   SDL_WM_SetCaption( "cboy", "cboy" );
   
   // create window
+//   screen = SDL_SetVideoMode( 320+1+256, 288, 0, 0 );
   screen = SDL_SetVideoMode( 320, 288, 0, 0 );
 #endif  // USE_SDL
   
@@ -441,6 +496,7 @@ void vid_waitForNextFrame()
 {
 #ifdef USE_SDL
 #ifndef __APPLE__
+  // TODO
   SDL_Delay(1000 / 60.0);
 #endif
 #endif
@@ -476,6 +532,7 @@ void vid_frame()
   u32 *surfPixels = screen->pixels;
   int width = screen->w;
   int srcStartOfLine=0, dstStartOfLine=0;
+  // double up the gb video onto the surface
   for( y=0; y<144; ++y )
   {
     for( x=0; x<160; ++x )
@@ -488,6 +545,24 @@ void vid_frame()
     srcStartOfLine += 160;
     dstStartOfLine += width*2;
   }
+  
+//   // draw a red line
+//   for( y=0; y<screen->h; y++ )
+//   {
+//     surfPixels[y*(screen->w) + 320] = 0x00FF0000;
+//   }
+//   
+//   // copy visual memory to surface
+//   for( y=0; y<256; ++y )
+//   {
+//     for( x=0; x<256; ++x )
+//     {
+//       surfPixels[321+x+y*(screen->w)] = visual_memory[x+y*256];
+//     }
+//   }
+  
+  // clear visual memory
+//   memset(visual_memory, 0, 256*256*4);
     
   SDL_UnlockSurface( screen );
   SDL_UpdateRect( screen, 0, 0, 0, 0 );

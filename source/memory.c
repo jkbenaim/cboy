@@ -26,9 +26,12 @@
 #include "cart.h"
 #include "mbc.h"
 
-// u8 ram[0x1];
-u8 vram_bank_zero[0x4000];	// 8000-9FFF
-u8 vram_bank_one[0x4000];	// 8000-9FFF
+// usage statistics
+pixel_t visual_memory[65536];
+
+u8 ram[0x1];
+u8 vram_bank_zero[0x2000];	// 8000-9FFF
+u8 vram_bank_one[0x2000];	// 8000-9FFF
 u8 wram[0x8000];
 u8 *wram_bank_zero;	        // C000-CFFF
 u8 *wram_bank_n;		// D000-DFFF
@@ -232,7 +235,7 @@ void read_special() {
       memByte = state.iflag;
       break;
     case ADDR_NR10:
-      memByte = state.nr10 | 0x80;;
+      memByte = state.nr10 | 0x80;
       break;
     case ADDR_NR11:
       memByte = state.nr11 | 0x3F;
@@ -694,16 +697,19 @@ void write_special() {
       break;
     case ADDR_HDMA5:
       state.hdma5 = memByte;
-      if( state.hdma5 == 0xFF ) break;
+//       if( state.hdma5 == 0xFF ) break;
       if( (state.hdma5 & 0x80) == 0 )
       {
+        // TODO: dma is supposed to take time, but the current
+        //       implementation completes instantly
 	// general-purpose DMA
 	int source = state.hdma_source & 0xFFF0;
 	int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
-// 	printf("HDMA: source=%04X, dest=%04X\n", source, dest);
+        int length = state.hdma5 & 0x7F;
+	printf("general HDMA: source=%04X, dest=%04X, length=%02X\n", source, dest, length);
 	
 	int i;
-	for(i=0; i<(state.hdma5+1)*16; ++i)
+	for(i=0; i<(length+1)*16; ++i)
 	{
 	  address = source + i;
 	  READ_BYTE();
@@ -716,8 +722,11 @@ void write_special() {
       {
 	// h-blank DMA
       // TODO
-	printf("WARNING: h-blank dma supressed\n");
-	state.hdma5 = 0xFF;
+        int source = state.hdma_source & 0xFFF0;
+        int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
+        int length = state.hdma5 & 0x7F;
+        printf("h-blank HDMA: source=%04X, dest=%04X, length=%02X\n", source, dest, length);
+// 	state.hdma5 &= 0x7F;
       }
       break;
     case ADDR_RP:
@@ -774,6 +783,38 @@ void write_out_of_bounds( void )
 {
   fprintf( stderr, "Out-of-bounds write, address: %04X, pc: %04X\n", address, state.pc );
   exit(1);
+}
+
+int min( int n, int m )
+{
+  return n<m?n:m;
+}
+
+void vm_add( int c )
+{
+  int ar = (visual_memory[address] & 0x00ff0000) >> 16;
+  int ag = (visual_memory[address] & 0x0000ff00) >>  8;
+  int ab = (visual_memory[address] & 0x000000ff) >>  0;
+  
+  int cr = (                     c & 0x00ff0000) >> 16;
+  int cg = (                     c & 0x0000ff00) >>  8;
+  int cb = (                     c & 0x000000ff) >>  0;
+  
+  int nr = min(ar+cr, 255);
+  int ng = min(ag+cg, 255);
+  int nb = min(ab+cb, 255);
+  
+  visual_memory[address] = (nr << 16) + (ng << 8) + nb ;
+}
+
+void read_byte( void ) {
+  readmem[address>>8]();
+//   vm_add(0x00002080);
+}
+
+void write_byte( void ) {
+  writemem[address>>8]();
+//   vm_add(0x00802000);
 }
 
 void read_word( void ) {

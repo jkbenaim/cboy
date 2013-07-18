@@ -111,6 +111,7 @@ void mbc_mbc3_write_rom_bank_select() {
   else
     offset = (size_t)memByte*16384 % cart.cartromsize;
   
+//   printf( "switch cart bank num: %02X\n", cart.cart_bank_num );
   assert("MBC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
 }
@@ -162,7 +163,7 @@ void mbc_mbc3_write_ram_bank_select() {
       }
       break;
     default:
-      printf("Switching to invalid bank %02X \n", memByte );
+      printf("Switching to invalid extram bank %02X \n", memByte );
       break;
   }
 }

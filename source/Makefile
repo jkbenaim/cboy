@@ -1,11 +1,11 @@
 
 CC=gcc
-CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
+CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE -lasound
 
 all: cboy
 
-cboy: Makefile cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o
-	$(CC) $(CFLAGS) cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o `sdl-config --libs` -o cboy
+cboy: Makefile audio.o cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o
+	$(CC) $(CFLAGS) audio.o cart.o cpu.o input.o main.o mbc_cam.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o `sdl-config --libs` -o cboy
 
 clean:
 	rm -f cboy gbinfo *.o
@@ -22,6 +22,9 @@ debug: cboy
 profile: cboy run
 	gprof cboy > profile.txt
 
+audio.o: Makefile audio.c audio.h
+	$(CC) $(CFLAGS) -c audio.c
+
 cart.o: Makefile cart.c cart.h memory.h mbc.h mbc_boot.h cartdesc.h cpu.h
 	$(CC) $(CFLAGS) -c cart.c
 
@@ -31,7 +34,7 @@ cpu.o: Makefile cpu.c cpu.h memory.h assert.h endian.h serial.h pqueue.h
 input.o: Makefile input.c types.h main.h memory.h input.h cpu.h
 	$(CC) $(CFLAGS) -c input.c
 
-main.o: Makefile main.c types.h cpu.h memory.h video.h cart.h main.h
+main.o: Makefile main.c audio.h types.h cpu.h memory.h video.h cart.h main.h
 	$(CC) $(CFLAGS) -c main.c
 
 mbc_cam.o: Makefile mbc_cam.c memory.h cart.h mbc_cam.h

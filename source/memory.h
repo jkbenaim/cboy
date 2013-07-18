@@ -22,25 +22,19 @@
 #include "types.h"
 #include "cart.h"
 #include "assert.h"
+#include <SDL/SDL.h>
 
-#ifndef NDEBUG
-#define READ_BYTE() { \
-assert( "Reading byte: address is non-negative", address >= 0 ); \
-assert( "Reading byte: address is less than 0x10000", address < 0x10000 ); \
-readmem[address>>8](); \
-}
+#define READ_BYTE() read_byte()
 #define READ_WORD() read_word()
-#define WRITE_BYTE() writemem[address>>8]()
+#define WRITE_BYTE() write_byte()
 #define WRITE_WORD() write_word()
-#else // NDEBUG
-#define READ_BYTE() readmem[address>>8]()
-#define READ_WORD() read_word()
-#define WRITE_BYTE() writemem[address>>8]()
-#define WRITE_WORD() write_word()
-#endif
 
+extern void read_byte( void );
 extern void read_word( void );
+extern void write_byte( void );
 extern void write_word( void );
+
+extern pixel_t visual_memory[65536];
 
 #define ADDR_JOYP	0xFF00
 #define ADDR_SB		0xFF01
@@ -141,8 +135,8 @@ extern address_t address;
 extern u8 memByte;
 extern u16 memWord;
 
-extern u8 vram_bank_zero[0x4000];
-extern u8 vram_bank_one[0x4000];
+extern u8 vram_bank_zero[0x2000];
+extern u8 vram_bank_one[0x2000];
 extern u8 oam[0xA0];
 extern u8 hram[0x7F];
 

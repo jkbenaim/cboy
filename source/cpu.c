@@ -3702,7 +3702,7 @@ void cpu_do_one_instruction()
     }
     else
     {
-      // We're in the HBlank period.
+      // We're in the hblank period.
       state.old_vid_mode = state.vid_mode;
       state.vid_mode = 0;
       
@@ -3712,6 +3712,32 @@ void cpu_do_one_instruction()
       // Fire the hblank interrupt, if enabled.
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x08) )
         state.iflag |= IMASK_LCD_STAT;
+      
+//       // Continue an hblank DMA if one was running.
+//       if( (state.hdma5 & 0x80) == 0 )
+//       {
+//         // Transfer 0x10 bytes from source to destination
+//         int source = state.hdma_source & 0xFFF0;
+//         int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
+//         printf( "moving some data for hblank dma, source=%04X, dest=%04X, hdma5: %02X\n", source, dest, state.hdma5 );
+//         int i;
+//         for( i=0; i<0x10; ++i)
+//         {
+//           address = source + i;
+//           READ_BYTE();
+//           address = dest + i;
+//           WRITE_BYTE();
+//         }
+//         
+//         state.hdma_source += 0x10;
+//         state.hdma_destination += 0x10;
+//         // Decrement hdma5. If it was already 0, it should wrap to 0xFF.
+//         // This also sets bit 7 when the transfer is complete.
+//         if( state.hdma5 == 0x00 )
+//           state.hdma5 = 0xff;
+//         else
+//           state.hdma5 -= 1;
+//       }
       
       // Is it time to render a frame?
       if( state.ly != state.last_line_rendered )
