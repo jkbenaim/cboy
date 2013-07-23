@@ -47,8 +47,28 @@ init:
   call set_system_mode
   xor a
   ldh (R_SVBK), a
-  ld b, $1
-  ld a, $11
+  
+  ; These are set by a real CGB during bootup.
+  ld hl, $d000
+  ld a, (hl)
+  ld b, a
+  
+  ld hl, $0080
+  push hl
+  pop af
+  
+  xor a
+  ld c,a
+  ld d,a
+  
+  ld a,$08
+  ld e,a
+
+  ; The game can check the initial value of
+  ; the A and B registers to determine the
+  ; machine type.
+  ld a, $11     ; $01= DMG,SGB1  $11= CGB,GBA, $FF= SGB2,MGB
+  
   jp chainload
 
 .org $fe
@@ -69,11 +89,27 @@ set_system_mode:
   ; CGB flag ($0143) from the cart rom
   ; to $FF4C.
   ldh ($4c), a
+  
+  ; $d000 stores the bootup value of the B register
+  ld hl, $d000
+  ld a, $00     ; $00= CGB   $01= GBA
+  ld (hl), a
+  
   jr _return
   
   
   _dmg_game:
   ; dmg game
+  
+  call compute_name_checksum
+  
+  ; set palette
+  ld a,$fc
+  ldh (R_BGP), a
+  xor a
+  ldh (R_OBP0), a
+  ldh (R_OBP1), a
+  
   ; write $04 to $FF4C.
   ld a, $04
   ldh ($4c), a
@@ -128,6 +164,34 @@ wait_for_vblank:
   bit 0, (hl)
   jr z, _loop_vblank
   pop hl
+  ret
+
+; A real CGB takes the checksum of a game's name if
+; it is not a CGB-aware game. The checksum is used
+; for three purposes:
+;       1. Setting the palette.
+;       2. Showing the original DMG logo or not.
+;       3. The checksum is stored both at
+;          $D000 and as the contents of the B
+;          register at bootup.
+; Since we want to simulate the initial register state
+; of a real CGB, we have to calculate this to set the B
+; register.
+; Note that this only applies to DMG games; in the case
+; of CGB-aware games, the intial value of the B register
+; is either $00 (CGB) or $01 (GBA).
+; This function returns the checksum in the A and E registers.
+compute_name_checksum:
+  ld de, $1000
+  ld hl, $0134
+  _loop_compute_name_checksum:
+  ld a, (hl+)
+  add e
+  ld  e,a
+  dec d
+  jr nz, _loop_compute_name_checksum
+  ld hl, $d000
+  ld (hl), a
   ret
 
 ; This palette data was shamelessly stolen from BGB.

@@ -20,6 +20,9 @@
 
 .define IF	$FF0F
 .define	LCDC	$FF40
+.define BGP     $FF47
+.define OBP0    $FF48
+.define OBP1    $FF49
 .define BGPI	$FF68
 .define BGPD	$FF69
 .define OBPI	$FF6A
@@ -28,6 +31,9 @@
 
 .define R_IF	$0F
 .define R_LCDC	$40
+.define R_BGP   $47
+.define R_OBP0  $48
+.define R_OBP1  $49
 .define R_BGPI	$68
 .define R_BGPD	$69
 .define R_OBPI	$6A
