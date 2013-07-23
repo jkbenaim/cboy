@@ -279,6 +279,8 @@ void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, 
         {
           pixmem[ lineStart + x + p ] = pixels[ 7-p ];
         } else {
+          // Uncomment the next line to highlight the
+          // sprite-behind-background case in bright red.
 //           pixmem[ lineStart + x + p ] = 0x001f; // red
         }
       } else {
