@@ -3554,7 +3554,7 @@ void cpu_do_one_instruction()
     }
     else if( pendingInterrupts & IMASK_LCD_STAT )
     {
-//       printf("LCD_STAT, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
+//       printf("LCD_STAT, iflag: %02X, ie: %02X, stat: %02X\n", state.iflag, state.ie, state.stat);
       state.iflag &= ~IMASK_LCD_STAT;
       state.sp -= 2;
       address = state.sp;
@@ -3601,6 +3601,7 @@ void cpu_do_one_instruction()
   address = state.pc;
   READ_BYTE();
   state.op = memByte;
+//   printf("%04X %04X %02X\n", address, state.sp, memByte);
   
   // Set instruction length (in memBytes).
 //   instr_length = op_lengths[state.op];
@@ -3648,15 +3649,18 @@ void cpu_do_one_instruction()
     state.line_progress -= CYCLES_LINE;
     state.ly++;
   }
-  if( state.ly > 0x9A )
+  if( state.ly > 153 )
     state.ly = 0;
   
   // Check LYC.
-  if( state.ly == state.lyc )
+  if( (state.ly == state.lyc) && (state.ly != state.last_ly) )
   {
     state.stat |= 0x04;	// coincidence flag
     if( state.stat & 0x40 )
+    {
       state.iflag |= IMASK_LCD_STAT;
+//       printf("setting IMASK_LCD_STAT (coincidence)\n");
+    }
   }
   else
     state.stat &= 0xFB;
@@ -3672,7 +3676,10 @@ void cpu_do_one_instruction()
     
     // Fire the interrupt, if enabled.
     if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x10) )
+    {
       state.iflag |= IMASK_LCD_STAT;
+      printf("setting IMASK_LCD_STAT (vblank)\n");
+    }
   }
   else
   {
@@ -3687,7 +3694,10 @@ void cpu_do_one_instruction()
       
       // Fire the interrupt, if enabled.
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x20) )
+      {
         state.iflag |= IMASK_LCD_STAT;
+        printf("setting IMASK_LCD_STAT (oam)\n");
+      }
     }
     else if(state.line_progress < (CYCLES_MODE_2 + CYCLES_MODE_3))
     {
@@ -3711,7 +3721,10 @@ void cpu_do_one_instruction()
       
       // Fire the hblank interrupt, if enabled.
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x08) )
+      {
         state.iflag |= IMASK_LCD_STAT;
+        printf("setting IMASK_LCD_STAT (hblank)\n");
+      }
       
 //       // Continue an hblank DMA if one was running.
 //       if( (state.hdma5 & 0x80) == 0 )
