@@ -3651,6 +3651,8 @@ void cpu_do_one_instruction()
   }
   if( state.ly > 153 )
     state.ly = 0;
+  if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
+    state.ly = 0;
   
   // Check LYC.
   if( (state.ly == state.lyc) && (state.ly != state.last_ly) )
@@ -3723,7 +3725,7 @@ void cpu_do_one_instruction()
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x08) )
       {
         state.iflag |= IMASK_LCD_STAT;
-        printf("setting IMASK_LCD_STAT (hblank)\n");
+//         printf("setting IMASK_LCD_STAT (hblank)\n");
       }
       
 //       // Continue an hblank DMA if one was running.

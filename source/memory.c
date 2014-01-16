@@ -615,7 +615,8 @@ void write_special() {
       break;
     case ADDR_LCDC:
       state.lcdc = memByte;
-//       printf("LCDC: %02X\n", state.lcdc);
+      if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
+        state.ly = 0;
       break;
     case ADDR_STAT:
       state.stat = memByte & 0xF8;
