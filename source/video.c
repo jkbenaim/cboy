@@ -431,9 +431,15 @@ void vid_render_line()
       else
 	objHeight = 8;
       
+      if(objHeight == 16)
+      {
+	tileNum &= 0xfe;
+      }
+      
       // Is this sprite on this line? If not, let's skip it.
       int reject = 0;
       int lineOfSpriteToRender = objLineToRender - y + 16;
+      // yFlip is handled here
       if( attributes & SPRITE_YFLIP )
 	lineOfSpriteToRender = objHeight - lineOfSpriteToRender - 1;
       if( lineOfSpriteToRender >= objHeight || lineOfSpriteToRender < 0  )
