@@ -22,5 +22,6 @@
 #include "types.h"
 
 extern int stop;
+extern int pause;
 
 #endif // _MAIN_H_

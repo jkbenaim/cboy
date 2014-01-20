@@ -45,6 +45,12 @@ int input_event_filter(const SDL_Event *event)
 	case SDLK_q:
 	  stop = 1;
 	  break;
+	case SDLK_p:
+	  if(pause)
+	    pause = 0;
+	  else
+	    pause = 1;
+	  break;
 	case SDLK_RETURN:
 	  state.joyp_buttons &= ~INPUT_BUTTONS_START;
 	  state.iflag |= IMASK_JOYPAD;

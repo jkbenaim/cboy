@@ -33,6 +33,7 @@
 #include "audio.h"
 
 int stop = 0;
+int pause = 0;
 
 #ifdef __ANDROID__
 #define  LOG_TAG    "libcboy"
@@ -68,8 +69,11 @@ int main ( int argc, char* argv[] ) {
   {
     vid_waitForNextFrame();
     input_handle();
-    cpu_do_one_frame();
-    vid_frame();
+    if(!pause)
+    {
+      cpu_do_one_frame();
+      vid_frame();
+    }
   }
   
   cart_cleanup();
