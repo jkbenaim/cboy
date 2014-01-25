@@ -119,6 +119,7 @@ struct state_s {
   int ie, iflag;
   int halt;		// 0 = not halted, 1 = halted
   u8 op;
+  int halt_glitch;
   
   // sound stuff
   u8 nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
