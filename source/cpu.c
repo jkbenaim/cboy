@@ -686,7 +686,7 @@ u8* cpu_getReg( int regNumber )
       break;
     default:
       // danger danger
-      fprintf(stderr, "Register decode error\n");
+      printf("Register decode error: %d\n", regNumber);
       return &(state.a);
       break;
   }
