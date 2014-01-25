@@ -521,6 +521,16 @@ inline u32 rgb555_to_SDL( int color )
 }
 #endif  // USE_SDL
 
+inline u32 rgb555_to_rgb888( int color )
+{
+  u32 out;
+  int r = ((color & 0x001F) >> 0      ) << 3;
+  int g = ((color & 0x03E0) >> 5      ) << 3;
+  int b = ((color & 0x7C00) >> 10     ) << 3;
+  out = (r<<16) + (g<<8) + b;
+  return out;
+}
+
 inline uint16_t rgb555_to_rgb565( pixel_t in )
 {
   uint16_t out;
@@ -545,10 +555,10 @@ void vid_frame()
   {
     for( x=0; x<160; ++x )
     {
-		surfPixels[dstStartOfLine + 2*x + 0] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
-		surfPixels[dstStartOfLine + 2*x + 1] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
-		surfPixels[dstStartOfLine + 2*x + 0 + width] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
-		surfPixels[dstStartOfLine + 2*x + 1 + width] = rgb555_to_SDL( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 0] = rgb555_to_rgb888( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 1] = rgb555_to_rgb888( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 0 + width] = rgb555_to_rgb888( pixmem[srcStartOfLine + x] );
+		surfPixels[dstStartOfLine + 2*x + 1 + width] = rgb555_to_rgb888( pixmem[srcStartOfLine + x] );
     }
     srcStartOfLine += 160;
     dstStartOfLine += width*2;
