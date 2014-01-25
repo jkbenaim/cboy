@@ -1270,8 +1270,18 @@ void LD_HL_R( void )
 void HALT( void )
 {
   // opcode 76
-  state.halt = 1;
-  state.pc++;
+  
+  // emulate the halt bug. not sure if this
+  // should happen on CGB or not.
+  if( state.ime == IME_DISABLED )
+  {
+    state.halt_glitch = 1;
+  }
+  else
+  {
+    state.halt = 1;
+    state.pc++;
+  }
 }
 
 void LD_A_HL( void )
@@ -3453,6 +3463,7 @@ int cpu_init() {
   state.bootRomEnabled = 1;
   state.caps = 0x80;
   state.svbk = 1;
+  state.halt_glitch = 0;
   
   state.pc = 0x0000;
   state.sp = 0xFFFE;
@@ -3532,8 +3543,10 @@ void cpu_do_one_instruction()
   
   // Handle pending interrupts.
   
+  // Is an interrupt pending?
   if( (state.ie & state.iflag) != 0x00 )
   {
+    // Un-halt
     state.halt = 0;
   }
   
@@ -3632,7 +3645,18 @@ void cpu_do_one_instruction()
   if(state.halt == 0)
   {
     assert("Op address in range", state.pc <= 0xFFFE);
-    ops[state.op]();
+    if( state.halt_glitch == 1 )
+    {
+      state.halt_glitch = 0;
+      address = state.pc + 1;
+      READ_BYTE();
+      state.op = memByte;
+      ops[state.op]();
+    }
+    else
+    {
+      ops[state.op]();
+    }
     // Reset the unused bits in the flags register
     state.f &= 0xF0;
   }
