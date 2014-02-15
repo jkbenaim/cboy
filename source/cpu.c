@@ -3691,6 +3691,13 @@ void cpu_do_one_instruction()
   else
     state.stat &= 0xFB;
   
+  // Couple of quirks when the LCD is off...
+  if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
+  {
+    state.ly = 0;	// always on line 0
+    state.stat |= 0x04;	// coincidence flag always set
+  }
+  
   // Update vid_mode.
   if( state.ly >= 144 ) {
     // We're in the VBlank period (mode 1)
