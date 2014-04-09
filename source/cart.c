@@ -25,6 +25,7 @@
 #include "cartdesc.h"
 #include "cpu.h"
 #include <string.h>
+#include "cart_chardev.h"
 
 struct cart_s cart;
 
@@ -67,7 +68,35 @@ char* romname2savename( char* savename, char* romname, int savenamelength )
   return savename;
 }
 
-void cart_init( char* bootromName, char* cartromName ) {
+void cart_init( char* bootromName, char* cartromName )
+{
+  // stat the cartrom to see if it's a file,
+  // or a character device.
+  struct stat s;
+  if( stat( cartromName, &s ) != 0 )
+  {
+    printf("Couldn't stat cartrom %s\n", cartromName);
+    exit(1);
+  }
+  
+  
+  if( S_ISREG(s.st_mode) )
+  {
+    cart.chardev_mode = 0;
+    cart_init_file(bootromName, cartromName);
+  }
+  else if( S_ISCHR(s.st_mode) )
+  {
+    cart.chardev_mode = 1;
+    printf("Opening %s...\n", cartromName);
+    cart_init_chardev(bootromName, cartromName);
+  }
+  
+  
+  
+}
+
+void cart_init_file( char* bootromName, char* cartromName ) {
   
   cart.cleanup = &cart_default_cleanup;
   
@@ -115,6 +144,18 @@ void cart_init( char* bootromName, char* cartromName ) {
     fprintf( stderr, "Extram malloc failed.\n" );
     exit(1);
   }
+  // allocate memory for extram cache validity thing - read
+  if( (cart.extramValidRead = (u8 *)malloc(cart.extram_size)) == NULL )
+  {
+    fprintf( stderr, "Extram malloc failed.\n" );
+    exit(1);
+  }
+  // allocate memory for extram cache validity thing - read
+  if( (cart.extramValidWrite = (u8 *)malloc(cart.extram_size)) == NULL )
+  {
+    fprintf( stderr, "Extram malloc failed.\n" );
+    exit(1);
+  }
   
   // determine whether the extram (if any) is battery-backed
   switch( cart.mbc_type )
@@ -122,12 +163,13 @@ void cart_init( char* bootromName, char* cartromName ) {
     case 0x03:  // MBC1+RAM+BATTERY
     case 0x06:  // MBC2+BATTERY
     case 0x0F:  // MBC3+TIMER+BATTERY
-    case 0x10:  // MBC3+TIMERY+RAM+BATTERY
+    case 0x10:  // MBC3+TIMER+RAM+BATTERY
     case 0x13:  // MBC3+RAM+BATTERY
     case 0x1B:  // MBC5+RAM+BATTERY
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
     case 0x22:  // MBC7+RAM+BATTERY
     case 0xFC:  // POCKET CAMERA
+    case 0xFE:  // HuC3
       cart.battery_backed = 1;
       break;
     default:
@@ -230,7 +272,7 @@ void cart_init_bootrom( char* bootromName )
     exit(1);
   }
   fclose( fd );
-  //printf( "Boot rom: %d bytes read.\n", cart.bootromsize );
+//   printf( "Boot rom: %d bytes read.\n", cart.bootromsize );
 }
 
 /*
@@ -240,6 +282,12 @@ void cart_init_bootrom( char* bootromName )
  */
 void cart_reset_mbc()
 {
+  if( cart.chardev_mode == 1 )
+  {
+    cart_c_reset_mbc();
+    return;
+  }
+    
   if( cart.cleanup != NULL )
     cart.cleanup();
   
@@ -251,6 +299,7 @@ void cart_reset_mbc()
   }
   
   // install MBC driver
+//   mbc_sim_install();
   switch( cart.mbc_type )
   {
     case 0x00:  // ROM ONLY
@@ -268,7 +317,7 @@ void cart_reset_mbc()
       mbc_mbc2_install();
       break;
     case 0x0F:	// MBC3+TIMER+BATTERY
-    case 0x10:	// MBC3+TIMERY+RAM+BATTERY
+    case 0x10:	// MBC3+TIMER+RAM+BATTERY
     case 0x11:	// MBC3
     case 0x12:	// MBC3+RAM
     case 0x13:	// MBC3+RAM+BATTERY
@@ -288,6 +337,9 @@ void cart_reset_mbc()
     case 0xFC:	// POCKET CAMERA
       mbc_cam_install();
       break;
+    case 0xFE:  // HuC3
+      mbc_huc3_install();
+      break;
     default:
       // danger danger
       printf( "MBC reset: Unhandled cart type: %02Xh %s\n", cart.mbc_type, cartdesc_carttype[cart.mbc_type] );
@@ -300,6 +352,12 @@ void cart_reset_mbc()
   
 void cart_cleanup()
 {
+  if( cart.chardev_mode == 1 )
+  {
+    cart_c_cleanup();
+    return;
+  }
+  
   // call the mbc handler's cleanup function
   cart.cleanup();
   

@@ -1,6 +1,6 @@
 /*************************************************************************
  *   Cboy, a Game Boy emulator
- *   Copyright (C) 2012 jkbenaim
+ *   Copyright (C) 2014 jkbenaim
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,20 +16,16 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#ifndef _MBC_CAM_H_
-#define _MBC_CAM_H_
-extern void mbc_cam_install( void );
-void mbc_cam_dummy( void );
-void mbc_cam_read_bank_0( void );
-void mbc_cam_read_bank_n( void );
-void mbc_cam_write_ram_enable( void );
-void mbc_cam_write_rom_bank_select( void );
-void mbc_cam_extram_bank_select( void );
-void mbc_cam_write_mode_select( void );
-void mbc_cam_read_extram( void );
-void mbc_cam_write_extram( void );
-#ifdef __ANDROID__
-void mbc_cam_getCameraImage();
-#endif // __ANDROID__
-void mbc_cam_invalidateCache( void );
-#endif // _MBC_CAM_H_
+#ifndef _MBC_C_NONE_H_
+#define _MBC_C_NONE_H_
+void mbc_c_none_install( void );
+extern void mbc_c_none_read_bank_0( void );
+extern void mbc_c_none_write_bank_0( void );
+extern void mbc_c_none_read_bank_n( void );
+extern void mbc_c_none_write_bank_n( void );
+extern void mbc_c_none_dummy( void );
+extern void mbc_c_none_read_extram( void );
+extern void mbc_c_none_write_extram( void );
+extern void mbc_c_none_read_ff( void );
+
+#endif // _MBC_C_NONE_H_

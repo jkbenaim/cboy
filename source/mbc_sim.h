@@ -16,20 +16,20 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#ifndef _MBC_CAM_H_
-#define _MBC_CAM_H_
-extern void mbc_cam_install( void );
-void mbc_cam_dummy( void );
-void mbc_cam_read_bank_0( void );
-void mbc_cam_read_bank_n( void );
-void mbc_cam_write_ram_enable( void );
-void mbc_cam_write_rom_bank_select( void );
-void mbc_cam_extram_bank_select( void );
-void mbc_cam_write_mode_select( void );
-void mbc_cam_read_extram( void );
-void mbc_cam_write_extram( void );
-#ifdef __ANDROID__
-void mbc_cam_getCameraImage();
-#endif // __ANDROID__
-void mbc_cam_invalidateCache( void );
-#endif // _MBC_CAM_H_
+#ifndef _MBC_SIM_H_
+#define _MBC_SIM_H_
+extern void mbc_sim_install( void );
+void mbc_sim_read_ff();
+void mbc_sim_dummy();
+void mbc_sim_read_rom_0();
+void mbc_sim_read_rom_n();
+void mbc_sim_read_ram();
+void mbc_sim_write_invalidate_rom();
+void mbc_sim_write_invalidate_ram();
+void mbc_sim_write_invalidate_rom_ram();
+void mbc_sim_cleanup();
+void mbc_sim_invalidate_rom();
+void mbc_sim_invalidate_ram();
+void mbc_sim_invalidate_rom_ram();
+
+#endif // _MBC_SIM_H_

@@ -20,33 +20,46 @@
 #define _CART_H_
 #include "types.h"
 #include <stddef.h> // for size_t
+#include <stdio.h> // for FILE
 
 struct cart_s {
   int mbc_type;
   int cartrom_num_banks;
   int reg_rom_bank_low;	// low bits of ROM bank
   int reg_rom_bank_high;  // high bits of ROM bank
-  u8* cartrom;
-  size_t cartromsize;
   u8* bootrom;
   size_t bootromsize;
-  u8* extram;
-  size_t extram_size;
-  u8* extram_bank;
-  u8 extram_bank_num;
-  int extram_num_banks;
-  int battery_backed;
-  u8 cart_bank_num;
+  u8* cartrom;
+  u8* cartromValid;
   u8* cartrom_bank_zero;
   u8* cartrom_bank_n;
+  u8* cartromValid_bank_n;
+  u8 cart_bank_num;
+  size_t cartromsize;
+  u8* extram;
+  u8* extramValidRead;
+  u8* extramValidWrite;
+  u8* extram_bank;
+  u8* extram_bank_validRead;
+  u8* extram_bank_validWrite;
+  u8 extram_bank_num;
+  int extramEnabled;
+  size_t extram_size;
+  int extram_num_banks;
+  int battery_backed;
   void (*cleanup)(void);
   char savename[256];
+  int huc3_ram_mode;
+  FILE *fd;
+  int chardev_mode;
 };
 
 #define MAX_CARTROM_SIZE	8388608
 #define MAX_BOOTROM_SIZE	2304
 
 extern void cart_init( char* boot_rom, char* rom );
+void cart_init_file( char* boot_rom, char* rom );
+void cart_init_chardev( char* boot_rom, char* rom );
 extern void cart_cleanup( void );
 extern void cart_disable_bootrom( void );
 void cart_init_cartrom( char* cartromName );
