@@ -678,7 +678,7 @@ void write_special() {
       select_vram_bank( memByte );
       break;
     case ADDR_ROM_DISABLE:
-      if(memByte != 0)
+      if((memByte != 0) && state.bootRomEnabled == 1)
       {
 	state.bootRomEnabled = 0;
 	cart_reset_mbc();
