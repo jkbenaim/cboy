@@ -92,9 +92,15 @@ void mbc_mbc2_write_ram_enable() {
 void mbc_mbc2_write_rom_bank_select() {
   size_t offset;
   if( memByte == 0 )
+  {
+    cart.cart_bank_num = 1;
     offset = (size_t)16384;
+  }
   else
+  {
+    cart.cart_bank_num = memByte;
     offset = (size_t)memByte*16384 % cart.cartromsize;
+  }
   
   cart.cartrom_bank_n = cart.cartrom + offset;
 }
