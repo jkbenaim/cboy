@@ -26,6 +26,7 @@ void cart_chardev_default_cleanup( void );
 void cart_chardev_bringup_device( char *cartromName );
 extern void cart_c_reset_mbc();
 extern void cart_c_cleanup();
-void ca_write( FILE *fd, unsigned int address, unsigned char data );
+extern void ca_write( FILE *fd, unsigned int address, unsigned char data );
+extern void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination );
 
 #endif // _CART_CHARDEV_H_

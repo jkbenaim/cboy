@@ -254,11 +254,10 @@ void ca_write( FILE *fd, unsigned int address, unsigned char data )
   fgetc(cart.fd);
   fgetc(cart.fd);
 }
-/*
+
 void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )
 {
-  const unsigned int endAddress = startAddress + 255;
-  unsigned int readAddress, data;
+  unsigned int data;
   fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
   fprintf( cart.fd, "c%d\n", startAddress );
   int i;
@@ -267,9 +266,9 @@ void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *
     unsigned int temp=0;
     temp=fgetc(cart.fd);
     data = (unsigned char)temp;
-//       printf("a%02x\n", temp);
+//     printf("a%02x\n", temp);
     destination[i] = data;
   }
   fgetc(cart.fd);
   fgetc(cart.fd);
-}*/
+}

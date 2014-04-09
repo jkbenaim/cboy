@@ -33,7 +33,7 @@
 #include "audio.h"
 
 int stop = 0;
-int pause = 0;
+int pause = 1;
 
 #ifdef __ANDROID__
 #define  LOG_TAG    "libcboy"
@@ -45,7 +45,7 @@ int pause = 0;
 int main ( int argc, char* argv[] ) {
   printf( " ----------------------- \n" );
   printf( " --- Welcome to cboy --- \n" );
-  printf( " ---    (c) 2013     --- \n" );
+  printf( " ---    (c) 2014     --- \n" );
   printf( " ----------------------- \n" );
   
   if(argc < 3)

@@ -83,50 +83,19 @@ void mbc_c_none_read_bank_0()
   {
     // fill cache
     unsigned int startAddress = address & 0xFF00;
-    unsigned int endAddress = startAddress + 255;
-    unsigned int readAddress, data;
-    fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
-    fprintf( cart.fd, "c%d\n", startAddress );
-    for( readAddress = startAddress; readAddress <= endAddress; readAddress++ )
-    {
-      unsigned int temp=0;
-      temp=fgetc(cart.fd);
-      data = (u8)temp;
-//       printf("a%02x\n", temp);
-      cart.cartrom[readAddress] = data;
-      cart.cartromValid[readAddress] = 1;
-    }
-    fgetc(cart.fd);
-    fgetc(cart.fd);
+    ca_read256Bytes( cart.fd, startAddress, cart.cartrom+startAddress );
+    
+    // mark cache as valid
+    int i;
+    for( i=0; i<256; i++ )
+      cart.cartromValid[startAddress+i] = 1;
   }
   // read from cache
   memByte = cart.cartrom[address];
-//   printf("Read: %04x:%02x\n", address, memByte);
 }
 
 void mbc_c_none_read_bank_n() {
-  if( !cart.cartromValid[address] )
-  {
-    // fill cache
-    unsigned int startAddress = address & 0xFF00;
-    unsigned int endAddress = startAddress + 255;
-    unsigned int readAddress, data;
-    fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
-    fprintf( cart.fd, "c%d\n", startAddress );
-    for( readAddress = startAddress; readAddress <= endAddress; readAddress++ )
-    {
-      unsigned int temp=0;
-      temp=fgetc(cart.fd);
-      data = (u8)temp;
-//       printf("a%02x\n", temp);
-      cart.cartrom[readAddress] = data;
-      cart.cartromValid[readAddress] = 1;
-    }
-    fgetc(cart.fd);
-    fgetc(cart.fd);
-  }
-  // read from cache
-  memByte = cart.cartrom[address];
+  mbc_c_none_read_bank_0();
 }
 
 void mbc_c_none_write_bank_0() {
