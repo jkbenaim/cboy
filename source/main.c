@@ -33,7 +33,7 @@
 #include "audio.h"
 
 int stop = 0;
-int pause = 1;
+int pause = 0;
 
 #ifdef __ANDROID__
 #define  LOG_TAG    "libcboy"
