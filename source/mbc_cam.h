@@ -31,5 +31,4 @@ void mbc_cam_write_extram( void );
 #ifdef __ANDROID__
 void mbc_cam_getCameraImage();
 #endif // __ANDROID__
-void mbc_cam_invalidateCache( void );
 #endif // _MBC_CAM_H_
