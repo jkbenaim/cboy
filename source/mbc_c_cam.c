@@ -19,12 +19,12 @@
 #include "memory.h"
 #include "cart_chardev.h"
 #include "cart.h"
-#include "mbc_c_mbc3.h"
+#include "mbc_c_cam.h"
 
 int rom_bank_shadow;
 int ram_bank_shadow;
 
-void mbc_c_mbc3_install()
+void mbc_c_cam_install()
 {
   int i;
   
@@ -41,46 +41,38 @@ void mbc_c_mbc3_install()
   
   // read cart bank zero
   for( i=0x0; i<=(0x3F); ++i ) {
-    readmem[i]   = mbc_c_mbc3_read_bank_0;
+    readmem[i]   = mbc_c_cam_read_bank_0;
   }
   // read cart bank n
   for( i=0x40; i<=(0x7F); ++i ) {
-    readmem[i]   = mbc_c_mbc3_read_bank_n;
+    readmem[i]   = mbc_c_cam_read_bank_n;
   }
   
   // write 0000-1FFF: ram enable
   for( i=0x00; i<=0x1F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_ram_enable;
+    writemem[i] = mbc_c_cam_write_ram_enable;
   }
   // write 2000-3FFF: rom bank select
   for( i=0x20; i<=0x3F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_rom_bank_select;
+    writemem[i] = mbc_c_cam_write_rom_bank_select;
   }
   // write 4000-5FFF: ram bank select
   for( i=0x40; i<=0x5F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_ram_bank_select;
+    writemem[i] = mbc_c_cam_write_ram_bank_select;
   }
-  // write 6000-7FFF: clock data latch
+  // write 6000-7FFF: nothing
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_clock_data_latch;
+    writemem[i] = mbc_c_cam_dummy;
   }
   
   // read A000-BFFF: read extram
-  // calculate the last address where extram is installed
-  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
-  for( i=0xA0; i<extram_end; ++i ) {
-    readmem[i] = mbc_c_mbc3_read_extram;
-  }
-  for( i=extram_end; i<=0xBF; ++i ) {
-    readmem[i] = mbc_c_mbc3_read_ff;
+  for( i=0xA0; i<=0xBF; ++i ) {
+    readmem[i] = mbc_c_cam_read_extram;
   }
   
   // write A000-BFFF: write extram
-  for( i=0xA0; i<extram_end; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_extram;
-  }
-  for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_c_mbc3_dummy;
+  for( i=0xA0; i<=0xBF; ++i ) {
+    writemem[i] = mbc_c_cam_write_extram;
   }
   
   // set up cart params
@@ -95,10 +87,10 @@ void mbc_c_mbc3_install()
   ram_bank_shadow = -1;
   cart.extram_bank_num = 0;
   
-  cart.cleanup = mbc_c_mbc3_cleanup;
+  cart.cleanup = mbc_c_cam_cleanup;
 }
 
-void mbc_c_mbc3_read_bank_0()
+void mbc_c_cam_read_bank_0()
 {
   if( !cart.cartromValid[address] )
   {
@@ -116,7 +108,7 @@ void mbc_c_mbc3_read_bank_0()
 //   printf("Read: %04x:%02x\n", address, memByte);
 }
 
-void mbc_c_mbc3_read_bank_n() {
+void mbc_c_cam_read_bank_n() {
   if( !cart.cartromValid_bank_n[address-0x4000] )
   {
     // set rom bank
@@ -138,21 +130,21 @@ void mbc_c_mbc3_read_bank_n() {
   memByte = cart.cartrom_bank_n[address-0x4000];
 }
 
-void mbc_c_mbc3_dummy() {
+void mbc_c_cam_dummy() {
   // do nothing
 }
 
-void mbc_c_mbc3_read_ff() {
+void mbc_c_cam_read_ff() {
   memByte = 0xFF;
 }
 
 // write 0000-1FFFF: ram enable
-void mbc_c_mbc3_write_ram_enable() {
+void mbc_c_cam_write_ram_enable() {
   cart.extramEnabled = memByte;
 }
 
 // write 2000-3FFF: rom bank select
-void mbc_c_mbc3_write_rom_bank_select() {
+void mbc_c_cam_write_rom_bank_select() {
   size_t offset;
   memByte &= 0x7F;
   if(memByte == 0)
@@ -167,51 +159,53 @@ void mbc_c_mbc3_write_rom_bank_select() {
 }
 
 // write 4000-5FFF: ram bank select
-void mbc_c_mbc3_write_ram_bank_select() {
+void mbc_c_cam_write_ram_bank_select() {
   int i;
   switch( memByte )
   {
-    case 0x00:
     case 0x01:
     case 0x02:
     case 0x03:
-      cart.extram_bank_num = memByte&0x03;
+    case 0x04:
+    case 0x05:
+    case 0x06:
+    case 0x07:
+    case 0x08:
+    case 0x09:
+    case 0x0a:
+    case 0x0b:
+    case 0x0c:
+    case 0x0d:
+    case 0x0e:
+    case 0x0f:
+      // these are all valid extram banks
+      cart.extram_bank_num = memByte;
       cart.extram_bank = cart.extram + memByte*8192;
       cart.extram_bank_validRead = cart.extramValidRead + memByte*8192;
       cart.extram_bank_validWrite = cart.extramValidWrite + memByte*8192;
       
-      // calculate the last address where extram is installed
-      int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
-      
       // read A000-BFFF: read extram
-      for( i=0xA0; i<extram_end; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_extram;
-      }
-      for( i=extram_end; i<=0xBF; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_ff;
+      for( i=0xA0; i<0xBF; ++i ) {
+        readmem[i] = mbc_c_cam_read_extram;
       }
       
       // write A000-BFFF: write extram
-      for( i=0xA0; i<extram_end; ++i ) {
-        writemem[i] = mbc_c_mbc3_write_extram;
-      }
-      for( i=extram_end; i<=0xBF; ++i ) {
-        writemem[i] = mbc_c_mbc3_dummy;
+      for( i=0xA0; i<=0xBF; ++i ) {
+        writemem[i] = mbc_c_cam_write_extram;
       }
       break;
-    case 0x08:  // seconds
-    case 0x09:  // minutes
-    case 0x0A:  // hours
-    case 0x0B:  // day bits 0-7
-    case 0x0C:  // day bit 8, carry bit, halt flag
+    case 0x00:
+    case 0x10:
       cart.extram_bank_num = memByte;
-      // read A000-BFFF: read rtc
-      for( i=0xA0; i<=0xBF; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_rtc;
+      // this is the camera register bank
+      // read A000-BFFF: read camera
+      for( i=0xA0; i<0xBF; ++i ) {
+        readmem[i] = mbc_c_cam_read_camera;
       }
-      // write A000-BFFF: write rtc
+      
+      // write A000-BFFF: write camera
       for( i=0xA0; i<=0xBF; ++i ) {
-        writemem[i] = mbc_c_mbc3_write_rtc;
+        writemem[i] = mbc_c_cam_write_camera;
       }
       break;
     default:
@@ -220,13 +214,42 @@ void mbc_c_mbc3_write_ram_bank_select() {
   }
 }
 
-// write 6000-7FFF: clock data latch
-void mbc_c_mbc3_write_clock_data_latch() {
-  // TODO
+// read A000-BFFF camera
+void mbc_c_cam_read_camera() {
+  // this just gets passed right through
+  // set ram bank
+  if( ram_bank_shadow != cart.extram_bank_num )
+  {
+    ca_write( cart.fd, 0x4000, cart.extram_bank_num );
+    ram_bank_shadow = cart.extram_bank_num;
+  }
+  memByte = ca_read( cart.fd, address );
+  
+  //HACK
+  if(address == 0xa000)
+    memByte &= 0xFE;
+}
+
+// write A000-BFFF camera
+void mbc_c_cam_write_camera() {
+  // this just gets passed "write" through! haha
+  // set ram bank
+  if( ram_bank_shadow != cart.extram_bank_num )
+  {
+    ca_write( cart.fd, 0x4000, cart.extram_bank_num );
+    ram_bank_shadow = cart.extram_bank_num;
+  }
+  ca_write( cart.fd, address, memByte );
+  
+  // also, we need to invalidate the extram cache due to reasons
+  // BUG: need to write changes back first
+//   int i;
+//   for(i=0; i<0x2000; i++)
+//     cart.extramValidRead[i] = 0;
 }
 
 // read A000-BFFF extram
-void mbc_c_mbc3_read_extram() {
+void mbc_c_cam_read_extram() {
   if( cart.extramEnabled != 0x0a )
   {
     memByte = 0xff;
@@ -260,77 +283,38 @@ void mbc_c_mbc3_read_extram() {
 }
 
 // write A000-BFFF extram
-void mbc_c_mbc3_write_extram() {
+void mbc_c_cam_write_extram() {
   cart.extram_bank[address&0x1fff] = memByte;
   cart.extram_bank_validRead[address&0x1fff] = 1;
   cart.extram_bank_validWrite[address&0x1fff] = 1;
 }
 
-// read A000-BFFF rtc
-void mbc_c_mbc3_read_rtc() {
-  memByte = 0x00;
-}
-
-// write A000-BFFF rtc
-void mbc_c_mbc3_write_rtc() {
-}
-
-void mbc_c_mbc3_cleanup() {
+void mbc_c_cam_cleanup() {
   // save extram back
   
-  if( cart.battery_backed )
+  // enable extram
+  ca_write( cart.fd, 0x0000, 0x0a );
+  
+  // write to extram
+  unsigned int address;
+  unsigned char data;
+  int bank;
+  // 128KBytes in 16 banks of 8KBytes each
+  for(bank=0; bank<16; bank++)
   {
-    // enable extram
-    ca_write( cart.fd, 0x0000, 0x0a );
+    // switch to bank
+    ca_write( cart.fd, 0x4000, bank );
+    cart.extram_bank = cart.extram + bank*0x2000;
+    cart.extram_bank_validWrite = cart.extramValidWrite + bank*0x2000;
     
-    // write to extram
-    unsigned int address;
-    unsigned char data;
-    int bank;
-    switch( cart.extram_size )
+    // write
+    for( address=0xA000; address<0xC000; address++ )
     {
-      case 0:
-      case 2048:
-      case 8192:
-        // switch to bank 0
-        ca_write( cart.fd, 0x4000, 0 );
-        cart.extram_bank = cart.extram;
-        cart.extram_bank_validWrite = cart.extramValidWrite;
-        
-        // write
-        for( address=0xA000; address<(0xA000+cart.extram_size); address++ )
-        {
-          if(cart.extram_bank_validWrite[address-0xA000] == 1)
-          {
-            data = cart.extram_bank[address-0xA000];
-            ca_write( cart.fd, address, data );
-          }
-        }
-        break;
-      case 32768:
-        // 32KBytes in 4 banks of 8KBytes each
-        for(bank=0; bank<4; bank++)
-        {
-          // switch to bank
-          ca_write( cart.fd, 0x4000, bank );
-          cart.extram_bank = cart.extram + bank*0x2000;
-          cart.extram_bank_validWrite = cart.extramValidWrite + bank*0x2000;
-          
-          // write
-          for( address=0xA000; address<(0xC000); address++ )
-          {
-            if(cart.extram_bank_validWrite[address-0xA000] == 1)
-            {
-              data = cart.extram_bank[address-0xA000];
-              ca_write( cart.fd, address, data );
-            }
-          }
-        }
-        break;
-      default:
-        fprintf( stderr, "Invalid extram size when saving extram back.\n" );
-        exit(1);
-        break;
+      if(cart.extram_bank_validWrite[address-0xA000] == 1)
+      {
+	data = cart.extram_bank[address-0xA000];
+	ca_write( cart.fd, address, data );
+      }
     }
   }
 }

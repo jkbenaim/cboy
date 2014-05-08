@@ -16,18 +16,22 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#ifndef _CART_CHARDEV_H_
-#define _CART_CHARDEV_H_
-#include "types.h"
-#include <stdio.h> // for FILE
+#ifndef _MBC_C_CAM_H_
+#define _MBC_C_CAM_H_
+void mbc_c_cam_install( void );
+extern void mbc_c_cam_read_bank_0( void );
+extern void mbc_c_cam_write_bank_0( void );
+extern void mbc_c_cam_read_bank_n( void );
+extern void mbc_c_cam_write_bank_n( void );
+extern void mbc_c_cam_dummy( void );
+extern void mbc_c_cam_read_extram( void );
+extern void mbc_c_cam_write_extram( void );
+extern void mbc_c_cam_read_camera( void );
+extern void mbc_c_cam_write_camera( void );
+extern void mbc_c_cam_read_ff( void );
+void mbc_c_cam_write_ram_enable( void );
+void mbc_c_cam_write_rom_bank_select( void );
+void mbc_c_cam_write_ram_bank_select( void );
+void mbc_c_cam_cleanup( void );
 
-extern void cart_init_chardev( char* boot_rom, char* rom );
-void cart_chardev_default_cleanup( void );
-void cart_chardev_bringup_device( char *cartromName );
-extern void cart_c_reset_mbc();
-extern void cart_c_cleanup();
-extern void ca_write( FILE *fd, unsigned int address, unsigned int data );
-extern unsigned char ca_read( FILE *fd, unsigned int address );
-extern void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination );
-
-#endif // _CART_CHARDEV_H_
+#endif // _MBC_C_CAM_H_

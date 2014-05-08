@@ -206,11 +206,11 @@ void cart_c_reset_mbc()
     case 0x01:  // MBC1
     case 0x02:  // MBC1+RAM
     case 0x03:  // MBC1+RAM+BATTERY
-//       mbc_c_mbc1_install();
+      mbc_c_mbc1_install();
       break;
     case 0x05:  // MBC2
     case 0x06:  // MBC2+BATTERY
-//       mbc_mbc2_install();
+      mbc_c_mbc2_install();
       break;
     case 0x0F:  // MBC3+TIMER+BATTERY
     case 0x10:  // MBC3+TIMERY+RAM+BATTERY
@@ -225,16 +225,16 @@ void cart_c_reset_mbc()
     case 0x1C:  // MBC5+RUMBLE
     case 0x1D:  // MBC5+RUMBLE+RAM
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
-//       mbc_mbc5_install();
+//       mbc_c_mbc5_install();
       break;
     case 0x22:  // MBC7+?
-//       mbc_mbc7_install();
+//       mbc_c_mbc7_install();
       break;
     case 0xFC:  // POCKET CAMERA
-//       mbc_cam_install();
+      mbc_c_cam_install();
       break;
     case 0xFE:  // HuC3
-//       mbc_huc3_install();
+//       mbc_c_huc3_install();
       break;
     default:
       // danger danger
@@ -247,12 +247,22 @@ void cart_c_reset_mbc()
 }
 
 
-void ca_write( FILE *fd, unsigned int address, unsigned char data )
+void ca_write( FILE *fd, unsigned int address, unsigned int data )
 {
   fprintf( stdout, "w%d %d (%04x %02x)\n", address, data, address, data );
   fprintf( fd, "w%d %d\n", address, data );
   fgetc(cart.fd);
   fgetc(cart.fd);
+}
+
+unsigned char ca_read( FILE *fd, unsigned int address )
+{
+  fprintf( fd, "b%d\n", address );
+  unsigned char temp = fgetc(cart.fd);
+  fprintf( stdout, "b%d (%04x) (%02X)\n", address, address, temp );
+  fgetc(cart.fd);
+  fgetc(cart.fd);
+  return temp;
 }
 
 void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )

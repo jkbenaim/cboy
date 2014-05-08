@@ -19,13 +19,15 @@
 #include "memory.h"
 #include "cart_chardev.h"
 #include "cart.h"
-#include "mbc_c_mbc3.h"
+#include "mbc_c_mbc1.h"
 
 int rom_bank_shadow;
 int ram_bank_shadow;
+int mode_select;
 
-void mbc_c_mbc3_install()
+void mbc_c_mbc1_install()
 {
+  printf("Warning: ROM bank select incomplete\n");
   int i;
   
   // invalidate caches
@@ -41,46 +43,46 @@ void mbc_c_mbc3_install()
   
   // read cart bank zero
   for( i=0x0; i<=(0x3F); ++i ) {
-    readmem[i]   = mbc_c_mbc3_read_bank_0;
+    readmem[i]   = mbc_c_mbc1_read_bank_0;
   }
   // read cart bank n
   for( i=0x40; i<=(0x7F); ++i ) {
-    readmem[i]   = mbc_c_mbc3_read_bank_n;
+    readmem[i]   = mbc_c_mbc1_read_bank_n;
   }
   
   // write 0000-1FFF: ram enable
   for( i=0x00; i<=0x1F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_ram_enable;
+    writemem[i] = mbc_c_mbc1_write_ram_enable;
   }
-  // write 2000-3FFF: rom bank select
+  // write 2000-3FFF: rom bank select (lower 5 bits)
   for( i=0x20; i<=0x3F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_rom_bank_select;
+    writemem[i] = mbc_c_mbc1_write_rom_bank_select;
   }
-  // write 4000-5FFF: ram bank select
+  // write 4000-5FFF: ram bank select / rom bank select (upper 2 bits)
   for( i=0x40; i<=0x5F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_ram_bank_select;
+    writemem[i] = mbc_c_mbc1_write_ram_bank_select;
   }
-  // write 6000-7FFF: clock data latch
+  // write 6000-7FFF: rom/ram mode select
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_clock_data_latch;
+    writemem[i] = mbc_c_mbc1_dummy;
   }
   
   // read A000-BFFF: read extram
   // calculate the last address where extram is installed
   int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
   for( i=0xA0; i<extram_end; ++i ) {
-    readmem[i] = mbc_c_mbc3_read_extram;
+    readmem[i] = mbc_c_mbc1_read_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    readmem[i] = mbc_c_mbc3_read_ff;
+    readmem[i] = mbc_c_mbc1_read_ff;
   }
   
   // write A000-BFFF: write extram
   for( i=0xA0; i<extram_end; ++i ) {
-    writemem[i] = mbc_c_mbc3_write_extram;
+    writemem[i] = mbc_c_mbc1_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_c_mbc3_dummy;
+    writemem[i] = mbc_c_mbc1_dummy;
   }
   
   // set up cart params
@@ -95,10 +97,10 @@ void mbc_c_mbc3_install()
   ram_bank_shadow = -1;
   cart.extram_bank_num = 0;
   
-  cart.cleanup = mbc_c_mbc3_cleanup;
+  cart.cleanup = mbc_c_mbc1_cleanup;
 }
 
-void mbc_c_mbc3_read_bank_0()
+void mbc_c_mbc1_read_bank_0()
 {
   if( !cart.cartromValid[address] )
   {
@@ -116,7 +118,7 @@ void mbc_c_mbc3_read_bank_0()
 //   printf("Read: %04x:%02x\n", address, memByte);
 }
 
-void mbc_c_mbc3_read_bank_n() {
+void mbc_c_mbc1_read_bank_n() {
   if( !cart.cartromValid_bank_n[address-0x4000] )
   {
     // set rom bank
@@ -138,21 +140,21 @@ void mbc_c_mbc3_read_bank_n() {
   memByte = cart.cartrom_bank_n[address-0x4000];
 }
 
-void mbc_c_mbc3_dummy() {
+void mbc_c_mbc1_dummy() {
   // do nothing
 }
 
-void mbc_c_mbc3_read_ff() {
+void mbc_c_mbc1_read_ff() {
   memByte = 0xFF;
 }
 
 // write 0000-1FFFF: ram enable
-void mbc_c_mbc3_write_ram_enable() {
+void mbc_c_mbc1_write_ram_enable() {
   cart.extramEnabled = memByte;
 }
 
 // write 2000-3FFF: rom bank select
-void mbc_c_mbc3_write_rom_bank_select() {
+void mbc_c_mbc1_write_rom_bank_select() {
   size_t offset;
   memByte &= 0x7F;
   if(memByte == 0)
@@ -161,13 +163,13 @@ void mbc_c_mbc3_write_rom_bank_select() {
   offset = (size_t)memByte*16384 % cart.cartromsize;
   
 //   printf( "switch cart bank num: %02X\n", cart.cart_bank_num );
-  assert("MBC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
+  assert("MBC1 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
   cart.cartromValid_bank_n = cart.cartromValid + offset;
 }
 
 // write 4000-5FFF: ram bank select
-void mbc_c_mbc3_write_ram_bank_select() {
+void mbc_c_mbc1_write_ram_bank_select() {
   int i;
   switch( memByte )
   {
@@ -185,18 +187,18 @@ void mbc_c_mbc3_write_ram_bank_select() {
       
       // read A000-BFFF: read extram
       for( i=0xA0; i<extram_end; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_extram;
+        readmem[i] = mbc_c_mbc1_read_extram;
       }
       for( i=extram_end; i<=0xBF; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_ff;
+        readmem[i] = mbc_c_mbc1_read_ff;
       }
       
       // write A000-BFFF: write extram
       for( i=0xA0; i<extram_end; ++i ) {
-        writemem[i] = mbc_c_mbc3_write_extram;
+        writemem[i] = mbc_c_mbc1_write_extram;
       }
       for( i=extram_end; i<=0xBF; ++i ) {
-        writemem[i] = mbc_c_mbc3_dummy;
+        writemem[i] = mbc_c_mbc1_dummy;
       }
       break;
     case 0x08:  // seconds
@@ -207,11 +209,11 @@ void mbc_c_mbc3_write_ram_bank_select() {
       cart.extram_bank_num = memByte;
       // read A000-BFFF: read rtc
       for( i=0xA0; i<=0xBF; ++i ) {
-        readmem[i] = mbc_c_mbc3_read_rtc;
+        readmem[i] = mbc_c_mbc1_read_rtc;
       }
       // write A000-BFFF: write rtc
       for( i=0xA0; i<=0xBF; ++i ) {
-        writemem[i] = mbc_c_mbc3_write_rtc;
+        writemem[i] = mbc_c_mbc1_write_rtc;
       }
       break;
     default:
@@ -221,12 +223,12 @@ void mbc_c_mbc3_write_ram_bank_select() {
 }
 
 // write 6000-7FFF: clock data latch
-void mbc_c_mbc3_write_clock_data_latch() {
+void mbc_c_mbc1_write_clock_data_latch() {
   // TODO
 }
 
 // read A000-BFFF extram
-void mbc_c_mbc3_read_extram() {
+void mbc_c_mbc1_read_extram() {
   if( cart.extramEnabled != 0x0a )
   {
     memByte = 0xff;
@@ -260,22 +262,22 @@ void mbc_c_mbc3_read_extram() {
 }
 
 // write A000-BFFF extram
-void mbc_c_mbc3_write_extram() {
+void mbc_c_mbc1_write_extram() {
   cart.extram_bank[address&0x1fff] = memByte;
   cart.extram_bank_validRead[address&0x1fff] = 1;
   cart.extram_bank_validWrite[address&0x1fff] = 1;
 }
 
 // read A000-BFFF rtc
-void mbc_c_mbc3_read_rtc() {
+void mbc_c_mbc1_read_rtc() {
   memByte = 0x00;
 }
 
 // write A000-BFFF rtc
-void mbc_c_mbc3_write_rtc() {
+void mbc_c_mbc1_write_rtc() {
 }
 
-void mbc_c_mbc3_cleanup() {
+void mbc_c_mbc1_cleanup() {
   // save extram back
   
   if( cart.battery_backed )
