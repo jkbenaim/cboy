@@ -81,6 +81,7 @@ void mbc_c_cam_install()
   
   // enable extram, just in case
   ca_write( cart.fd, 0x0000, 0x0a );
+  cart.extramEnabled = 0x0a;
   
   rom_bank_shadow = -1;
   cart.cart_bank_num = 1;
@@ -195,9 +196,27 @@ void mbc_c_cam_write_ram_bank_select() {
       }
       break;
     case 0x00:
-    case 0x10:
+      // this is a volatile region of battery-backed sram that is shared with the camera
       cart.extram_bank_num = memByte;
+      cart.extram_bank = cart.extram + memByte*8192;
+      cart.extram_bank_validRead = cart.extramValidRead + memByte*8192;
+      cart.extram_bank_validWrite = cart.extramValidWrite + memByte*8192;
+      
+      
+      // read A000-BFFF: read camera
+      for( i=0xA0; i<0xBF; ++i ) {
+        readmem[i] = mbc_c_cam_read_extram_bank_0;
+      }
+      
+      // write A000-BFFF: write camera
+      for( i=0xA0; i<=0xBF; ++i ) {
+        writemem[i] = mbc_c_cam_read_extram_bank_0;
+      }
+      break;
+    case 0x10:
       // this is the camera register bank
+      
+      cart.extram_bank_num = memByte;
       // read A000-BFFF: read camera
       for( i=0xA0; i<0xBF; ++i ) {
         readmem[i] = mbc_c_cam_read_camera;
@@ -224,10 +243,6 @@ void mbc_c_cam_read_camera() {
     ram_bank_shadow = cart.extram_bank_num;
   }
   memByte = ca_read( cart.fd, address );
-  
-  //HACK
-  if(address == 0xa000)
-    memByte &= 0xFE;
 }
 
 // write A000-BFFF camera
@@ -250,11 +265,12 @@ void mbc_c_cam_write_camera() {
 
 // read A000-BFFF extram
 void mbc_c_cam_read_extram() {
-  if( cart.extramEnabled != 0x0a )
-  {
-    memByte = 0xff;
-    return;
-  }
+//   if( cart.extramEnabled != 0x0a )
+//   {
+//     printf("warning: reading from address %04X while extram is disabled\n", address);
+//     memByte = 0xff;
+//     return;
+//   }
   if( !cart.extram_bank_validRead[address-0xA000] )
   {
     // set ram bank
@@ -271,7 +287,7 @@ void mbc_c_cam_read_extram() {
     for( i=0; i<256; i++ )
     {
       if( cart.extram_bank_validRead[startAddress+i-0xA000] == 0 )
-	cart.extram_bank[startAddress+i-0xA000] = buf[i];
+        cart.extram_bank[startAddress+i-0xA000] = buf[i];
     }
     
     // mark cache as valid
@@ -280,6 +296,21 @@ void mbc_c_cam_read_extram() {
   }
   // read from cache
   memByte = cart.extram_bank[address - 0xA000];
+}
+
+void mbc_c_cam_read_extram_bank_0() {
+  if( address == 0xA100 )
+  {
+    printf("cam cache invalidated\n");
+    // invalidate read cache
+    int i;
+    for( i=0xA100; i<=0xBFFF; i++ )
+      cart.extram_bank_validRead[i-0xA000] = 0;
+  }
+  if( address >= 0xA000 && address <= 0xA0FF )
+    mbc_c_cam_read_camera();
+  else
+    mbc_c_cam_read_extram();
 }
 
 // write A000-BFFF extram

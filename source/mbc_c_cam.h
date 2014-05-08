@@ -25,6 +25,7 @@ extern void mbc_c_cam_read_bank_n( void );
 extern void mbc_c_cam_write_bank_n( void );
 extern void mbc_c_cam_dummy( void );
 extern void mbc_c_cam_read_extram( void );
+extern void mbc_c_cam_read_extram_bank_0( void );
 extern void mbc_c_cam_write_extram( void );
 extern void mbc_c_cam_read_camera( void );
 extern void mbc_c_cam_write_camera( void );
