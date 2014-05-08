@@ -26,7 +26,6 @@ int ram_bank_shadow;
 
 void mbc_c_mbc2_install()
 {
-  printf("Note: unable to switch ROM banks on MBC2. Writes seem to have no effect.\n");
   int i;
   
   // invalidate caches
@@ -54,8 +53,9 @@ void mbc_c_mbc2_install()
     writemem[i] = mbc_c_mbc2_write_ram_enable;
   }
   // write 2000-3FFF: rom bank select
-  for( i=0x20; i<=0x3F; ++i ) {
-    writemem[i] = mbc_c_mbc2_write_rom_bank_select;
+  for( i=0x20; i<=0x3F; i+=2 ) {
+    writemem[i] = mbc_c_mbc2_dummy;
+    writemem[i+1] = mbc_c_mbc2_write_rom_bank_select;
   }
   // write 4000-5FFF: nothing
   for( i=0x40; i<=0x5F; ++i ) {
@@ -121,12 +121,9 @@ void mbc_c_mbc2_read_bank_n() {
     // set rom bank
     if( rom_bank_shadow != cart.cart_bank_num )
     {
-      printf("Switching cart to rom bank %d\n", cart.cart_bank_num);
-      ca_write( cart.fd, 0x2000, cart.cart_bank_num );
+      ca_write( cart.fd, 0x2100, cart.cart_bank_num );
       rom_bank_shadow = cart.cart_bank_num;
     }
-    else
-      printf("Not switching cart to rom bank %d\n", cart.cart_bank_num);
     // fill cache
     unsigned int startAddress = address & 0xFF00;
     ca_read256Bytes( cart.fd, startAddress, cart.cartrom_bank_n+startAddress-0x4000 );
