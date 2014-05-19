@@ -25,6 +25,7 @@
 #include "memory.h"
 #include "cartdesc.h"
 #include <stdio.h> // for FILE
+#include <termios.h>    // for tcflush
 
 void cart_init_chardev( char* bootromName, char* cartromName )
 {
@@ -171,6 +172,8 @@ void cart_chardev_bringup_device( char *cartromName )
     exit(1);
   }
   
+  tcflush( fileno(cart.fd), TCIOFLUSH );
+  
   // Reset the cart.
   fprintf( stdout, "R\n" );
   fprintf( cart.fd, "R\n" );
@@ -249,6 +252,7 @@ void cart_c_reset_mbc()
 
 void ca_write( FILE *fd, unsigned int address, unsigned int data )
 {
+  tcflush( fileno(cart.fd), TCIOFLUSH );
   fprintf( stdout, "w%d %d (%04x %02x)\n", address, data, address, data );
   fprintf( fd, "w%d %d\n", address, data );
   fgetc(cart.fd);
@@ -257,6 +261,7 @@ void ca_write( FILE *fd, unsigned int address, unsigned int data )
 
 unsigned char ca_read( FILE *fd, unsigned int address )
 {
+  tcflush( fileno(cart.fd), TCIOFLUSH );
   fprintf( fd, "b%d\n", address );
   unsigned char temp = fgetc(cart.fd);
   fprintf( stdout, "b%d (%04x) (%02X)\n", address, address, temp );
@@ -267,11 +272,31 @@ unsigned char ca_read( FILE *fd, unsigned int address )
 
 void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )
 {
+  tcflush( fileno(cart.fd), TCIOFLUSH );
   unsigned int data;
   fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
   fprintf( cart.fd, "c%d\n", startAddress );
   int i;
   for( i=0; i<256; i++ )
+  {
+    unsigned int temp=0;
+    temp=fgetc(cart.fd);
+    data = (unsigned char)temp;
+//     printf("a%02x\n", temp);
+    destination[i] = data;
+  }
+  fgetc(cart.fd);
+  fgetc(cart.fd);
+}
+
+void ca_read4096Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )
+{
+  tcflush( fileno(cart.fd), TCIOFLUSH );
+  unsigned int data;
+  fprintf( stdout, "d%d (%04x)\n", startAddress, startAddress );
+  fprintf( cart.fd, "d%d\n", startAddress );
+  int i;
+  for( i=0; i<4096; i++ )
   {
     unsigned int temp=0;
     temp=fgetc(cart.fd);

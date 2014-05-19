@@ -29,5 +29,6 @@ extern void cart_c_cleanup();
 extern void ca_write( FILE *fd, unsigned int address, unsigned int data );
 extern unsigned char ca_read( FILE *fd, unsigned int address );
 extern void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination );
+extern void ca_read4096Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination );
 
 #endif // _CART_CHARDEV_H_
