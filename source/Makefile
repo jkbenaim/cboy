@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS= -O0 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
+CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
 
 all: cboy
 
