@@ -27,22 +27,22 @@ struct cart_s {
   int cartrom_num_banks;
   int reg_rom_bank_low;	// low bits of ROM bank
   int reg_rom_bank_high;  // high bits of ROM bank
-  u8* bootrom;
+  uint8_t* bootrom;
   size_t bootromsize;
-  u8* cartrom;
-  u8* cartromValid;
-  u8* cartrom_bank_zero;
-  u8* cartrom_bank_n;
-  u8* cartromValid_bank_n;
-  u8 cart_bank_num;
+  uint8_t* cartrom;
+  uint8_t* cartromValid;
+  uint8_t* cartrom_bank_zero;
+  uint8_t* cartrom_bank_n;
+  uint8_t* cartromValid_bank_n;
+  uint8_t cart_bank_num;
   size_t cartromsize;
-  u8* extram;
-  u8* extramValidRead;
-  u8* extramValidWrite;
-  u8* extram_bank;
-  u8* extram_bank_validRead;
-  u8* extram_bank_validWrite;
-  u8 extram_bank_num;
+  uint8_t* extram;
+  uint8_t* extramValidRead;
+  uint8_t* extramValidWrite;
+  uint8_t* extram_bank;
+  uint8_t* extram_bank_validRead;
+  uint8_t* extram_bank_validWrite;
+  uint8_t extram_bank_num;
   int extramEnabled;
   size_t extram_size;
   int extram_num_banks;

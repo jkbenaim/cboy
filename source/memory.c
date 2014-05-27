@@ -29,21 +29,21 @@
 // usage statistics
 pixel_t visual_memory[65536];
 
-u8 ram[0x1];
-u8 vram_bank_zero[0x2000];	// 8000-9FFF
-u8 vram_bank_one[0x2000];	// 8000-9FFF
-u8 wram[0x8000];
-u8 *wram_bank_zero;	        // C000-CFFF
-u8 *wram_bank_n;		// D000-DFFF
-u8 oam[0xA0];			// FE00-FE9F
-u8 hram[0x7F];			// FF80-FFFE
+uint8_t ram[0x1];
+uint8_t vram_bank_zero[0x2000];	// 8000-9FFF
+uint8_t vram_bank_one[0x2000];	// 8000-9FFF
+uint8_t wram[0x8000];
+uint8_t *wram_bank_zero;	// C000-CFFF
+uint8_t *wram_bank_n;		// D000-DFFF
+uint8_t oam[0xA0];		// FE00-FE9F
+uint8_t hram[0x7F];		// FF80-FFFE
 
 void (*readmem[0x101])(void);
 void (*writemem[0x101])(void);
 
 address_t address;
-u8 memByte;
-u16 memWord;
+uint8_t memByte;
+uint16_t memWord;
 
 void mem_init( void ) {
   int i;
@@ -106,7 +106,7 @@ void write_nothing() {
 
 
 // vram bank switch
-void select_vram_bank( u8 num ) {
+void select_vram_bank( uint8_t num ) {
   int i;
   if( (num & 0x01) == 0 )
     for( i=0x80; i<=(0x9F); ++i ) {

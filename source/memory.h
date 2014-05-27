@@ -132,13 +132,13 @@ extern void (*readmem[0x101])(void);
 extern void (*writemem[0x101])(void);
 
 extern address_t address;
-extern u8 memByte;
-extern u16 memWord;
+extern uint8_t memByte;
+extern uint16_t memWord;
 
-extern u8 vram_bank_zero[0x2000];
-extern u8 vram_bank_one[0x2000];
-extern u8 oam[0xA0];
-extern u8 hram[0x7F];
+extern uint8_t vram_bank_zero[0x2000];
+extern uint8_t vram_bank_one[0x2000];
+extern uint8_t oam[0xA0];
+extern uint8_t hram[0x7F];
 
 
 void mem_init( void );
@@ -156,7 +156,7 @@ void read_cart_bank_n( void );
 void write_cart_bank_n( void );
 
 // vram
-void select_vram_bank( u8 num );
+void select_vram_bank( uint8_t num );
 void read_vram_bank_zero( void );
 void write_vram_bank_zero( void );
 void read_vram_bank_one( void );

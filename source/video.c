@@ -43,7 +43,7 @@ pixel_t colormem[160*144];
 SDL_Surface *screen;
 #endif
 
-void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip, int updateColormem ) {
+void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int updateColormem ) {
   
   // Is this span off the left of the screen?
   if(x<-7)
@@ -83,7 +83,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int x
   
   
   int lineStart = 160 * y;
-//   u32 *pixmem = (u32*) screen->pixels;
+//   uint32_t *pixmem = (uint32_t*) screen->pixels;
   
   
   // fill pixel array with span
@@ -162,7 +162,7 @@ void vid_drawOpaqueSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int x
   
 }
 
-void vid_drawTransparentSpan( u8 pal, u16 vramAddr, int x, int y, int vramBank, int xFlip, int priority ) {
+void vid_drawTransparentSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int priority ) {
   
   // Is this span off the left of the screen?
   if(x<-7)
@@ -332,7 +332,7 @@ void vid_render_line()
       }
       
       
-      u8 attributes = vram_bank_one[tileAddress];
+      uint8_t attributes = vram_bank_one[tileAddress];
       int xFlip = (attributes&BG_XFLIP)?1:0;
       int yFlip = (attributes&BG_YFLIP)?1:0;
       
@@ -348,7 +348,7 @@ void vid_render_line()
 	vramBank = (attributes & BG_VRAM_BANK)?1:0;
       
       // Set the palette.
-      u8 pal;
+      uint8_t pal;
       if( state.caps == 0x04 )
 	pal = 0;	// dmg mode
       else
@@ -387,7 +387,7 @@ void vid_render_line()
 	  tileDataAddress = tile*16;
       }
       
-      u8 attributes = vram_bank_one[tileAddress];
+      uint8_t attributes = vram_bank_one[tileAddress];
       int xFlip = (attributes&BG_XFLIP)?1:0;
       int yFlip = (attributes&BG_YFLIP)?1:0;
       
@@ -403,7 +403,7 @@ void vid_render_line()
         vramBank = (attributes & BG_VRAM_BANK)?1:0;
       
       // Set the palette.
-      u8 pal;
+      uint8_t pal;
       if( state.caps == 0x04 )
         pal = 0;        // dmg mode
       else
@@ -419,10 +419,10 @@ void vid_render_line()
   if( state.lcdc & LCDC_OBJ_DISPLAY )
     for( i=0; i<40; ++i )
     {
-      u8 y          = oam[(i<<2)    ];
-      u8 x          = oam[(i<<2) + 1];
-      u8 tileNum    = oam[(i<<2) + 2];
-      u8 attributes = oam[(i<<2) + 3];
+      uint8_t y          = oam[(i<<2)    ];
+      uint8_t x          = oam[(i<<2) + 1];
+      uint8_t tileNum    = oam[(i<<2) + 2];
+      uint8_t attributes = oam[(i<<2) + 3];
       
       // Set object height.
       int objHeight;
@@ -448,7 +448,7 @@ void vid_render_line()
 	continue;
       
       // Set the palette.
-      u8 pal;
+      uint8_t pal;
       if( state.caps == 0x04 )
 	if( attributes & SPRITE_DMG_PAL )	// dmg mode
 	  pal = 1;
@@ -494,7 +494,7 @@ void vid_init()
 #endif  // USE_SDL
   
 //   int x,y;
-//   u32 *surfPixels = screen->pixels;
+//   uint32_t *surfPixels = screen->pixels;
 //   for( y=0; y<screen->h; y++ )
 //     for( x=0; x<screen->w; x++ )
 //       surfPixels[y*screen->w + x] = SDL_MapRGB( screen->format, 127, 127, 127 );
@@ -512,7 +512,7 @@ void vid_waitForNextFrame()
 }
 
 #ifdef USE_SDL
-inline u32 rgb555_to_SDL( int color )
+inline uint32_t rgb555_to_SDL( int color )
 {
   int r = ((color & 0x001F) >> 0      ) << 3;
   int g = ((color & 0x03E0) >> 5      ) << 3;
@@ -521,9 +521,9 @@ inline u32 rgb555_to_SDL( int color )
 }
 #endif  // USE_SDL
 
-inline u32 rgb555_to_rgb888( int color )
+inline uint32_t rgb555_to_rgb888( int color )
 {
-  u32 out;
+  uint32_t out;
   int r = ((color & 0x001F) >> 0      ) << 3;
   int g = ((color & 0x03E0) >> 5      ) << 3;
   int b = ((color & 0x7C00) >> 10     ) << 3;
@@ -547,7 +547,7 @@ void vid_frame()
     // TODO
   SDL_LockSurface( screen );
   int x,y;
-  u32 *surfPixels = screen->pixels;
+  uint32_t *surfPixels = screen->pixels;
   int width = screen->w;
   int srcStartOfLine=0, dstStartOfLine=0;
   // double up the gb video onto the surface

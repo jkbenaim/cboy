@@ -21,12 +21,12 @@
 
 
 /*
- * int mbc_romSize2numBanks( u8 romSize )
+ * int mbc_romSize2numBanks( uint8_t romSize )
  * 
  * Given the romSize byte from the cart header, returns
  * the size of the rom.
  */
-int mbc_romSize2numBanks( u8 romSize )
+int mbc_romSize2numBanks( uint8_t romSize )
 {
   switch( romSize )
   {
@@ -70,7 +70,7 @@ int mbc_romSize2numBanks( u8 romSize )
   }
 }
 
-int mbc_ramSize2numBytes( u8 ramSize )
+int mbc_ramSize2numBytes( uint8_t ramSize )
 {
   switch( ramSize )
   {

@@ -24,64 +24,64 @@
 
 struct state_s {
   pc_t pc;
-  u16 sp;
+  uint16_t sp;
 #ifdef __BIG_ENDIAN__
   union {
     struct {
-      u8 h;
-      u8 l;
+      uint8_t h;
+      uint8_t l;
     };
-    u16 hl;
+    uint16_t hl;
   };
   union {
     struct {
-      u8 d;
-      u8 e;
+      uint8_t d;
+      uint8_t e;
     };
-    u16 de;
+    uint16_t de;
   };
   union {
     struct {
-      u8 b;
-      u8 c;
+      uint8_t b;
+      uint8_t c;
     };
-    u16 bc;
+    uint16_t bc;
   };
   union {
     struct {
-      u8 a;
-      u8 f;
+      uint8_t a;
+      uint8_t f;
     };
-    u16 af;
+    uint16_t af;
   };
 #else	// __LITTLE_ENDIAN__
   union {
     struct {
-      u8 l;
-      u8 h;
+      uint8_t l;
+      uint8_t h;
     };
-    u16 hl;
+    uint16_t hl;
   };
   union {
     struct {
-      u8 e;
-      u8 d;
+      uint8_t e;
+      uint8_t d;
     };
-    u16 de;
+    uint16_t de;
   };
   union {
     struct {
-      u8 c;
-      u8 b;
+      uint8_t c;
+      uint8_t b;
     };
-    u16 bc;
+    uint16_t bc;
   };
   union {
     struct {
-      u8 f;
-      u8 a;
+      uint8_t f;
+      uint8_t a;
     };
-    u16 af;
+    uint16_t af;
   };
 #endif
   int flag_c;
@@ -91,81 +91,81 @@ struct state_s {
   int vid_cycles;
   int vid_mode;
   int old_vid_mode;
-  u8 joyp;
-  u8 joyp_buttons;
-  u8 joyp_directions;
-  u8 joyp_select;
+  uint8_t joyp;
+  uint8_t joyp_buttons;
+  uint8_t joyp_directions;
+  uint8_t joyp_select;
   int masterClock; // incremented at 1,048,576 Hz
   int lastMasterClock; 
-  u8 div, tima, tma, tac;	// timers
+  uint8_t div, tima, tma, tac;	// timers
   int serialBitsSent;	// bits sent over link
   int serialClocksUntilNextSend;
   int serialTimeoutClock;
-  u8 sb, sc;
-  u8 lcdc;
-  u8 stat;
-  u8 scy;
-  u8 scx;
-  u8 ly;
+  uint8_t sb, sc;
+  uint8_t lcdc;
+  uint8_t stat;
+  uint8_t scy;
+  uint8_t scx;
+  uint8_t ly;
   int line_progress;
-  u8 lyc;
-  u8 last_ly;
-  u8 bgp;
-  u8 obp0, obp1;
-  u8 wx,wy;
-  u8 last_line_rendered;
+  uint8_t lyc;
+  uint8_t last_ly;
+  uint8_t bgp;
+  uint8_t obp0, obp1;
+  uint8_t wx,wy;
+  uint8_t last_line_rendered;
   int bootRomEnabled;	// 0 = disabled, 1 = enabled
   int ime;		// set to IME_ENABLED or IME_DISABLED
   int ie, iflag;
   int halt;		// 0 = not halted, 1 = halted
-  u8 op;
+  uint8_t op;
   int halt_glitch;
   
   // sound stuff
-  u8 nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
-  u8 nr32, nr33, nr34, nr41, nr42, nr43, nr44, nr50, nr51, nr52;
-  u8 waveram[0x10];
+  uint8_t nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
+  uint8_t nr32, nr33, nr34, nr41, nr42, nr43, nr44, nr50, nr51, nr52;
+  uint8_t waveram[0x10];
   
   //cgb stuff
-  u8 bgpi;
-  u8 bgpd[0x40];
-  u8 obpi;
-  u8 obpd[0x40];
-  u8 vbk;
-  u8 caps;
-  u8 svbk;
+  uint8_t bgpi;
+  uint8_t bgpd[0x40];
+  uint8_t obpi;
+  uint8_t obpd[0x40];
+  uint8_t vbk;
+  uint8_t caps;
+  uint8_t svbk;
 #ifdef __BIG_ENDIAN__
   union {
     struct {
-      u8 hdma1;
-      u8 hdma2;
+      uint8_t hdma1;
+      uint8_t hdma2;
     };
-    u16 hdma_source;
+    uint16_t hdma_source;
   };
   union {
     struct {
-      u8 hdma3;
-      u8 hdma4;
+      uint8_t hdma3;
+      uint8_t hdma4;
     };
-    u16 hdma_destination;
+    uint16_t hdma_destination;
   };
 #else	// __LITTLE_ENDIAN__
   union {
     struct {
-      u8 hdma2;
-      u8 hdma1;
+      uint8_t hdma2;
+      uint8_t hdma1;
     };
-    u16 hdma_source;
+    uint16_t hdma_source;
   };
   union {
     struct {
-      u8 hdma4;
-      u8 hdma3;
+      uint8_t hdma4;
+      uint8_t hdma3;
     };
-    u16 hdma_destination;
+    uint16_t hdma_destination;
   };
 #endif
-  u8 hdma5;
+  uint8_t hdma5;
 }; // state
 
 // convenience macros
@@ -414,9 +414,9 @@ void CB_SET_B_HL(void);	// CB C6,CE,D6,DE,E6,EE,F6,FE
 int cpu_init( void );
 void cpu_do_one_instruction( void );
 void cpu_do_one_frame( void );
-u8* cpu_getReg( int );
-u8 cpu_get_flags_register( void );
-void cpu_set_flags_register( u8 );
+uint8_t* cpu_getReg( int );
+uint8_t cpu_get_flags_register( void );
+void cpu_set_flags_register( uint8_t );
 
 extern int stop;
 extern int op_lengths[0x100];

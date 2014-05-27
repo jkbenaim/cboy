@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
+#include "types.h"
 #include "mbc_boot.h"
 #include "mbc_none.h"
 #include "mbc_cam.h"
@@ -33,9 +34,9 @@
 #include "mbc_c_mbc3.h"
 #include "mbc_c_cam.h"
 
-#ifdef _MBC_H_
+#ifndef _MBC_H_
 #define _MBC_H_
 
-extern void mbc_romSize2numBanks( u8 romSize );
+extern int mbc_romSize2numBanks( uint8_t romSize );
 
 #endif // _MBC_H_

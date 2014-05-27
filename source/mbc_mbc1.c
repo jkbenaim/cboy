@@ -21,11 +21,11 @@
 #include "mbc_mbc1.h"
 #include <stdio.h>
 
-u8 mbc1_bank_low; // bits 0-4
-u8 mbc1_bank_high;  // bit 5-6 (stored in bits 0-1)
-u8 mbc1_ram_bank;
-u8 mbc1_mode_select;
-u8 mbc1_ram_enable;
+uint8_t mbc1_bank_low; // bits 0-4
+uint8_t mbc1_bank_high;  // bit 5-6 (stored in bits 0-1)
+uint8_t mbc1_ram_bank;
+uint8_t mbc1_mode_select;
+uint8_t mbc1_ram_enable;
 
 void mbc_mbc1_install()
 {

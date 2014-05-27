@@ -71,7 +71,7 @@ void mbc_c_boot_read_bank_0()
       {
         unsigned int temp=0;
         temp=fgetc(cart.fd);
-        data = (u8)temp;
+        data = (uint8_t)temp;
 //         printf("a%d\n", temp);
         cart.cartrom[readAddress] = data;
         cart.cartromValid[readAddress] = 1;

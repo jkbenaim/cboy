@@ -139,19 +139,19 @@ void cart_init_file( char* bootromName, char* cartromName ) {
   }
   
   // allocate memory for extram
-  if( (cart.extram = (u8 *)malloc(cart.extram_size)) == NULL )
+  if( (cart.extram = (uint8_t *)malloc(cart.extram_size)) == NULL )
   {
     fprintf( stderr, "Extram malloc failed.\n" );
     exit(1);
   }
   // allocate memory for extram cache validity thing - read
-  if( (cart.extramValidRead = (u8 *)malloc(cart.extram_size)) == NULL )
+  if( (cart.extramValidRead = (uint8_t *)malloc(cart.extram_size)) == NULL )
   {
     fprintf( stderr, "Extram malloc failed.\n" );
     exit(1);
   }
   // allocate memory for extram cache validity thing - read
-  if( (cart.extramValidWrite = (u8 *)malloc(cart.extram_size)) == NULL )
+  if( (cart.extramValidWrite = (uint8_t *)malloc(cart.extram_size)) == NULL )
   {
     fprintf( stderr, "Extram malloc failed.\n" );
     exit(1);
@@ -211,7 +211,7 @@ void cart_init_cartrom( char* cartromName )
     cart.cartromsize = sb.st_size;
   
   // Allocate memory for the cartrom.
-  if( (cart.cartrom = (u8 *)malloc(cart.cartromsize)) == NULL )
+  if( (cart.cartrom = (uint8_t *)malloc(cart.cartromsize)) == NULL )
   {
     fprintf( stderr, "Cart rom malloc failed.\n" );
     exit(1);
@@ -257,7 +257,7 @@ void cart_init_bootrom( char* bootromName )
     cart.bootromsize = sb.st_size;
   
   // Allocate memory for the bootrom.
-  if( (cart.bootrom = (u8 *)malloc(cart.bootromsize)) == NULL )
+  if( (cart.bootrom = (uint8_t *)malloc(cart.bootromsize)) == NULL )
   {
     fprintf( stderr, "Boot rom malloc failed.\n" );
     exit(1);

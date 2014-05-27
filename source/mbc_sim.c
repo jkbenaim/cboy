@@ -102,7 +102,7 @@ void mbc_sim_read_rom_0()
     {
       unsigned int temp=0;
       temp=fgetc(fd);
-      data = (u8)temp;
+      data = (uint8_t)temp;
       cache_rom[readAddress] = data;
       cacheValid_rom[readAddress] = 1;
     }
@@ -127,7 +127,7 @@ void mbc_sim_read_rom_n()
     {
       unsigned int temp=0;
       temp=fgetc(fd);
-      data = (u8)temp;
+      data = (uint8_t)temp;
       cache_rom[readAddress + 0x4000*romBank] = data;
       cacheValid_rom[readAddress + 0x4000*romBank] = 1;
     }
@@ -152,7 +152,7 @@ void mbc_sim_read_ram()
     {
       unsigned int temp=0;
       temp=fgetc(fd);
-      data = (u8)temp;
+      data = (uint8_t)temp;
       cache_ram[readAddress - 0xA000] = data;
       cacheValid_ram[readAddress - 0xA000] = 1;
     }

@@ -19,17 +19,10 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#define BIT(x,i)	(((x) >> (i)) & 0x1)
+#include <stdint.h>
 
-typedef signed   char  s8;
-typedef unsigned char  u8;
-typedef signed   short s16;
-typedef unsigned short u16;
-typedef signed   int   s32;
-typedef unsigned int   u32;
-
-typedef s32 pc_t;
-typedef s32 address_t;
-typedef u32 pixel_t;
+typedef uint16_t pc_t;
+typedef uint16_t address_t;
+typedef uint32_t pixel_t;
 
 #endif // _TYPES_H_

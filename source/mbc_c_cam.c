@@ -276,7 +276,7 @@ void mbc_c_cam_read_extram() {
     }
     // fill cache
     unsigned int startAddress = address & 0xF000;
-    u8 buf[4096];
+    uint8_t buf[4096];
     ca_read4096Bytes( cart.fd, startAddress, buf );
     int i;
     for( i=0; i<4096; i++ )
@@ -312,7 +312,7 @@ void mbc_c_cam_read_extram_bank_0() {
       {
         // write it back
         cart.extram_bank_validWrite[i-0xA000] = 0;
-        u8 data = cart.extram_bank[i-0xA000];
+        uint8_t data = cart.extram_bank[i-0xA000];
         ca_write( cart.fd, i, data );
       }
       cart.extram_bank_validRead[i-0xA000] = 0;
@@ -326,8 +326,8 @@ void mbc_c_cam_read_extram_bank_0() {
 
 // write A000-BFFF extram
 void mbc_c_cam_write_extram() {
-  u16 oldAddress = address;
-  u8 oldMemByte = memByte;
+  uint16_t oldAddress = address;
+  uint8_t oldMemByte = memByte;
   READ_BYTE();
   address = oldAddress;
   memByte = oldMemByte;

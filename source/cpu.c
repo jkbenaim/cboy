@@ -339,7 +339,7 @@ void INC_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x38) >> 3;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int old_r = (*reg);
   (*reg)++;
@@ -374,7 +374,7 @@ void DEC_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x38) >> 3;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int old_r = (*reg);
   (*reg)--;
@@ -612,7 +612,7 @@ void JR_INDEX( void )
   // opcode 18
   address = state.pc + 1;
   READ_BYTE();
-  state.pc += (s8)memByte + 2;
+  state.pc += (int8_t)memByte + 2;
   return;
 }
 
@@ -659,7 +659,7 @@ void LD_A_DE( void )
   state.pc++;
 }
 
-u8* cpu_getReg( int regNumber )
+uint8_t* cpu_getReg( int regNumber )
 {
   switch(regNumber)
   {
@@ -744,7 +744,7 @@ void JR_NZ_INDEX( void )
   {
     address = state.pc + 1;
     READ_BYTE();
-    state.pc += (s8)memByte + 2;
+    state.pc += (int8_t)memByte + 2;
     branched = 1;
   }
   return;
@@ -842,7 +842,7 @@ void JR_Z_INDEX( void )
   {
     address = state.pc + 1;
     READ_BYTE();
-    state.pc += (s8)memByte + 2;
+    state.pc += (int8_t)memByte + 2;
     branched = 1;
   }
   else
@@ -942,7 +942,7 @@ void JR_NC_INDEX( void )
   {
     address = state.pc + 1;
     READ_BYTE();
-    state.pc += (s8)memByte + 2;
+    state.pc += (int8_t)memByte + 2;
     branched = 1;
   }
   return;
@@ -1079,7 +1079,7 @@ void JR_C_INDEX( void )
   {
     address = state.pc + 1;
     READ_BYTE();
-    state.pc += (s8)memByte + 2;
+    state.pc += (int8_t)memByte + 2;
     branched = 1;
   }
   else
@@ -1187,8 +1187,8 @@ void LD_R_R( void )
   int targetRegNumber = ((int)(memByte) & 0x38) >> 3;
   int sourceRegNumber = ((int)(memByte) & 0x07);
   
-  u8* targetReg = cpu_getReg(targetRegNumber);
-  u8* sourceReg = cpu_getReg(sourceRegNumber);
+  uint8_t* targetReg = cpu_getReg(targetRegNumber);
+  uint8_t* sourceReg = cpu_getReg(sourceRegNumber);
   
   (*targetReg) = (*sourceReg);
   
@@ -1258,7 +1258,7 @@ void LD_HL_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   address = STATE_HL;
   memByte = (*reg);
@@ -1301,7 +1301,7 @@ void ADD_A_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   int old_a = (int)(state.a);
   int new_a = (int)(state.a) + (int)(*reg);
@@ -1381,7 +1381,7 @@ void ADC_A_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   temp = state.a + *reg + c;
   int old_a = state.a;
@@ -1461,7 +1461,7 @@ void SUB_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   int old_a = (int)(state.a);
   int new_a = (int)(state.a) - (int)(*reg);
@@ -1543,7 +1543,7 @@ void SBC_A_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   temp = state.a - *reg - c;
   int old_a = state.a;
@@ -1623,7 +1623,7 @@ void AND_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   state.a &= (*reg);
   
@@ -1678,7 +1678,7 @@ void XOR_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   state.a = state.a ^ (*reg);
   
@@ -1735,7 +1735,7 @@ void OR_R( void )
   address = state.pc;
   READ_BYTE();
   int regNumber = ((int)(memByte) & 0x07);
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   state.a |= (*reg);
   
@@ -1795,7 +1795,7 @@ void CP_R( void )
   READ_BYTE();
   
   int regNumber = (int)(memByte) & 0x07;
-  u8* reg = cpu_getReg(regNumber);
+  uint8_t* reg = cpu_getReg(regNumber);
   
   int temp = (int)state.a - (int)(*reg);
   
@@ -2072,7 +2072,7 @@ void CB_RLC_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   if( ((*reg) & 0x80) == 0 )
   {
@@ -2136,7 +2136,7 @@ void CB_RRC_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   if( ((*reg) & 0x01) == 0 )
   {
@@ -2204,7 +2204,7 @@ void CB_RL_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int old_cy = ISSET_C();
   if( *reg & 0x80 )
@@ -2278,7 +2278,7 @@ void CB_RR_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int old_cy = ISSET_C();
   if( *reg & 0x01 )
@@ -2350,7 +2350,7 @@ void CB_SLA_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   if( *reg & 0x80 )
     SET_C();
@@ -2414,7 +2414,7 @@ void CB_SRA_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   int bit7 = (*reg) & 0x80;
   
   // flag C
@@ -2481,9 +2481,9 @@ void CB_SWAP_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
-  u8 temp = ((*reg) & 0xF0) >> 4;
+  uint8_t temp = ((*reg) & 0xF0) >> 4;
   (*reg) = ((*reg) << 4) | temp;
   
   // flag Z
@@ -2511,7 +2511,7 @@ void CB_SWAP_HL( void )
   address = STATE_HL;
   READ_BYTE();
   
-  u8 temp = (memByte & 0xF0) >> 4;
+  uint8_t temp = (memByte & 0xF0) >> 4;
   memByte = (memByte << 4) | temp;
   
   // flag Z
@@ -2543,7 +2543,7 @@ void CB_SRL_R( void )
   address = state.pc + 1;
   READ_BYTE();
   int regNumber = memByte & 0x07;
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   if( (*reg) & 0x01 )
     SET_C();
@@ -2609,11 +2609,11 @@ void CB_BIT_R( void )
   
   int bitToTest = ((int)(memByte) & 0x38) >> 3;
   int regNumber = ((int)(memByte) & 0x07);
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = 1 << bitToTest;
   
-  u8 temp = *reg & bitMask;
+  uint8_t temp = *reg & bitMask;
   
   // flag Z
   if( temp == 0 )
@@ -2679,7 +2679,7 @@ void CB_RES_B_R( void )
   
   int bitToReset = ((int)(memByte) & 0x38) >> 3;
   int regNumber = ((int)(memByte) & 0x07);
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = ~(1 << bitToReset);
   
@@ -2723,7 +2723,7 @@ void CB_SET_B_R( void )
   
   int bitToReset = ((int)(memByte) & 0x38) >> 3;
   int regNumber = ((int)(memByte) & 0x07);
-  u8 *reg = cpu_getReg(regNumber);
+  uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = 1 << bitToReset;
   
@@ -3143,7 +3143,7 @@ void ADD_SP_OFFSET( void )
   address = state.pc + 1;
   READ_BYTE();
   int old_sp = state.sp;
-  int offset = (int)((s8)memByte);
+  int offset = (int)((int8_t)memByte);
   int temp = (int)state.sp + offset;
   state.sp = temp;
   
@@ -3337,7 +3337,7 @@ void LDHL_SP_OFFSET( void )
   // ld hl, sp + SIGNED_OFFSET
   address = state.pc + 1;
   READ_BYTE();
-  int offset = (int)((s8)memByte);
+  int offset = (int)((int8_t)memByte);
   int temp = (int)state.sp + offset;
   state.hl = temp;
   
@@ -3486,9 +3486,9 @@ int cpu_init() {
   return 1;
 }
 
-u8 cpu_get_flags_register( void )
+uint8_t cpu_get_flags_register( void )
 {
-    u8 temp = 0;
+    uint8_t temp = 0;
     if( ISSET_C() )
         temp |= FLAGS_C;
     if( ISSET_H() )
@@ -3501,7 +3501,7 @@ u8 cpu_get_flags_register( void )
     return temp;
 }
 
-void cpu_set_flags_register( u8 flags )
+void cpu_set_flags_register( uint8_t flags )
 {
     if( (flags & FLAGS_C) != 0 )
         SET_C();

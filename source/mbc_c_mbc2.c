@@ -180,7 +180,7 @@ void mbc_c_mbc2_read_extram() {
   {
     // fill cache
     unsigned int startAddress = address & 0xFF00;
-    u8 buf[256];
+    uint8_t buf[256];
     ca_read256Bytes( cart.fd, startAddress, buf );
     int i;
     for( i=0; i<256; i++ )

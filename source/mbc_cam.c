@@ -207,8 +207,8 @@ void mbc_cam_write_extram() {
                 }
                 for( row_in_tile = 0; row_in_tile < 8 ; row_in_tile++ )
                 {
-                  cart.extram[ram_address_offset + 0] = (u8)value_to_write_lo;
-                  cart.extram[ram_address_offset + 1] = (u8)value_to_write_hi;
+                  cart.extram[ram_address_offset + 0] = (uint8_t)value_to_write_lo;
+                  cart.extram[ram_address_offset + 1] = (uint8_t)value_to_write_hi;
                   ram_address_offset +=2;
                 }
               }
