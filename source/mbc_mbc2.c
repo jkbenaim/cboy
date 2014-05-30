@@ -43,7 +43,7 @@ void mbc_mbc2_install()
   }
   // write 4000-5FFF: ram bank select
   for( i=0x40; i<=0x7F; ++i ) {
-    writemem[i] = mbc_mbc2_dummy;
+    writemem[i] = mbc_mbc2_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -58,7 +58,7 @@ void mbc_mbc2_install()
     writemem[i] = mbc_mbc2_write_extram;
   }
   for( i=0xA2; i<=0xBF; ++i ) {
-    writemem[i] = mbc_mbc2_dummy;
+    writemem[i] = mbc_mbc2_write_dummy;
   }
   
   // set up cart params
@@ -66,51 +66,56 @@ void mbc_mbc2_install()
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
 }
 
-void mbc_mbc2_read_ff()
+uint8_t mbc_mbc2_read_ff( uint16_t address )
 {
-  memByte = 0xff;
+  return 0xff;
 }
 
-void mbc_mbc2_dummy()
+void mbc_mbc2_write_dummy( uint16_t address, uint8_t data )
 {
 }
 
-void mbc_mbc2_read_bank_0()
+uint8_t mbc_mbc2_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_mbc2_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_mbc2_read_bank_n( uint16_t address )
+{
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
-void mbc_mbc2_write_ram_enable() {
+void mbc_mbc2_write_ram_enable( uint16_t address, uint8_t data )
+{
 }
 
 // write 2000-3FFF
-void mbc_mbc2_write_rom_bank_select() {
+void mbc_mbc2_write_rom_bank_select( uint16_t address, uint8_t data )
+{
   size_t offset;
-  if( memByte == 0 )
+  if( data == 0 )
   {
     cart.cart_bank_num = 1;
     offset = (size_t)16384;
   }
   else
   {
-    cart.cart_bank_num = memByte;
-    offset = (size_t)memByte*16384 % cart.cartromsize;
+    cart.cart_bank_num = data;
+    offset = (size_t)data*16384 % cart.cartromsize;
   }
   
   cart.cartrom_bank_n = cart.cartrom + offset;
 }
 
 // read A000-A1FF
-void mbc_mbc2_read_extram() {
-  memByte = cart.extram[address&0x01ff];
+uint8_t mbc_mbc2_read_extram( uint16_t address )
+{
+  return cart.extram[address&0x01ff];
 }
 
 // write A000-A1FF
-void mbc_mbc2_write_extram() {
-  cart.extram[address&0x01ff] = memByte & 0x0F;
+void mbc_mbc2_write_extram( uint16_t address, uint8_t data )
+{
+  cart.extram[address&0x01ff] = data & 0x0F;
 }

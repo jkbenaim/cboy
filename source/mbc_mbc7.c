@@ -50,7 +50,7 @@ void mbc_mbc7_install()
   }
   // write 6000-7FFF: nothing
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_mbc7_dummy;
+    writemem[i] = mbc_mbc7_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -68,7 +68,7 @@ void mbc_mbc7_install()
     writemem[i] = mbc_mbc7_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_mbc7_dummy;
+    writemem[i] = mbc_mbc7_write_dummy;
   }
   
   // set up cart params
@@ -80,34 +80,36 @@ void mbc_mbc7_install()
   cart.extram_bank_num = 0;
 }
 
-void mbc_mbc7_read_ff()
+uint8_t mbc_mbc7_read_ff( uint16_t address )
 {
-  memByte = 0xff;
+  return 0xff;
 }
 
-void mbc_mbc7_dummy()
+void mbc_mbc7_write_dummy( uint16_t address, uint8_t data )
 {
 }
 
-void mbc_mbc7_read_bank_0()
+uint8_t mbc_mbc7_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_mbc7_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_mbc7_read_bank_n( uint16_t address )
+{
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
 // write 0x0A to enable extram, anything else to disable extram
-void mbc_mbc7_write_ram_enable() {
+void mbc_mbc7_write_ram_enable( uint16_t address, uint8_t data )
+{
   // TODO
-//   printf("wrote ROM, address: %04X, byte: %02X\n", address, memByte);
 }
 
 // write 2000-2FFF
-void mbc_mbc7_write_rom_bank_select() {
-  cart.reg_rom_bank_low = memByte;
+void mbc_mbc7_write_rom_bank_select( uint16_t address, uint8_t data )
+{
+  cart.reg_rom_bank_low = data;
   int bank =  cart.reg_rom_bank_low + (int)(cart.reg_rom_bank_high)*256;
   
   bank = bank % cart.cartrom_num_banks;
@@ -120,34 +122,38 @@ void mbc_mbc7_write_rom_bank_select() {
   cart.cartrom_bank_n = cart.cartrom + offset;
   assert( "MBC7 rom bank select: bank number", bank <= cart.cartrom_num_banks );
   assert( "MBC7 rom bank select: offset computation", offset <= (cart.cartromsize - 16384) );
-//   printf("wrote ROM, address: %04X, byte: %02X: set ROM bank to %d\n", address, memByte, bank);
+//   printf("wrote ROM, address: %04X, byte: %02X: set ROM bank to %d\n", address, data, bank);
 }
 
 // write 4000-5FFF
-void mbc_mbc7_write_ram_bank_select() {
+void mbc_mbc7_write_ram_bank_select( uint16_t address, uint8_t data )
+{
   if( cart.extram_size == 32768 )
   {
-    int bank = memByte & 0x03;
+    int bank = data & 0x03;
     cart.extram_bank = cart.extram + bank*8192;
-//     printf("wrote ROM, address: %04X, byte: %02X: set EXTRAM bank to %d\n", address, memByte, bank);
+//     printf("wrote ROM, address: %04X, byte: %02X: set EXTRAM bank to %d\n", address, data, bank);
   }
 }
 
 // read A000-BFFF
-void mbc_mbc7_read_extram() {
-  memByte = cart.extram_bank[address&0x1fff];
+uint8_t mbc_mbc7_read_extram( uint16_t address )
+{
+  return cart.extram_bank[address&0x1fff];
 }
 
 // write A000-BFFF
-void mbc_mbc7_write_extram() {
+void mbc_mbc7_write_extram( uint16_t address, uint8_t data )
+{
   // TODO
   // Major work is needed here.
   // MBC7 carts have an accelerometer which is available via high RAM banks.
   // Emulation of the accelerometer is necessary to play any MBC7 game.
   
-//   printf("wrote EXTRAM, address: %04X, byte: %02X\n", address, memByte);
-  cart.extram_bank[address&0x1fff] = memByte;
+//   printf("wrote EXTRAM, address: %04X, byte: %02X\n", address, data);
+  cart.extram_bank[address&0x1fff] = data;
 }
 
-void mbc_mbc7_cleanup() {
+void mbc_mbc7_cleanup()
+{
 }

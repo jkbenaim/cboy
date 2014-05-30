@@ -51,7 +51,7 @@ void mbc_c_none_install()
   }
   // write 0000-7FFF: nothing
   for( i=0x00; i<=0x7F; ++i ) {
-    writemem[i] = mbc_c_none_dummy;
+    writemem[i] = mbc_c_none_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -69,7 +69,7 @@ void mbc_c_none_install()
     writemem[i] = mbc_c_none_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_c_none_dummy;
+    writemem[i] = mbc_c_none_write_dummy;
   }
   
   // set up cart params
@@ -77,7 +77,7 @@ void mbc_c_none_install()
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
 }
 
-void mbc_c_none_read_bank_0()
+uint8_t mbc_c_none_read_bank_0( uint16_t address )
 {
   if( !cart.cartromValid[address] )
   {
@@ -91,35 +91,40 @@ void mbc_c_none_read_bank_0()
       cart.cartromValid[startAddress+i] = 1;
   }
   // read from cache
-  memByte = cart.cartrom[address];
+  return cart.cartrom[address];
 }
 
-void mbc_c_none_read_bank_n() {
-  mbc_c_none_read_bank_0();
+uint8_t mbc_c_none_read_bank_n( uint16_t address )
+{
+  return mbc_c_none_read_bank_0(address);
 }
 
-void mbc_c_none_write_bank_0() {
+void mbc_c_none_write_bank_0( uint16_t address, uint8_t data )
+{
   // do nothing
 }
 
-
-
-void mbc_c_none_write_bank_n() {
+void mbc_c_none_write_bank_n( uint16_t address, uint8_t data )
+{
   // do nothing
 }
 
-void mbc_c_none_dummy() {
+void mbc_c_none_write_dummy( uint16_t address, uint8_t data )
+{
   // do nothing
 }
 
-void mbc_c_none_read_ff() {
-  memByte = 0xFF;
+uint8_t mbc_c_none_read_ff( uint16_t address )
+{
+  return 0xFF;
 }
 
-void mbc_c_none_read_extram() {
-  memByte = 0xFF;
+uint8_t mbc_c_none_read_extram( uint16_t address )
+{
+  return 0xFF;
 }
 
-void mbc_c_none_write_extram() {
+void mbc_c_none_write_extram( uint16_t address, uint8_t data )
+{
   // do nothing
 }

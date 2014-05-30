@@ -264,25 +264,20 @@ void (*cb_ops[0x100])(void) = {
 
 void UNDEF( void )
 {
-  address = state.pc;
-  READ_BYTE();
-  printf("Undefined opcode %02X at address %04X\n", memByte, state.pc);
+  printf("Undefined opcode %02X at address %04X\n", state.op, state.pc);
   exit(1);
 }
 
 void UNDEF_CB( void )
 {
-  address = state.pc + 1;
-  READ_BYTE();
-  printf("Undefined CB-prefixed opcode %02X at address %04X\n", memByte, state.pc);
+  uint8_t data = read_byte(state.pc+1);
+  printf("Undefined CB-prefixed opcode %02X at address %04X\n", data, state.pc);
   exit(1);
 }
 
 void LOCKUP( void )
 {
-  address = state.pc;
-  READ_BYTE();
-  printf("LOCKUP opcode %02X at address %04X\n", memByte, state.pc);
+  printf("LOCKUP opcode %02X at address %04X\n", state.op, state.pc);
   exit(1);
 }
 
@@ -297,17 +292,7 @@ void NOP( void )
 void LD_BC_WORD( void )
 {
   // opcode 01
-//   address = state.pc + 1;
-//   READ_BYTE();
-//   state.c = memByte;
-//   
-//   address = state.pc + 2;
-//   READ_BYTE();
-//   state.b = memByte;
-
-  address = state.pc + 1;
-  READ_WORD();
-  state.bc = memWord;
+  state.bc = read_word(state.pc+1);
   
   state.pc += 3;
 }
@@ -315,9 +300,7 @@ void LD_BC_WORD( void )
 void LD_BC_A( void )
 {
   // opcode 02
-  address = STATE_BC;
-  memByte = state.a;
-  WRITE_BYTE();
+  write_byte(state.bc, state.a);
   // no flags affected
   state.pc++;
 }
@@ -336,9 +319,7 @@ void INC_R( void )
   // INC r
   // 00rrr100
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x38) >> 3;
+  int regNumber = ((int)(state.op) & 0x38) >> 3;
   uint8_t *reg = cpu_getReg(regNumber);
   
   int old_r = (*reg);
@@ -371,9 +352,7 @@ void DEC_R( void )
   // DEC r
   // 00rrr101
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x38) >> 3;
+  int regNumber = ((int)(state.op) & 0x38) >> 3;
   uint8_t *reg = cpu_getReg(regNumber);
   
   int old_r = (*reg);
@@ -403,9 +382,7 @@ void DEC_R( void )
 void LD_B_BYTE( void )
 {
   // opcode 06
-  address = state.pc + 1;
-  READ_BYTE();
-  state.b = memByte;
+  state.b = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -440,13 +417,12 @@ void RLCA( void )
 void LD_WORD_SP( void )
 {
   // opcode 08
-  address = state.pc + 1;
-  READ_WORD();
-  address = memWord;
-  memWord = state.sp;
-  WRITE_WORD();
+  write_word(
+              read_word(state.pc+1),
+              state.sp
+            );
   
-  // no flags affected?
+  // no flags affected
   
   state.pc += 3;
 } 
@@ -454,7 +430,7 @@ void LD_WORD_SP( void )
 void ADD_HL_BC( void )
 {
   // opcode 09
-  int result = (int)(STATE_HL) + (int)(STATE_BC);
+  int result = (int)(state.hl) + (int)(state.bc);
   
   // flag Z in not affected
   
@@ -487,9 +463,7 @@ void ADD_HL_BC( void )
 void LD_A_BC( void )
 {
   // opcode 0A
-  address = STATE_BC;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.bc);
   state.pc++;
 }
 
@@ -503,9 +477,7 @@ void DEC_BC( void )
 void LD_C_BYTE( void )
 {
   // opcode 0E
-  address = state.pc + 1;
-  READ_BYTE();
-  state.c = memByte;
+  state.c = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -547,9 +519,7 @@ void STOP( void )
 void LD_DE_WORD( void )
 {
   // opcode 11
-  address = state.pc + 1;
-  READ_WORD();
-  state.de = memWord;
+  state.de = read_word(state.pc+1);
   
   state.pc+=3;
 }
@@ -557,9 +527,7 @@ void LD_DE_WORD( void )
 void LD_DE_A( void )
 {
   // opcode 12
-  memByte = state.a;
-  address = STATE_DE;
-  WRITE_BYTE();
+  write_byte(state.de, state.a);
   // no flags modified
   state.pc++;
 }
@@ -575,9 +543,7 @@ void INC_DE( void )
 void LD_D_BYTE( void )
 {
   // opcode 16
-  address = state.pc + 1;
-  READ_BYTE();
-  state.d = memByte;
+  state.d = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -610,16 +576,14 @@ void RLA( void )
 void JR_INDEX( void )
 {
   // opcode 18
-  address = state.pc + 1;
-  READ_BYTE();
-  state.pc += (int8_t)memByte + 2;
+  state.pc += (int8_t)read_byte(state.pc+1) + 2;
   return;
 }
 
 void ADD_HL_DE( void )
 {
   // opcode 19
-  int result = (int)(STATE_HL) + (int)(STATE_DE);
+  int result = (int)(state.hl) + (int)(state.de);
   
   // flag Z in not affected
   
@@ -653,9 +617,7 @@ void ADD_HL_DE( void )
 void LD_A_DE( void )
 {
   // opcode 1A
-  address = STATE_DE;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.de);
   state.pc++;
 }
 
@@ -702,9 +664,7 @@ void DEC_DE( void )
 void LD_E_BYTE( void )
 {
   // opcode 1E
-  address = state.pc + 1;
-  READ_BYTE();
-  state.e = memByte;
+  state.e = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -742,9 +702,7 @@ void JR_NZ_INDEX( void )
   }
   else
   {
-    address = state.pc + 1;
-    READ_BYTE();
-    state.pc += (int8_t)memByte + 2;
+    state.pc += (int8_t)read_byte(state.pc+1) + 2;
     branched = 1;
   }
   return;
@@ -753,9 +711,7 @@ void JR_NZ_INDEX( void )
 void LD_HL_WORD( void )
 {
   // opcode 21
-  address = state.pc + 1;
-  READ_WORD();
-  state.hl = memWord;
+  state.hl = read_word(state.pc+1);
   
   state.pc+=3;
   return;
@@ -764,9 +720,7 @@ void LD_HL_WORD( void )
 void LDI_HL_A( void )
 {
   // opcode 22
-  address = STATE_HL;
-  memByte = state.a;
-  WRITE_BYTE();
+  write_byte(state.hl, state.a);
   state.hl++;
   
   state.pc++;
@@ -784,9 +738,7 @@ void INC_HL( void )
 void LD_H_BYTE( void )
 {
   // opcode 26
-  address = state.pc + 1;
-  READ_BYTE();
-  state.h = memByte;
+  state.h = read_byte(state.pc+1);
   // no flags changed
   state.pc += 2;
 }
@@ -840,9 +792,7 @@ void JR_Z_INDEX( void )
   // opcode 28
   if( ISSET_Z() )
   {
-    address = state.pc + 1;
-    READ_BYTE();
-    state.pc += (int8_t)memByte + 2;
+    state.pc += (int8_t)read_byte(state.pc+1) + 2;
     branched = 1;
   }
   else
@@ -855,7 +805,7 @@ void JR_Z_INDEX( void )
 void ADD_HL_HL( void )
 {
   // opcode 29
-  int result = (int)(STATE_HL) + (int)(STATE_HL);
+  int result = (int)(state.hl) + (int)(state.hl);
   
   // flag Z in not affected
   
@@ -889,9 +839,7 @@ void ADD_HL_HL( void )
 void LDI_A_HL( void )
 {
   // opcode 2A
-  address = STATE_HL;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.hl);
   
   state.hl++;
   
@@ -908,9 +856,7 @@ void DEC_HL( void )
 void LD_L_BYTE( void )
 {
   // opcode 2E
-  address = state.pc + 1;
-  READ_BYTE();
-  state.l = memByte;
+  state.l = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -940,9 +886,7 @@ void JR_NC_INDEX( void )
   }
   else
   {
-    address = state.pc + 1;
-    READ_BYTE();
-    state.pc += (int8_t)memByte + 2;
+    state.pc += (int8_t)read_byte(state.pc+1) + 2;
     branched = 1;
   }
   return;
@@ -951,9 +895,7 @@ void JR_NC_INDEX( void )
 void LD_SP_WORD( void )
 {
   // opcode 31
-  address = state.pc + 1;
-  READ_WORD();
-  state.sp = memWord;
+  state.sp = read_word(state.pc+1);
   
   state.pc+=3;
   return;
@@ -962,9 +904,7 @@ void LD_SP_WORD( void )
 void LDD_HL_A( void )
 {
   // opcode 32
-  address = STATE_HL;
-  memByte = state.a;
-  WRITE_BYTE();
+  write_byte(state.hl, state.a);
   
   state.hl--;
   state.pc++;
@@ -984,15 +924,12 @@ void INC_SP( void )
 void INC_AT_HL( void )
 {
   // opcode 34
-  address = STATE_HL;
-  READ_BYTE();
-  int old_memByte = memByte;
-  memByte++;
-  int new_memByte = memByte;
-  WRITE_BYTE();
+  int old_memByte = read_byte(state.hl);
+  int new_memByte = old_memByte+1;
+  write_byte(state.hl, new_memByte);
   
   // flag Z
-  if( memByte == 0 )
+  if( new_memByte == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -1014,15 +951,12 @@ void INC_AT_HL( void )
 void DEC_AT_HL( void )
 {
   // opcode 35
-  address = STATE_HL;
-  READ_BYTE();
-  int old_memByte = memByte;
-  memByte--;
-  int new_memByte = memByte;
-  WRITE_BYTE();
+  int old_memByte = read_byte(state.hl);
+  int new_memByte = old_memByte-1;
+  write_byte(state.hl, new_memByte);
   
   // flag Z
-  if( memByte == 0 )
+  if( new_memByte == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -1045,10 +979,7 @@ void LD_HL_BYTE( void )
 {
   // opcode 36
   // ld [hl], $memByte
-  address = state.pc + 1;
-  READ_BYTE();
-  address = STATE_HL;
-  WRITE_BYTE();
+  write_byte(state.hl, read_byte(state.pc+1));
   state.pc += 2;
 }
 
@@ -1077,9 +1008,7 @@ void JR_C_INDEX( void )
   // opcode 38
   if( ISSET_C() )
   {
-    address = state.pc + 1;
-    READ_BYTE();
-    state.pc += (int8_t)memByte + 2;
+    state.pc += (int8_t)read_byte(state.pc+1) + 2;
     branched = 1;
   }
   else
@@ -1092,7 +1021,7 @@ void JR_C_INDEX( void )
 void ADD_HL_SP( void )
 {
   // opcode 39
-  int result = (int)(STATE_HL) + (int)(state.sp);
+  int result = (int)(state.hl) + (int)(state.sp);
   
   // flag Z in not affected
   
@@ -1125,9 +1054,7 @@ void ADD_HL_SP( void )
 void LDD_A_HL( void )
 {
   // opcode 3A
-  address = STATE_HL;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.hl);
   
   state.hl--;
   state.pc++;
@@ -1146,9 +1073,7 @@ void DEC_SP( void )
 void LD_A_BYTE( void )
 {
   // opcode 3E
-  address = state.pc + 1;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -1182,10 +1107,8 @@ void LD_R_R( void )
   // LD r, R
   // 01rrrRRR
   
-  address = state.pc;
-  READ_BYTE();
-  int targetRegNumber = ((int)(memByte) & 0x38) >> 3;
-  int sourceRegNumber = ((int)(memByte) & 0x07);
+  int targetRegNumber = ((int)(state.op) & 0x38) >> 3;
+  int sourceRegNumber = ((int)(state.op) & 0x07);
   
   uint8_t* targetReg = cpu_getReg(targetRegNumber);
   uint8_t* sourceReg = cpu_getReg(sourceRegNumber);
@@ -1198,54 +1121,42 @@ void LD_R_R( void )
 void LD_B_HL( void )
 {
   // opcode 46
-  address = STATE_HL;
-  READ_BYTE();
-  state.b = memByte;
+  state.b = read_byte(state.hl);
   state.pc++;
 }
 
 void LD_C_HL( void )
 {
   // opcode 4E
-  address = STATE_HL;
-  READ_BYTE();
-  state.c = memByte;
+  state.c = read_byte(state.hl);
   state.pc++;
 }
 
 void LD_D_HL( void )
 {
   // opcode 56
-  address = STATE_HL;
-  READ_BYTE();
-  state.d = memByte;
+  state.d = read_byte(state.hl);
   state.pc++;
 }
 
 void LD_E_HL( void )
 {
   // opcode 5E
-  address = STATE_HL;
-  READ_BYTE();
-  state.e = memByte;
+  state.e = read_byte(state.hl);
   state.pc++;
 }
 
 void LD_H_HL( void )
 {
   // opcode 66
-  address = STATE_HL;
-  READ_BYTE();
-  state.h = memByte;
+  state.h = read_byte(state.hl);
   state.pc++;
 }
 
 void LD_L_HL( void )
 {
   // opcode 6E
-  address = STATE_HL;
-  READ_BYTE();
-  state.l = memByte;
+  state.l = read_byte(state.hl);
   state.pc++;
 }
 
@@ -1255,14 +1166,10 @@ void LD_HL_R( void )
   // LD (HL), r
   // 01110rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
-  address = STATE_HL;
-  memByte = (*reg);
-  WRITE_BYTE();
+  write_byte(state.hl, *reg);
   state.pc++;
   return;
 }
@@ -1287,9 +1194,7 @@ void HALT( void )
 void LD_A_HL( void )
 {
   // opcode 7E
-  address = STATE_HL;
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(state.hl);
   state.pc++;
 }
 
@@ -1298,9 +1203,7 @@ void ADD_A_R( void )
   // opcode 80-85,87
   // 10000rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
   int old_a = (int)(state.a);
@@ -1335,10 +1238,9 @@ void ADD_A_R( void )
 void ADD_A_HL( void )
 {
   // opcode 86
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  int new_a = (int)(state.a) + (int)(memByte);
+  int new_a = (int)(state.a) + (int)(data);
   
   state.a = new_a;
   
@@ -1352,7 +1254,7 @@ void ADD_A_HL( void )
   RESET_N();
   
   // flag H
-  if( ((int)(state.a & 0x0F) - (int)(memByte & 0x0F)) < 0 )
+  if( ((int)(state.a & 0x0F) - (int)(data & 0x0F)) < 0 )
     SET_H();
   else
     RESET_H();
@@ -1378,9 +1280,7 @@ void ADC_A_R( void )
   else
     c = 0;
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
   temp = state.a + *reg + c;
@@ -1422,10 +1322,9 @@ void ADC_A_HL( void )
   else
     c = 0;
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  temp = state.a + memByte + c;
+  temp = state.a + data + c;
   int old_a = state.a;
   state.a = temp;
   
@@ -1439,7 +1338,7 @@ void ADC_A_HL( void )
   RESET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) + (memByte & 0x0F) + c ) & 0x10 )
+  if( ( (old_a & 0x0F) + (data & 0x0F) + c ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -1458,9 +1357,7 @@ void SUB_R( void )
   // opcodes 90-95,97
   // 10010rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
   int old_a = (int)(state.a);
@@ -1496,11 +1393,10 @@ void SUB_HL( void )
 {
   // opcode 96
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
   int old_a = (int)(state.a);
-  int new_a = (int)(state.a) - (int)(memByte);
+  int new_a = (int)(state.a) - (int)(data);
   
   state.a = new_a;
   
@@ -1514,7 +1410,7 @@ void SUB_HL( void )
   SET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) - (memByte & 0x0F) ) & 0x10 )
+  if( ( (old_a & 0x0F) - (data & 0x0F) ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -1540,9 +1436,7 @@ void SBC_A_R( void )
   else
     c = 0;
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
   temp = state.a - *reg - c;
@@ -1584,10 +1478,9 @@ void SBC_A_HL( void )
   else
     c = 0;
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  temp = state.a - memByte - c;
+  temp = state.a - data - c;
   int old_a = state.a;
   state.a = temp;
   
@@ -1601,7 +1494,7 @@ void SBC_A_HL( void )
   SET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) - (memByte & 0x0F) - c ) & 0x10 )
+  if( ( (old_a & 0x0F) - (data & 0x0F) - c ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -1620,9 +1513,7 @@ void AND_R( void )
   // opcodes A0-A5,A7
   // 10100rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t *reg = cpu_getReg(regNumber);
   
   state.a &= (*reg);
@@ -1648,9 +1539,7 @@ void AND_R( void )
 void AND_HL( void )
 {
   // opcode A6
-  address = STATE_HL;
-  READ_BYTE();
-  state.a &= memByte;
+  state.a &= read_byte(state.hl);
   
   // flag Z
   if( state.a == 0 )
@@ -1675,9 +1564,7 @@ void XOR_R( void )
   // opcodes A8-AD,AF
   // 10110rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t *reg = cpu_getReg(regNumber);
   
   state.a = state.a ^ (*reg);
@@ -1703,10 +1590,7 @@ void XOR_R( void )
 void XOR_HL( void )
 {
   // opcode AE
-  address = STATE_HL;
-  READ_BYTE();
-  
-  state.a ^= memByte;
+  state.a ^= read_byte(state.hl);
   
   // flag Z
   if( state.a == 0 )
@@ -1732,9 +1616,7 @@ void OR_R( void )
   // OR r
   // 10110rrr
   
-  address = state.pc;
-  READ_BYTE();
-  int regNumber = ((int)(memByte) & 0x07);
+  int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
   state.a |= (*reg);
@@ -1762,10 +1644,7 @@ void OR_HL( void )
   // opcode B6
   // OR (HL)
   
-  address = STATE_HL;
-  READ_BYTE();
-  
-  state.a |= memByte;
+  state.a |= read_byte(state.hl);
   
   // flag Z
   if( state.a == 0 )
@@ -1791,10 +1670,7 @@ void CP_R( void )
   // CP r
   // 10111rrr
   
-  address = state.pc;
-  READ_BYTE();
-  
-  int regNumber = (int)(memByte) & 0x07;
+  int regNumber = (int)(state.op) & 0x07;
   uint8_t* reg = cpu_getReg(regNumber);
   
   int temp = (int)state.a - (int)(*reg);
@@ -1829,10 +1705,9 @@ void CP_HL( void )
   // CP (HL)
   // 10111110
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  int temp = (int)state.a - (int)(memByte);
+  int temp = (int)state.a - (int)(data);
   
   // flag Z
   if( (temp & 0xFF) == 0 )
@@ -1844,7 +1719,7 @@ void CP_HL( void )
   SET_N();
   
   // flag H
-  if( ((int)(state.a & 0x0F) - (int)(memByte & 0x0F)) < 0 )
+  if( ((int)(state.a & 0x0F) - (int)(data & 0x0F)) < 0 )
     SET_H();
   else
     RESET_H();
@@ -1915,10 +1790,7 @@ void RET_CC( void)
 void POP_BC( void )
 {
   // opcode C1
-
-  address = state.sp;
-  READ_WORD();
-  state.bc = memWord;
+  state.bc = read_word(state.sp);
   
   state.sp += 2;
   
@@ -1933,18 +1805,14 @@ void JP_NZ_ADDR( void )
     state.pc += 3;
     return;
   }
-  address = state.pc + 1;
-  READ_WORD();
-  state.pc = memWord;
+  state.pc = read_word(state.pc+1);
   branched = 1;
 }
 
 void JP_ADDR( void )
 {
   // opcode C3
-  address = state.pc + 1;
-  READ_WORD();
-  state.pc = memWord;
+  state.pc = read_word(state.pc+1);
 }
 
 void CALL_NZ( void )
@@ -1957,14 +1825,8 @@ void CALL_NZ( void )
   else
   {
     state.sp -= 2;
-    address = state.sp;
-    memWord = state.pc + 3;
-    WRITE_WORD();
-    
-    address = state.pc + 1;
-    READ_WORD();
-//     printf("CALL_NZ address: %x, pc: %x, memWord:%x\n", address, state.pc, memWord);
-    state.pc = memWord;
+    write_word(state.sp, state.pc+3);
+    state.pc = read_word(state.pc+1);
   }
 }
 
@@ -1972,9 +1834,7 @@ void PUSH_BC( void )
 {
   // opcode C5
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.bc;
-  WRITE_WORD();
+  write_word(state.sp, state.bc);
   
   // no flags affected
   
@@ -1984,11 +1844,10 @@ void PUSH_BC( void )
 void ADD_A_BYTE( void )
 {
   // opcode C6
-  address = state.pc + 1;
-  READ_BYTE();
-  int temp = (int)(state.a) + (int)(memByte);
+  uint8_t data = read_byte(state.pc+1);
+  int temp = (int)(state.a) + (int)(data);
   int old_a = state.a;
-  state.a += memByte;
+  state.a += data;
   
   // flag Z
   if( state.a == 0 )
@@ -2000,7 +1859,7 @@ void ADD_A_BYTE( void )
   RESET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) + (memByte & 0x0F) ) & 0x10 )
+  if( ( (old_a & 0x0F) + (data & 0x0F) ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -2017,25 +1876,8 @@ void ADD_A_BYTE( void )
 void RET( void )
 {
   // opcode C9
-//   int old_pc = state.pc;
-//   int low, high;
-//   address = state.sp;
-//   READ_BYTE();
-//   low = memByte;
-//   state.sp++;
-//   address = state.sp;
-//   READ_BYTE();
-//   high = (int)(memByte) << 8;
-//   state.sp++;
-
-  address = state.sp;
-  READ_WORD();
-  state.pc = memWord;
+  state.pc = read_word(state.sp);
   state.sp += 2;
-  
-//   state.pc = low | high;
-  
-//   printf("RET pc: %04X, retaddr: %04X\n", old_pc, state.pc);
 }
 
 void JP_Z_ADDR( void )
@@ -2043,9 +1885,7 @@ void JP_Z_ADDR( void )
   // opcode CA
   if( ISSET_Z() )
   {
-    address = state.pc + 1;
-    READ_WORD();
-    state.pc = memWord;
+    state.pc = read_word(state.pc+1);
     branched = 1;
     return;
   }
@@ -2057,9 +1897,7 @@ void CB_PREFIX( void )
   // opcode CB
   // lots of instructions use the CB prefix
 //   printf("CB_PREFIX\n");
-  address = state.pc + 1;
-  READ_BYTE();
-  cb_ops[memByte]();
+  cb_ops[state.cb_op]();
   return;
 }
 
@@ -2069,9 +1907,7 @@ void CB_RLC_R( void )
   // 11001011 CB
   // 00000rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   if( ((*reg) & 0x80) == 0 )
@@ -2098,22 +1934,21 @@ void CB_RLC_R( void )
 void CB_RLC_HL( void )
 {
   // opcode CB 06
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  if( (memByte & 0x80) == 0 )
+  if( (data & 0x80) == 0 )
   {
     RESET_C();
-    memByte = memByte << 1;
+    data = data << 1;
   } else {
     SET_C();
-    memByte = (memByte << 1) | 1;
+    data = (data << 1) | 1;
   }
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   // flag Z
-  if( memByte == 0 )
+  if( data == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -2133,9 +1968,7 @@ void CB_RRC_R( void )
   // 11001011 CB
   // 0001rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   if( ((*reg) & 0x01) == 0 )
@@ -2166,22 +1999,21 @@ void CB_RRC_R( void )
 void CB_RRC_HL( void )
 {
   // opcode CB 0E
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  if( (memByte & 0x01) == 0 )
+  if( (data & 0x01) == 0 )
   {
     RESET_C();
-    memByte = memByte >> 1;
+    data = data >> 1;
   } else {
     SET_C();
-    memByte = (memByte >> 1) | 0x80;
+    data = (data >> 1) | 0x80;
   }
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   // flag Z
-  if( memByte == 0 )
+  if( data == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -2201,9 +2033,7 @@ void CB_RL_R( void )
   // 11001011 CB
   // 00010rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   int old_cy = ISSET_C();
@@ -2238,22 +2068,21 @@ void CB_RL_HL( void )
   // 11001011 CB
   // 00010110
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
   int old_cy = ISSET_C();
-  if( memByte & 0x80 )
+  if( data & 0x80 )
     SET_C();
   else
     RESET_C();
   
-  memByte = memByte << 1;
+  data = data << 1;
   
   if( old_cy )
-    memByte |= 0x01;
+    data |= 0x01;
   
   // flag Z
-  if( memByte == 0x00 )
+  if( data == 0x00 )
     SET_Z();
   else
     RESET_Z();
@@ -2264,7 +2093,7 @@ void CB_RL_HL( void )
   // flag H
   RESET_H();
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2275,9 +2104,7 @@ void CB_RR_R( void )
   // 11001011 CB
   // 00001rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   int old_cy = ISSET_C();
@@ -2310,22 +2137,21 @@ void CB_RR_HL( void )
 {
   // opcode CB 1E
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
   int old_cy = ISSET_C();
-  if( memByte & 0x01 )
+  if( data & 0x01 )
     SET_C();
   else
     RESET_C();
   
-  memByte = memByte >> 1;
+  data = data >> 1;
   
   if( old_cy )
-    memByte |= 0x80;
+    data |= 0x80;
   
   // flag Z
-  if( memByte == 0x00 )
+  if( data == 0x00 )
     SET_Z();
   else
     RESET_Z();
@@ -2336,7 +2162,7 @@ void CB_RR_HL( void )
   // flag H
   RESET_H();
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2347,9 +2173,7 @@ void CB_SLA_R( void )
   // 11001011 CB
   // 00100rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   if( *reg & 0x80 )
@@ -2378,18 +2202,17 @@ void CB_SLA_HL( void )
 {
   // opcode CB 26
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  if( memByte & 0x80 )
+  if( data & 0x80 )
     SET_C();
   else
     RESET_C();
   
-  memByte = memByte << 1;
+  data = data << 1;
   
   // flag Z
-  if( memByte == 0x00 )
+  if( data == 0x00 )
     SET_Z();
   else
     RESET_Z();
@@ -2400,7 +2223,7 @@ void CB_SLA_HL( void )
   // flag H
   RESET_H();
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2411,9 +2234,7 @@ void CB_SRA_R( void )
   // 11001011 CB
   // 00101rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   int bit7 = (*reg) & 0x80;
   
@@ -2443,22 +2264,21 @@ void CB_SRA_R( void )
 void CB_SRA_HL( void )
 {
   // opcode CB 2E
-  address = STATE_HL;
-  READ_BYTE();
-  int bit7 = memByte & 0x80;
+  uint8_t data = read_byte(state.hl);
+  int bit7 = data & 0x80;
   
   // flag C
-  if( memByte & 0x01 )
+  if( data & 0x01 )
     SET_C();
   else
     RESET_C();
   
-  memByte = memByte >> 1 | bit7;
+  data = data >> 1 | bit7;
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   // flag Z
-  if( memByte == 0 )
+  if( data == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -2478,9 +2298,7 @@ void CB_SWAP_R( void )
   // 11001011 CB
   // 00110rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   uint8_t temp = ((*reg) & 0xF0) >> 4;
@@ -2508,14 +2326,13 @@ void CB_SWAP_HL( void )
 {
   // opcode CB 36
   
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  uint8_t temp = (memByte & 0xF0) >> 4;
-  memByte = (memByte << 4) | temp;
+  uint8_t temp = (data & 0xF0) >> 4;
+  data = (data << 4) | temp;
   
   // flag Z
-  if( memByte == 0x00 )
+  if( data == 0x00 )
     SET_Z();
   else
     RESET_Z();
@@ -2529,7 +2346,7 @@ void CB_SWAP_HL( void )
   // flag C
   RESET_C();
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2540,9 +2357,7 @@ void CB_SRL_R( void )
   // 11001011 CB
   // 00111rrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  int regNumber = memByte & 0x07;
+  int regNumber = state.cb_op & 0x07;
   uint8_t *reg = cpu_getReg(regNumber);
   
   if( (*reg) & 0x01 )
@@ -2570,20 +2385,19 @@ void CB_SRL_R( void )
 void CB_SRL_HL( void )
 {
   // opcode CB 38-3D,3F
-  address = STATE_HL;
-  READ_BYTE();
+  uint8_t data = read_byte(state.hl);
   
-  if( memByte & 0x01 )
+  if( data & 0x01 )
     SET_C();
   else
     RESET_C();
   
-  memByte = memByte >> 1;
+  data = data >> 1;
   
-  WRITE_BYTE();
+  write_byte(state.hl, data);
   
   // flag Z
-  if( memByte == 0 )
+  if( data == 0 )
     SET_Z();
   else
     RESET_Z();
@@ -2604,11 +2418,8 @@ void CB_BIT_R( void )
   // 11001011 CB
   // 01bbbrrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToTest = ((int)(memByte) & 0x38) >> 3;
-  int regNumber = ((int)(memByte) & 0x07);
+  int bitToTest = ((int)(state.cb_op) & 0x38) >> 3;
+  int regNumber = ((int)(state.cb_op) & 0x07);
   uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = 1 << bitToTest;
@@ -2639,15 +2450,11 @@ void CB_BIT_HL( void )
   // 11001011 CB
   // 01bbb110
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToTest = ((int)(memByte) & 0x38) >> 3;
+  int bitToTest = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = 1 << bitToTest;
   
-  address = STATE_HL;
-  READ_BYTE();
-  int temp = memByte & bitMask;
+  uint8_t data = read_byte(state.hl);
+  int temp = data & bitMask;
   
   // flag Z
   if( temp == 0 )
@@ -2674,11 +2481,8 @@ void CB_RES_B_R( void )
   // 11001011 CB
   // 10bbbrrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToReset = ((int)(memByte) & 0x38) >> 3;
-  int regNumber = ((int)(memByte) & 0x07);
+  int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
+  int regNumber = ((int)(state.cb_op) & 0x07);
   uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = ~(1 << bitToReset);
@@ -2696,16 +2500,12 @@ void CB_RES_B_HL( void )
   // 11001011 CB
   // 10bbb110 86,8E,96,9E,A6,AE,B6,BE
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToReset = ((int)(memByte) & 0x38) >> 3;
+  int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = ~(1 << bitToReset);
   
-  address = STATE_HL;
-  READ_BYTE();
-  memByte = memByte & bitMask;
-  WRITE_BYTE();
+  uint8_t data = read_byte(state.hl);
+  data &= bitMask;
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2718,11 +2518,8 @@ void CB_SET_B_R( void )
   // 11001011 CB
   // 11bbbrrr
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToReset = ((int)(memByte) & 0x38) >> 3;
-  int regNumber = ((int)(memByte) & 0x07);
+  int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
+  int regNumber = ((int)(state.cb_op) & 0x07);
   uint8_t *reg = cpu_getReg(regNumber);
   
   int bitMask = 1 << bitToReset;
@@ -2740,16 +2537,12 @@ void CB_SET_B_HL( void )
   // 11001011 CB
   // 11bbb110 C6,CE,D6,DE,E6,EE,F6,FE
   
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  int bitToReset = ((int)(memByte) & 0x38) >> 3;
+  int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = 1 << bitToReset;
   
-  address = STATE_HL;
-  READ_BYTE();
-  memByte = memByte | bitMask;
-  WRITE_BYTE();
+  uint8_t data = read_byte(state.hl);
+  data |= bitMask;
+  write_byte(state.hl, data);
   
   state.pc += 2;
 }
@@ -2764,13 +2557,8 @@ void CALL_Z( void )
   else
   {
     state.sp -= 2;
-    address = state.sp;
-    memWord = state.pc + 3;
-    WRITE_WORD();
-    
-    address = state.pc + 1;
-    READ_WORD();
-    state.pc = memWord;
+    write_word(state.sp, state.pc+3);
+    state.pc = read_word(state.pc+1);
   }
 }
 
@@ -2778,14 +2566,8 @@ void CALL( void )
 {
   // opcode CD
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 3;
-  WRITE_WORD();
-  
-  address = state.pc + 1;
-  READ_WORD();
-//   printf("CALL address: %x, pc: %x, memWord:%x\n", address, state.pc, memWord);
-  state.pc = memWord;
+  write_word(state.sp, state.pc+3);
+  state.pc = read_word(state.pc+1);
 }
 
 void ADC_A_BYTE( void )
@@ -2798,9 +2580,8 @@ void ADC_A_BYTE( void )
   else
     c = 0;
   
-  address = state.pc + 1;
-  READ_BYTE();
-  temp = state.a + memByte + c;
+  uint8_t arg = read_byte(state.pc+1);
+  temp = state.a + arg + c;
   int old_a = state.a;
   state.a = temp;
   
@@ -2814,7 +2595,7 @@ void ADC_A_BYTE( void )
   RESET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) + (memByte & 0x0F) + c ) & 0x10 )
+  if( ( (old_a & 0x0F) + (arg & 0x0F) + c ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -2832,29 +2613,14 @@ void RST_8( void )
 {
   // opcode CF
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
-  
-//   printf("RST_8 address: %x, pc: %x\n", address, state.pc);
+  write_word(state.sp, state.pc+1);
   state.pc = 0x0008;
 } 
 
 void POP_DE( void )
 {
   // opcode D1
-//   address = state.sp;
-//   READ_BYTE();
-//   state.e = memByte;
-//   
-//   address = state.sp + 1;
-//   READ_BYTE();
-//   state.d = memByte;
-
-  address = state.sp;
-  READ_WORD();
-  state.de = memWord;
-  
+  state.de = read_word(state.sp);
   state.sp += 2;
   
   state.pc++;
@@ -2868,9 +2634,7 @@ void JP_NC_ADDR( void )
     state.pc += 3;
     return;
   }
-  address = state.pc + 1;
-  READ_WORD();
-  state.pc = memWord;
+  state.pc = read_word(state.pc+1);
   branched = 1;
 }
 
@@ -2878,11 +2642,8 @@ void RST_0( void )
 {
   // opcode C7
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_word(state.sp, state.pc+1);
   
-//   printf("RST_0 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0000;
 }
 
@@ -2896,13 +2657,9 @@ void CALL_NC( void )
   else
   {
     state.sp -= 2;
-    address = state.sp;
-    memWord = state.pc + 3;
-    WRITE_WORD();
+    write_word(state.sp, state.pc+3);
     
-    address = state.pc + 1;
-    READ_WORD();
-    state.pc = memWord;
+    state.pc = read_word(state.pc+1);
   }
 }
 
@@ -2910,20 +2667,17 @@ void PUSH_DE( void )
 {
   // opcode D5
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.de;
-  WRITE_WORD();
+  write_word(state.sp, state.de);
   state.pc++;
 }
 
 void SUB_A_BYTE( void )
 {
   // opcode D6
-  address = state.pc + 1;
-  READ_BYTE();
-  int temp = (int)(state.a) - (int)(memByte);
+  uint8_t arg = read_byte(state.pc+1);
+  int temp = (int)(state.a) - (int)(arg);
   int old_a = state.a;
-  state.a -= memByte;
+  state.a -= arg;
   
   // flag Z
   if( state.a == 0 )
@@ -2935,7 +2689,7 @@ void SUB_A_BYTE( void )
   SET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) - (memByte & 0x0F) ) & 0x10 )
+  if( ( (old_a & 0x0F) - (arg & 0x0F) ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -2953,11 +2707,8 @@ void RST_10( void )
 {
   // opcode D7
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_byte(state.sp, state.pc+1);
   
-//   printf("RST_10 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0010;
 }
 
@@ -2973,9 +2724,7 @@ void JP_C_ADDR( void )
   // opcode DA
   if( ISSET_C() )
   {
-    address = state.pc + 1;
-    READ_WORD();
-    state.pc = memWord;
+    state.pc = read_word(state.pc+1);
     branched = 1;
     return;
   }
@@ -2992,13 +2741,9 @@ void CALL_C( void )
   else
   {
     state.sp -= 2;
-    address = state.sp;
-    memWord = state.pc + 3;
-    WRITE_WORD();
+    write_word(state.sp, state.pc+3);
     
-    address = state.pc + 1;
-    READ_WORD();
-    state.pc = memWord;
+    state.pc = read_word(state.pc+1);
   }
 }
 
@@ -3012,9 +2757,8 @@ void SBC_A_BYTE( void )
   else
     c = 0;
   
-  address = state.pc + 1;
-  READ_BYTE();
-  temp = state.a - memByte - c;
+  uint8_t arg = read_byte(state.pc+1);
+  temp = state.a - arg - c;
   int old_a = state.a;
   state.a = temp;
   
@@ -3028,7 +2772,7 @@ void SBC_A_BYTE( void )
   SET_N();
   
   // flag H
-  if( ( (old_a & 0x0F) - (memByte & 0x0F) - c ) & 0x10 )
+  if( ( (old_a & 0x0F) - (arg & 0x0F) - c ) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -3046,11 +2790,8 @@ void RST_18( void )
 {
   // opcode DF
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_word(state.sp, state.pc+1);
   
-//   printf("RST_18 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0018;
 }
 
@@ -3059,11 +2800,8 @@ void LD_FF_BYTE_A( void )
   // opcode E0
   // ld (ff00+memByte),a
   // also seen as: sta memByte
-  address = state.pc + 1;
-  READ_BYTE();
-  address = 0xFF00 + memByte;
-  memByte = state.a;
-  WRITE_BYTE();
+  uint8_t arg = read_byte(state.pc+1);
+  write_byte(0xFF00+arg, state.a);
   state.pc += 2;
   return;
 }
@@ -3071,9 +2809,7 @@ void LD_FF_BYTE_A( void )
 void POP_HL( void )
 {
   // opcode E1
-  address = state.sp;
-  READ_WORD();
-  state.hl = memWord;
+  state.hl = read_word(state.sp);
   
   state.sp += 2;
   
@@ -3083,9 +2819,7 @@ void POP_HL( void )
 void LD_FF_C_A( void )
 {
   // opcode E2
-  memByte = state.a;
-  address = 0xFF00 + state.c;
-  WRITE_BYTE();
+  write_byte(0xFF00+state.c, state.a);
   state.pc++;
   return;
 }
@@ -3094,18 +2828,15 @@ void PUSH_HL( void )
 {
   // opcode E5
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.hl;
-  WRITE_WORD();
+  write_word(state.sp, state.hl);
   state.pc++;
 }
 
 void AND_BYTE( void )
 {
   // opcode E6
-  address = state.pc + 1;
-  READ_BYTE();
-  state.a &= memByte;
+  uint8_t arg = read_byte(state.pc+1);
+  state.a &= arg;
   
   //flag Z
   if( state.a == 0)
@@ -3129,21 +2860,16 @@ void RST_20( void )
 {
   // opcode E7
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_word(state.sp, state.pc+1);
   
-//   printf("RST_20 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0020;
 }
 
 void ADD_SP_OFFSET( void )
 {
   // opcode E8
-  address = state.pc + 1;
-  READ_BYTE();
   int old_sp = state.sp;
-  int offset = (int)((int8_t)memByte);
+  int offset = (int)((int8_t)read_byte(state.pc+1));
   int temp = (int)state.sp + offset;
   state.sp = temp;
   
@@ -3187,27 +2913,20 @@ void ADD_SP_OFFSET( void )
 void JP_HL( void )
 {
   // opcode E9
-//   printf("JP_HL: hl: %04X\n", STATE_HL);
-  state.pc = STATE_HL;
+  state.pc = state.hl;
 }
 
 void LD_WORD_A( void )
 {
   // opcode EA
-  address = state.pc + 1;
-  READ_WORD();
-  address = memWord;
-  memByte = state.a;
-  WRITE_BYTE();
+  write_byte(read_word(state.pc+1), state.a);
   state.pc += 3;
 }
 
 void XOR_BYTE( void )
 {
   // opcode EE
-  address = state.pc + 1;
-  READ_BYTE();
-  state.a ^= memByte;
+  state.a ^= read_byte(state.pc+1);
   // flag Z
   if( state.a == 0 )
     SET_Z();
@@ -3230,11 +2949,8 @@ void RST_28( void )
 {
   // opcode EF
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_word(state.sp, state.pc+1);
   
-//   printf("RST_28 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0028;
 } 
 
@@ -3242,22 +2958,15 @@ void LD_A_FF_BYTE( void )
 {
   // opcode F0
   // ld a,(ff00+memByte)
-  address = state.pc + 1;
-  READ_BYTE();
-  
-  address = 0xFF00 + memByte;
-  READ_BYTE();
-  
-  state.a = memByte;
+  uint16_t address = 0xFF00 + read_byte(state.pc+1);
+  state.a = read_byte(address);
   state.pc += 2;
 }
 
 void POP_AF( void )
 {
   // opcode F1
-  address = state.sp;
-  READ_WORD();
-  state.af = memWord;
+  state.af = read_word(state.sp);
   
   // no flags affected
   
@@ -3269,9 +2978,7 @@ void LD_A_FF_C( void )
 {
   // opcode F2
   // ld a,(ff00+c)
-  address = 0xFF00 + (int)(state.c);
-  READ_BYTE();
-  state.a = memByte;
+  state.a = read_byte(0xFF00+(int)(state.c));
   
   state.pc++;
 }
@@ -3286,20 +2993,16 @@ void DI( void )
 void PUSH_AF( void )
 {
   // opcode F5
-  address = state.sp - 2;
-  memWord = state.af;
-  WRITE_WORD();
-  
   state.sp -= 2;
+  write_word(state.sp, state.af);
+  
   state.pc++;
 }
 
 void OR_BYTE( void )
 {
   // opcode F6
-  address = state.pc + 1;
-  READ_BYTE();
-  state.a |= memByte;
+  state.a |= read_byte(state.pc+1);
   
   // flag Z
   if( state.a == 0 )
@@ -3323,11 +3026,8 @@ void RST_30( void )
 {
   // opcode F7
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
-  
-//   printf("RST_30 address: %x, pc: %x\n", address, state.pc);
+  write_word(state.sp, state.pc+1);
+
   state.pc = 0x0030;
 }
 
@@ -3335,9 +3035,7 @@ void LDHL_SP_OFFSET( void )
 {
   // opcode F8
   // ld hl, sp + SIGNED_OFFSET
-  address = state.pc + 1;
-  READ_BYTE();
-  int offset = (int)((int8_t)memByte);
+  int offset = (int)((int8_t)read_byte(state.pc+1));
   int temp = (int)state.sp + offset;
   state.hl = temp;
   
@@ -3381,7 +3079,7 @@ void LDHL_SP_OFFSET( void )
 void LD_SP_HL( void )
 {
   // opcode F9
-  state.sp = STATE_HL;
+  state.sp = state.hl;
   
   // no flags affected
   
@@ -3391,11 +3089,8 @@ void LD_SP_HL( void )
 void LD_A_WORD( void )
 {
   // opcode FA
-  address = state.pc + 1;
-  READ_WORD();
-  address = memWord;
-  READ_BYTE();
-  state.a = memByte;
+  uint16_t address = read_word(state.pc+1);
+  state.a = read_byte(address);
   state.pc += 3;
 }
 
@@ -3409,9 +3104,8 @@ void EI( void )
 void CP_BYTE( void )
 {
   // opcode FE
-  address = state.pc + 1;
-  READ_BYTE();
-  int temp = (int)state.a - (int)memByte;
+  uint8_t arg = read_byte(state.pc+1);
+  int temp = (int)state.a - (int)arg;
   
   // flag Z
   if( (temp & 0xFF) == 0 )
@@ -3423,7 +3117,7 @@ void CP_BYTE( void )
   SET_N();
   
   // flag H
-  if( ((int)(state.a & 0x0F) - (int)(memByte & 0x0F)) < 0 )
+  if( ((int)(state.a & 0x0F) - (int)(arg & 0x0F)) < 0 )
     SET_H();
   else
     RESET_H();
@@ -3441,11 +3135,8 @@ void RST_38( void )
 {
   // opcode FF
   state.sp -= 2;
-  address = state.sp;
-  memWord = state.pc + 1;
-  WRITE_WORD();
+  write_word(state.sp, state.pc+1);
   
-//   printf("RST_38 address: %x, pc: %x\n", address, state.pc);
   state.pc = 0x0038;
 }
 
@@ -3560,9 +3251,7 @@ void cpu_do_one_instruction()
 //       printf("VBLANK, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
       state.iflag &= ~IMASK_VBLANK;
       state.sp -= 2;
-      address = state.sp;
-      memWord = state.pc;
-      WRITE_WORD();
+      write_word(state.sp, state.pc);
       state.pc = 0x0040;
     }
     else if( pendingInterrupts & IMASK_LCD_STAT )
@@ -3570,9 +3259,7 @@ void cpu_do_one_instruction()
 //       printf("LCD_STAT, iflag: %02X, ie: %02X, stat: %02X\n", state.iflag, state.ie, state.stat);
       state.iflag &= ~IMASK_LCD_STAT;
       state.sp -= 2;
-      address = state.sp;
-      memWord = state.pc;
-      WRITE_WORD();
+      write_word(state.sp, state.pc);
       state.pc = 0x0048;
     }
     else if( pendingInterrupts & IMASK_TIMER )
@@ -3580,9 +3267,7 @@ void cpu_do_one_instruction()
 //       printf("TIMER, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
       state.iflag &= ~IMASK_TIMER;
       state.sp -= 2;
-      address = state.sp;
-      memWord = state.pc;
-      WRITE_WORD();
+      write_word(state.sp, state.pc);
       state.pc = 0x0050;
     }
     else if( pendingInterrupts & IMASK_SERIAL )
@@ -3590,9 +3275,7 @@ void cpu_do_one_instruction()
 //       printf("SERIAL, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
       state.iflag &= ~IMASK_SERIAL;
       state.sp -= 2;
-      address = state.sp;
-      memWord = state.pc;
-      WRITE_WORD();
+      write_word(state.sp, state.pc);
       state.pc = 0x0058;
     }
     else if( pendingInterrupts & IMASK_JOYPAD )
@@ -3600,9 +3283,7 @@ void cpu_do_one_instruction()
 //       printf("JOYPAD, iflag: %02X, ie: %02X\n", state.iflag, state.ie);
       state.iflag &= ~IMASK_JOYPAD;
       state.sp -= 2;
-      address = state.sp;
-      memWord = state.pc;
-      WRITE_WORD();
+      write_word(state.sp, state.pc);
       state.pc = 0x0060;
     }
   }
@@ -3611,19 +3292,13 @@ void cpu_do_one_instruction()
 //   int instr_length = 0;
   
   // Fetch one instruction.
-  address = state.pc;
-  READ_BYTE();
-  state.op = memByte;
-//   printf("%04X %04X %02X\n", address, state.sp, memByte);
-  
-  // Set instruction length (in memBytes).
-//   instr_length = op_lengths[state.op];
+  state.op = read_byte(state.pc);
+  if( state.op == 0xCB )
+    state.cb_op = read_byte(state.pc+1);
   
   // Set instruction time (in cycles).
   if( state.op == 0xCB ) {
-    address = state.pc + 1;
-    READ_BYTE();
-    instr_time = op_cb_times[memByte];
+    instr_time = op_cb_times[state.cb_op];
   }
   else
   {
@@ -3648,9 +3323,7 @@ void cpu_do_one_instruction()
     if( state.halt_glitch == 1 )
     {
       state.halt_glitch = 0;
-      address = state.pc + 1;
-      READ_BYTE();
-      state.op = memByte;
+      state.op = read_byte(state.pc+1);
       ops[state.op]();
     }
     else

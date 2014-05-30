@@ -24,15 +24,10 @@
 #include "assert.h"
 #include <SDL/SDL.h>
 
-#define READ_BYTE() read_byte()
-#define READ_WORD() read_word()
-#define WRITE_BYTE() write_byte()
-#define WRITE_WORD() write_word()
-
-extern void read_byte( void );
-extern void read_word( void );
-extern void write_byte( void );
-extern void write_word( void );
+extern uint8_t  read_byte( uint16_t address );
+extern uint16_t read_word( uint16_t address );
+extern void     write_byte( uint16_t address, uint8_t  data );
+extern void     write_word( uint16_t address, uint16_t data );
 
 extern pixel_t visual_memory[65536];
 
@@ -128,12 +123,8 @@ extern pixel_t visual_memory[65536];
 #define SC_CLOCK_SPEED		0x02	// 0=Normal, 1=Fast (CGB only)
 #define SC_SHIFT_CLOCK		0x01	// 0=External Clock, 1=Internal Clock
 
-extern void (*readmem[0x101])(void);
-extern void (*writemem[0x101])(void);
-
-extern address_t address;
-extern uint8_t memByte;
-extern uint16_t memWord;
+extern uint8_t (*readmem[0x101])(uint16_t address);
+extern void (*writemem[0x101])(uint16_t address, uint8_t data);
 
 extern uint8_t vram_bank_zero[0x2000];
 extern uint8_t vram_bank_one[0x2000];
@@ -144,50 +135,50 @@ extern uint8_t hram[0x7F];
 void mem_init( void );
 
 // nothing
-void read_nothing( void );
-void write_nothing( void );
+uint8_t read_nothing( uint16_t address );
+void write_nothing( uint16_t address, uint8_t data );
 
 // cart bank zero
-void read_cart_bank_zero( void );
-void write_cart_bank_zero( void );
+uint8_t read_cart_bank_zero( uint16_t address );
+void write_cart_bank_zero( uint16_t address );
 
 // cart bank n
-void read_cart_bank_n( void );
-void write_cart_bank_n( void );
+uint8_t read_cart_bank_n( uint16_t address );
+void write_cart_bank_n( uint16_t address, uint8_t data );
 
 // vram
 void select_vram_bank( uint8_t num );
-void read_vram_bank_zero( void );
-void write_vram_bank_zero( void );
-void read_vram_bank_one( void );
-void write_vram_bank_one( void );
+uint8_t read_vram_bank_zero( uint16_t address );
+void write_vram_bank_zero( uint16_t address, uint8_t data );
+uint8_t read_vram_bank_one( uint16_t address );
+void write_vram_bank_one( uint16_t address, uint8_t data );
 
 // ram
-void read_ram( void );
-void write_ram( void );
+uint8_t read_ram( uint16_t address );
+void write_ram( uint16_t address, uint8_t data );
 
 // wram bank zero
-void read_wram_bank_zero( void );
-void write_wram_bank_zero( void );
+uint8_t read_wram_bank_zero( uint16_t address );
+void write_wram_bank_zero( uint16_t address, uint8_t data );
 
 // wram bank n
-void read_wram_bank_n( void );
-void write_wram_bank_n( void );
+uint8_t read_wram_bank_n( uint16_t address );
+void write_wram_bank_n( uint16_t address, uint8_t data );
 
 // echo ram
-void read_echoram( void );
-void write_echoram( void );
+uint8_t read_echoram( uint16_t address );
+void write_echoram( uint16_t address, uint8_t data );
 
 // oam
-void read_oam( void );
-void write_oam( void );
+uint8_t read_oam( uint16_t address );
+void write_oam( uint16_t address, uint8_t data );
 
 // special
-void read_special( void );
-void write_special( void );
+uint8_t read_special( uint16_t address );
+void write_special( uint16_t address, uint8_t data );
 
 // out of bounds
-void read_out_of_bounds( void );
-void write_out_of_bounds( void );
+uint8_t read_out_of_bounds( uint16_t address );
+void write_out_of_bounds( uint16_t address, uint8_t data );
 
 #endif // !_MEMORY_H_

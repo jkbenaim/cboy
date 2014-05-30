@@ -18,21 +18,21 @@
 
 #ifndef _MBC_C_CAM_H_
 #define _MBC_C_CAM_H_
-void mbc_c_cam_install( void );
-extern void mbc_c_cam_read_bank_0( void );
-extern void mbc_c_cam_write_bank_0( void );
-extern void mbc_c_cam_read_bank_n( void );
-extern void mbc_c_cam_write_bank_n( void );
-extern void mbc_c_cam_dummy( void );
-extern void mbc_c_cam_read_extram( void );
-extern void mbc_c_cam_read_extram_bank_0( void );
-extern void mbc_c_cam_write_extram( void );
-extern void mbc_c_cam_read_camera( void );
-extern void mbc_c_cam_write_camera( void );
-extern void mbc_c_cam_read_ff( void );
-void mbc_c_cam_write_ram_enable( void );
-void mbc_c_cam_write_rom_bank_select( void );
-void mbc_c_cam_write_ram_bank_select( void );
-void mbc_c_cam_cleanup( void );
+void mbc_c_cam_install();
+uint8_t mbc_c_cam_read_bank_0( uint16_t address );
+uint8_t mbc_c_cam_read_bank_n( uint16_t address );
+uint8_t mbc_c_cam_read_extram( uint16_t address );
+uint8_t mbc_c_cam_read_extram_bank_0( uint16_t address );
+uint8_t mbc_c_cam_read_camera( uint16_t address );
+uint8_t mbc_c_cam_read_ff( uint16_t address );
+void mbc_c_cam_write_bank_0( uint16_t address, uint8_t data );
+void mbc_c_cam_write_bank_n( uint16_t address, uint8_t data );
+void mbc_c_cam_write_dummy( uint16_t address, uint8_t data );
+void mbc_c_cam_write_extram( uint16_t address, uint8_t data );
+void mbc_c_cam_write_camera( uint16_t address, uint8_t data );
+void mbc_c_cam_write_ram_enable( uint16_t address, uint8_t data );
+void mbc_c_cam_write_rom_bank_select( uint16_t address, uint8_t data );
+void mbc_c_cam_write_ram_bank_select( uint16_t address, uint8_t data );
+void mbc_c_cam_cleanup();
 
 #endif // _MBC_C_CAM_H_

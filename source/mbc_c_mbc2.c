@@ -54,16 +54,16 @@ void mbc_c_mbc2_install()
   }
   // write 2000-3FFF: rom bank select
   for( i=0x20; i<=0x3F; i+=2 ) {
-    writemem[i] = mbc_c_mbc2_dummy;
+    writemem[i] = mbc_c_mbc2_write_dummy;
     writemem[i+1] = mbc_c_mbc2_write_rom_bank_select;
   }
   // write 4000-5FFF: nothing
   for( i=0x40; i<=0x5F; ++i ) {
-    writemem[i] = mbc_c_mbc2_dummy;
+    writemem[i] = mbc_c_mbc2_write_dummy;
   }
   // write 6000-7FFF: nothing
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_c_mbc2_dummy;
+    writemem[i] = mbc_c_mbc2_write_dummy;
   }
   
   // read A000-A1FF: read extram
@@ -79,7 +79,7 @@ void mbc_c_mbc2_install()
     writemem[i] = mbc_c_mbc2_write_extram;
   }
   for( i=0xA2; i<=0xBF; ++i ) {
-    writemem[i] = mbc_c_mbc2_dummy;
+    writemem[i] = mbc_c_mbc2_write_dummy;
   }
   
   // set up cart params
@@ -97,7 +97,7 @@ void mbc_c_mbc2_install()
   cart.cleanup = mbc_c_mbc2_cleanup;
 }
 
-void mbc_c_mbc2_read_bank_0()
+uint8_t mbc_c_mbc2_read_bank_0( uint16_t address )
 {
   if( !cart.cartromValid[address] )
   {
@@ -111,11 +111,10 @@ void mbc_c_mbc2_read_bank_0()
       cart.cartromValid[startAddress+i] = 1;
   }
   // read from cache
-  memByte = cart.cartrom[address];
-//   printf("Read: %04x:%02x\n", address, memByte);
+  return cart.cartrom[address];
 }
 
-void mbc_c_mbc2_read_bank_n() {
+uint8_t mbc_c_mbc2_read_bank_n( uint16_t address ) {
   if( !cart.cartromValid_bank_n[address-0x4000] )
   {
     // set rom bank
@@ -134,19 +133,19 @@ void mbc_c_mbc2_read_bank_n() {
       cart.cartromValid_bank_n[startAddress+i-0x4000] = 1;
   }
   // read from cache
-  memByte = cart.cartrom_bank_n[address-0x4000];
+  return cart.cartrom_bank_n[address-0x4000];
 }
 
-void mbc_c_mbc2_dummy() {
+void mbc_c_mbc2_write_dummy( uint16_t address, uint8_t data ) {
   // do nothing
 }
 
-void mbc_c_mbc2_read_ff() {
-  memByte = 0xFF;
+uint8_t mbc_c_mbc2_read_ff( uint16_t address ) {
+  return 0xFF;
 }
 
 // write 0000-1FFFF: ram enable
-void mbc_c_mbc2_write_ram_enable() {
+void mbc_c_mbc2_write_ram_enable( uint16_t address, uint8_t data ) {
   // MBC2 is weird.
   // RAM is enabled when the least significant bit of the upper address byte is 0.
   // For example, writing any value to address 0x0000 would enable RAM.
@@ -155,13 +154,13 @@ void mbc_c_mbc2_write_ram_enable() {
 }
 
 // write 2000-3FFF: rom bank select
-void mbc_c_mbc2_write_rom_bank_select() {
+void mbc_c_mbc2_write_rom_bank_select( uint16_t address, uint8_t data ) {
   size_t offset;
-  memByte &= 0x0F;	// only 16 banks are supported
-  if(memByte == 0)
-    memByte = 1;
-  cart.cart_bank_num = memByte;
-  offset = (size_t)memByte*16384 % cart.cartromsize;
+  data &= 0x0F;	// only 16 banks are supported
+  if(data == 0)
+    data = 1;
+  cart.cart_bank_num = data;
+  offset = (size_t)data*16384 % cart.cartromsize;
   
   assert("MBC2 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
@@ -170,11 +169,10 @@ void mbc_c_mbc2_write_rom_bank_select() {
 
 
 // read A000-BFFF extram
-void mbc_c_mbc2_read_extram() {
+uint8_t mbc_c_mbc2_read_extram( uint16_t address ) {
   if( (cart.extramEnabled&0x01) == 0x01 )
   {
-    memByte = 0xff;
-    return;
+    return 0xff;
   }
   if( !cart.extramValidRead[address-0xA000] )
   {
@@ -194,15 +192,15 @@ void mbc_c_mbc2_read_extram() {
       cart.extramValidRead[startAddress+i-0xA000] = 1;
   }
   // read from cache
-  memByte = cart.extram[address - 0xA000];
+  return cart.extram[address - 0xA000];
 }
 
 // write A000-BFFF extram
-void mbc_c_mbc2_write_extram() {
+void mbc_c_mbc2_write_extram( uint16_t address, uint8_t data ) {
   // MBC2 has 512x4bits of RAM built into the MBC2 itself (no external RAM).
   // Only the lower 4 bits of the byte are stored. Upper 4 bits read as 0.
-  memByte &= 0x0f;
-  cart.extram[address&0x01ff] = memByte;
+  data &= 0x0f;
+  cart.extram[address&0x01ff] = data;
   cart.extramValidRead[address&0x01ff] = 1;
   cart.extramValidWrite[address&0x01ff] = 1;
 }

@@ -55,14 +55,10 @@ void cart_init_chardev( char* bootromName, char* cartromName )
   cart_c_reset_mbc();
   
   // set the MBC type for later use
-  address = 0x147;
-  READ_BYTE();
-  cart.mbc_type = memByte;
+  cart.mbc_type = read_byte(0x147);
   
   // determine the emulated extram size
-  address = 0x149;
-  READ_BYTE();
-  switch( memByte )
+  switch( read_byte(0x149) )
   {
     case 0:
       cart.extram_size = 0;

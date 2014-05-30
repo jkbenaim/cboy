@@ -54,7 +54,7 @@ void mbc_mbc5_install()
   }
   // write 6000-7FFF: nothing
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_mbc5_dummy;
+    writemem[i] = mbc_mbc5_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -72,7 +72,7 @@ void mbc_mbc5_install()
     writemem[i] = mbc_mbc5_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_mbc5_dummy;
+    writemem[i] = mbc_mbc5_write_dummy;
   }
   
   // set up cart params
@@ -84,33 +84,36 @@ void mbc_mbc5_install()
   cart.extram_bank_num = 0;
 }
 
-void mbc_mbc5_read_ff()
+uint8_t mbc_mbc5_read_ff( uint16_t address )
 {
-  memByte = 0xff;
+  return 0xff;
 }
 
-void mbc_mbc5_dummy()
+void mbc_mbc5_write_dummy( uint16_t address, uint8_t data )
 {
 }
 
-void mbc_mbc5_read_bank_0()
+uint8_t mbc_mbc5_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_mbc5_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_mbc5_read_bank_n( uint16_t address )
+{
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
 // write 0x0A to enable extram, anything else to disable extram
-void mbc_mbc5_write_ram_enable() {
+void mbc_mbc5_write_ram_enable( uint16_t address, uint8_t data )
+{
   // TODO
 }
 
 // write 2000-2FFF
-void mbc_mbc5_write_rom_bank_select_low() {
-  cart.reg_rom_bank_low = memByte;
+void mbc_mbc5_write_rom_bank_select_low( uint16_t address, uint8_t data )
+{
+  cart.reg_rom_bank_low = data;
   int bank =  cart.reg_rom_bank_low + (int)(cart.reg_rom_bank_high)*256;
   
   bank = bank % cart.cartrom_num_banks;
@@ -126,8 +129,9 @@ void mbc_mbc5_write_rom_bank_select_low() {
 }
 
 // write 3000-3FFF
-void mbc_mbc5_write_rom_bank_select_high() {
-  cart.reg_rom_bank_high = memByte & 0x01;
+void mbc_mbc5_write_rom_bank_select_high( uint16_t address, uint8_t data )
+{
+  cart.reg_rom_bank_high = data & 0x01;
   int bank =  cart.reg_rom_bank_low + (int)(cart.reg_rom_bank_high)*256;
   
   bank = bank % cart.cartrom_num_banks;
@@ -143,10 +147,11 @@ void mbc_mbc5_write_rom_bank_select_high() {
 }
 
 // write 4000-5FFF
-void mbc_mbc5_write_ram_bank_select() {
+void mbc_mbc5_write_ram_bank_select( uint16_t address, uint8_t data )
+{
   if( cart.extram_size == 32768 )
   {
-    int bank = memByte & 0x03;
+    int bank = data & 0x03;
     cart.extram_bank = cart.extram + bank*8192;
   }
   
@@ -156,8 +161,8 @@ void mbc_mbc5_write_ram_bank_select() {
     case 0x1C:  // MBC5+RUMBLE
     case 0x1D:  // MBC5+RUMBLE+RAM
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
-      if( memByte & 0x08 )
-        printf( "rumble ON, power: %d\n", memByte >> 4 );
+      if( data & 0x08 )
+        printf( "rumble ON, power: %d\n", data >> 4 );
       break;
     default:
       break;
@@ -165,14 +170,17 @@ void mbc_mbc5_write_ram_bank_select() {
 }
 
 // read A000-BFFF
-void mbc_mbc5_read_extram() {
-  memByte = cart.extram_bank[address&0x1fff];
+uint8_t mbc_mbc5_read_extram( uint16_t address )
+{
+  return cart.extram_bank[address&0x1fff];
 }
 
 // write A000-BFFF
-void mbc_mbc5_write_extram() {
-  cart.extram_bank[address&0x1fff] = memByte;
+void mbc_mbc5_write_extram( uint16_t address, uint8_t data )
+{
+  cart.extram_bank[address&0x1fff] = data;
 }
 
-void mbc_mbc5_cleanup() {
+void mbc_mbc5_cleanup()
+{
 }

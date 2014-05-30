@@ -50,12 +50,12 @@ void mbc_c_boot_install()
   cart.cartrom_bank_n = cart.cartrom + 0x4000;
 }
 
-void mbc_c_boot_read_bank_0()
+uint8_t mbc_c_boot_read_bank_0( uint16_t address )
 {
   if((address < 0x100) ||
     ( (address >= 0x200) && (address < 0x900) ) )
   {
-    memByte = cart.bootrom[address];
+    return cart.bootrom[address];
   }
   else
   {
@@ -80,21 +80,23 @@ void mbc_c_boot_read_bank_0()
       fgetc(cart.fd);
     }
   // read from cache
-  memByte = cart.cartrom[address];
+  return cart.cartrom[address];
 //   printf("Read: %04x:%02x\n", address, memByte);
   }
 }
 
-void mbc_c_boot_write_bank_0() {
+void mbc_c_boot_write_bank_0( uint16_t address, uint8_t data )
+{
   // do nothing
 }
 
 
 // cart bank n
-void mbc_c_boot_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_c_boot_read_bank_n( uint16_t address ) {
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
-void mbc_c_boot_write_bank_n() {
+void mbc_c_boot_write_bank_n( uint16_t address, uint8_t data )
+{
   // do nothing
 }

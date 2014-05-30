@@ -69,7 +69,7 @@ void mbc_mbc3_install()
     writemem[i] = mbc_mbc3_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_mbc3_dummy;
+    writemem[i] = mbc_mbc3_write_dummy;
   }
   
   // set up cart params
@@ -78,38 +78,40 @@ void mbc_mbc3_install()
   cart.extram_bank = cart.extram;
 }
 
-void mbc_mbc3_read_ff()
+uint8_t mbc_mbc3_read_ff( uint16_t address )
 {
-  memByte = 0xff;
+  return 0xff;
 }
 
-void mbc_mbc3_dummy()
+void mbc_mbc3_write_dummy( uint16_t address, uint8_t data )
 {
 }
 
-void mbc_mbc3_read_bank_0()
+uint8_t mbc_mbc3_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_mbc3_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_mbc3_read_bank_n( uint16_t address )
+{
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
-void mbc_mbc3_write_ram_enable() {
+void mbc_mbc3_write_ram_enable( uint16_t address, uint8_t data )
+{
+  // TODO
 }
 
 // write 2000-3FFF
-void mbc_mbc3_write_rom_bank_select() {
-//   printf("%02X ", memByte );
+void mbc_mbc3_write_rom_bank_select( uint16_t address, uint8_t data ) {
   size_t offset;
-  memByte &= 0x7F;
-  cart.cart_bank_num = memByte;
-  if( memByte == 0 )
+  data &= 0x7F;
+  cart.cart_bank_num = data;
+  if( data == 0 )
     offset = (size_t)16384;
   else
-    offset = (size_t)memByte*16384 % cart.cartromsize;
+    offset = (size_t)data*16384 % cart.cartromsize;
   
 //   printf( "switch cart bank num: %02X\n", cart.cart_bank_num );
   assert("MBC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
@@ -117,17 +119,17 @@ void mbc_mbc3_write_rom_bank_select() {
 }
 
 // write 4000-5FFF
-void mbc_mbc3_write_ram_bank_select() {
+void mbc_mbc3_write_ram_bank_select( uint16_t address, uint8_t data ) {
   int i;
-  switch( memByte )
+  switch( data )
   {
     case 0x00:
     case 0x01:
     case 0x02:
     case 0x03:
-//       printf("Switching to RAM bank %02X \n", memByte );
-      cart.extram_bank_num = memByte;
-      cart.extram_bank = cart.extram + memByte*8192;
+//       printf("Switching to RAM bank %02X \n", data );
+      cart.extram_bank_num = data;
+      cart.extram_bank = cart.extram + data*8192;
       // read A000-BFFF: read extram
       // calculate the last address where extram is installed
       int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
@@ -143,7 +145,7 @@ void mbc_mbc3_write_ram_bank_select() {
         writemem[i] = mbc_mbc3_write_extram;
       }
       for( i=extram_end; i<=0xBF; ++i ) {
-        writemem[i] = mbc_mbc3_dummy;
+        writemem[i] = mbc_mbc3_write_dummy;
       }
       break;
     case 0x08:	// seconds
@@ -151,8 +153,8 @@ void mbc_mbc3_write_ram_bank_select() {
     case 0x0A:	// hours
     case 0x0B:	// day bits 0-7
     case 0x0C:	// day bit 8, carry bit, halt flag
-//       printf("Switching to RTC bank %02X \n", memByte );
-      cart.extram_bank_num = memByte;
+//       printf("Switching to RTC bank %02X \n", data );
+      cart.extram_bank_num = data;
       // read A000-BFFF: read rtc
       for( i=0xA0; i<=0xBF; ++i ) {
 	readmem[i] = mbc_mbc3_read_rtc;
@@ -163,32 +165,32 @@ void mbc_mbc3_write_ram_bank_select() {
       }
       break;
     default:
-      printf("Switching to invalid extram bank %02X \n", memByte );
+      printf("Switching to invalid extram bank %02X \n", data );
       break;
   }
 }
 
 // write 6000-7FFF
-void mbc_mbc3_write_clock_data_latch() {
+void mbc_mbc3_write_clock_data_latch( uint16_t address, uint8_t data ) {
 }
 
 // read A000-BFFF extram
-void mbc_mbc3_read_extram() {
-  memByte = cart.extram_bank[address&0x1fff];
+uint8_t mbc_mbc3_read_extram( uint16_t address ) {
+  return cart.extram_bank[address&0x1fff];
 }
 
 // write A000-BFFF extram
-void mbc_mbc3_write_extram() {
-  cart.extram_bank[address&0x1fff] = memByte;
+void mbc_mbc3_write_extram( uint16_t address, uint8_t data ) {
+  cart.extram_bank[address&0x1fff] = data;
 }
 
 // read A000-BFFF rtc
-void mbc_mbc3_read_rtc() {
-  memByte = 0x00;
+uint8_t mbc_mbc3_read_rtc( uint16_t address ) {
+  return 0x00;
 }
 
 // write A000-BFFF rtc
-void mbc_mbc3_write_rtc() {
+void mbc_mbc3_write_rtc( uint16_t address, uint8_t data ) {
 }
 
 void mbc_mbc3_cleanup() {

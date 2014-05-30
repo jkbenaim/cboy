@@ -119,6 +119,7 @@ struct state_s {
   int ie, iflag;
   int halt;		// 0 = not halted, 1 = halted
   uint8_t op;
+  uint8_t cb_op;
   int halt_glitch;
   
   // sound stuff
@@ -167,12 +168,6 @@ struct state_s {
 #endif
   uint8_t hdma5;
 }; // state
-
-// convenience macros
-#define STATE_BC (state.bc)
-#define STATE_DE (state.de)
-#define STATE_HL (state.hl)
-#define STATE_AF (state.af)
 
 extern struct state_s state;
 

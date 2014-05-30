@@ -54,11 +54,11 @@ void mbc_cam_install()
   }
   // write 4000-5FFF: extram bank/mode select
   for( i=0x40; i<=0x5F; ++i ) {
-    writemem[i] = mbc_cam_extram_bank_select;
+    writemem[i] = mbc_cam_write_extram_bank_select;
   }
   // write 6000-7FFF: nothing
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_cam_dummy;
+    writemem[i] = mbc_cam_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -78,35 +78,35 @@ void mbc_cam_install()
   cam_mode = 0;
 }
 
-void mbc_cam_dummy()
+void mbc_cam_write_dummy( uint16_t address, uint8_t data )
 {
 }
 
-void mbc_cam_read_bank_0()
+uint8_t mbc_cam_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_cam_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_cam_read_bank_n( uint16_t address ) {
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
-void mbc_cam_write_ram_enable() {
+void mbc_cam_write_ram_enable( uint16_t address, uint8_t data ) {
   // TODO
 }
 
 // write 2000-3FFF
-void mbc_cam_write_rom_bank_select() {
+void mbc_cam_write_rom_bank_select( uint16_t address, uint8_t data ) {
   size_t cartoffset;
-  int rombank = (memByte==0)?1:memByte;
+  int rombank = (data==0)?1:data;
   cartoffset = (rombank*16384) % cart.cartromsize;
   cart.cartrom_bank_n = cart.cartrom + cartoffset;
 }
 
 // write 4000-5FFF
-void mbc_cam_extram_bank_select() {
-  if( memByte == 0x10 )
+void mbc_cam_write_extram_bank_select( uint16_t address, uint8_t data ) {
+  if( data == 0x10 )
   {
     // CAM mode
     cam_mode = 1;
@@ -116,36 +116,36 @@ void mbc_cam_extram_bank_select() {
     // RAM mode
     // access RAM like normal
     cam_mode = 0;
-    int bank = memByte & 0x0F;
+    int bank = data & 0x0F;
     cart.extram_bank = cart.extram + bank*8192;
   }
   
 }
 
 // write 6000-7FFF
-void mbc_cam_write_mode_select() {
+void mbc_cam_write_mode_select( uint16_t address, uint8_t data ) {
 }
 
 // read A000-BFFF
-void mbc_cam_read_extram() {
+uint8_t mbc_cam_read_extram( uint16_t address ) {
   if( cam_mode == 0 )
   {
     // access RAM like normal
-    memByte = cart.extram_bank[address&0x1fff];
+    return cart.extram_bank[address&0x1fff];
   }
   else
   {
     // access CAM registers
-    memByte = 0; //TODO
+    return 0; //TODO
   }
 }
 
 // write A000-BFFF
-void mbc_cam_write_extram() {
+void mbc_cam_write_extram( uint16_t address, uint8_t data ) {
   if( cam_mode == 0 )
   {
     // access RAM like normal
-    cart.extram_bank[address&0x1fff] = memByte;
+    cart.extram_bank[address&0x1fff] = data;
   }
   else
   {
@@ -154,7 +154,7 @@ void mbc_cam_write_extram() {
     {
       case 0xA000:
         // take a picture?
-        switch( memByte )
+        switch( data )
         {
           case 0x03:
             {
@@ -167,7 +167,7 @@ void mbc_cam_write_extram() {
               // no idea why.
               // i don't act on these.
             } else {
-              printf( "Picture taken! [%d]\n", pics_taken );
+//               printf( "Picture taken! [%d]\n", pics_taken );
 #ifdef __ANDROID__
               mbc_cam_getCameraImage();
 #else

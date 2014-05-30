@@ -18,21 +18,21 @@
 
 #ifndef _MBC_C_MBC1_H_
 #define _MBC_C_MBC1_H_
-void mbc_c_mbc1_install( void );
-extern void mbc_c_mbc1_read_bank_0( void );
-extern void mbc_c_mbc1_write_bank_0( void );
-extern void mbc_c_mbc1_read_bank_n( void );
-extern void mbc_c_mbc1_write_bank_n( void );
-extern void mbc_c_mbc1_dummy( void );
-extern void mbc_c_mbc1_read_extram( void );
-extern void mbc_c_mbc1_write_extram( void );
-extern void mbc_c_mbc1_read_ff( void );
-void mbc_c_mbc1_write_ram_enable( void );
-void mbc_c_mbc1_write_rom_bank_select( void );
-void mbc_c_mbc1_write_ram_bank_select( void );
-void mbc_c_mbc1_write_mode_select( void );
-void mbc_c_mbc1_read_rtc( void );
-void mbc_c_mbc1_write_rtc( void );
-void mbc_c_mbc1_cleanup( void );
+extern void mbc_c_mbc1_install();
+uint8_t mbc_c_mbc1_read_bank_0( uint16_t address );
+uint8_t mbc_c_mbc1_read_bank_n( uint16_t address );
+uint8_t mbc_c_mbc1_read_extram( uint16_t address );
+uint8_t mbc_c_mbc1_read_ff( uint16_t address );
+uint8_t mbc_c_mbc1_read_rtc( uint16_t address );
+void mbc_c_mbc1_write_bank_0( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_bank_n( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_dummy( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_extram( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_ram_enable( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_rom_bank_select( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_ram_bank_select( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_mode_select( uint16_t address, uint8_t data );
+void mbc_c_mbc1_write_rtc( uint16_t address, uint8_t data );
+void mbc_c_mbc1_cleanup();
 
 #endif // _MBC_C_MBC1_H_

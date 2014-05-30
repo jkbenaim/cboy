@@ -46,7 +46,7 @@ void mbc_huc3_install()
   }
   // TODO
   for( i=0x00; i<=0x7F; ++i ) {
-    writemem[i] = mbc_huc3_dummy;
+    writemem[i] = mbc_huc3_write_dummy;
   }
   // write 0000-1FFF: ram enable? or something
   for( i=0x00; i<=0x1F; ++i ) {
@@ -62,7 +62,7 @@ void mbc_huc3_install()
   }
   // write 6000-7FFF: select ROM or RAM mode, like MBC1. but this mapper is always in RAM mode.
   for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_huc3_dummy;
+    writemem[i] = mbc_huc3_write_dummy;
   }
   
   // read A000-BFFF: read extram
@@ -80,7 +80,7 @@ void mbc_huc3_install()
     writemem[i] = mbc_huc3_write_extram;
   }
   for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_huc3_dummy;
+    writemem[i] = mbc_huc3_write_dummy;
   }
   
   // set up cart params
@@ -92,36 +92,36 @@ void mbc_huc3_install()
   cart.extram_bank_num = 0;
 }
 
-void mbc_huc3_read_ff()
+uint8_t mbc_huc3_read_ff( uint16_t address )
 {
-  memByte = 0xff;
+  return 0xff;
 }
 
-void mbc_huc3_dummy()
+void mbc_huc3_write_dummy( uint16_t address, uint8_t data )
 {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
 }
 
-void mbc_huc3_read_bank_0()
+uint8_t mbc_huc3_read_bank_0( uint16_t address )
 {
-  memByte = cart.cartrom_bank_zero[address];
+  return cart.cartrom_bank_zero[address];
 }
 
-void mbc_huc3_read_bank_n() {
-  memByte = cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_huc3_read_bank_n( uint16_t address ) {
+  return cart.cartrom_bank_n[address&0x3fff];
 }
 
 // write 0000-1FFF
-void mbc_huc3_write_ram_enable() {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
+void mbc_huc3_write_ram_enable( uint16_t address, uint8_t data ) {
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
   // TODO
-  cart.huc3_ram_mode = memByte;
+  cart.huc3_ram_mode = data;
 }
 
 // write 2000-2FFF
-void mbc_huc3_write_rom_bank_select_low() {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
-  cart.reg_rom_bank_low = memByte;
+void mbc_huc3_write_rom_bank_select_low( uint16_t address, uint8_t data ) {
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
+  cart.reg_rom_bank_low = data;
   int bank =  cart.reg_rom_bank_low + (int)(cart.reg_rom_bank_high)*256;
   
   bank = bank % cart.cartrom_num_banks;
@@ -137,9 +137,9 @@ void mbc_huc3_write_rom_bank_select_low() {
 }
 
 // write 3000-3FFF
-void mbc_huc3_write_rom_bank_select_high() {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
-  cart.reg_rom_bank_high = memByte & 0x01;
+void mbc_huc3_write_rom_bank_select_high( uint16_t address, uint8_t data ) {
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
+  cart.reg_rom_bank_high = data & 0x01;
   int bank =  cart.reg_rom_bank_low + (int)(cart.reg_rom_bank_high)*256;
   
   bank = bank % cart.cartrom_num_banks;
@@ -155,38 +155,40 @@ void mbc_huc3_write_rom_bank_select_high() {
 }
 
 // write 4000-40FF
-void mbc_huc3_write_ram_bank_select() {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
+void mbc_huc3_write_ram_bank_select( uint16_t address, uint8_t data ) {
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
   if( cart.extram_size == 32768 )
   {
-    int bank = memByte & 0x03;
+    int bank = data & 0x03;
     cart.extram_bank = cart.extram + bank*8192;
   }
 }
 
 // read A000-BFFF
-void mbc_huc3_read_extram() {
+uint8_t mbc_huc3_read_extram( uint16_t address ) {
+  uint8_t data;
   switch( cart.huc3_ram_mode )
   {
     default:
     case 0:
-      memByte = 0xff;
+      data = 0xff;
       break;
     case 0x0A:
-      memByte = cart.extram_bank[address&0x1fff];
+      data = cart.extram_bank[address&0x1fff];
       break;
     case 0x0C:
     case 0x0D:
-      memByte = 0x01;
+      data = 0x01;
       break;
   }
-  printf("read: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
+  printf("read: pc:%04X, %04X:%02X\n", state.pc, address, data);
+  return data;
 }
 
 // write A000-BFFF
-void mbc_huc3_write_extram() {
-  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, memByte);
-  cart.extram_bank[address&0x1fff] = memByte;
+void mbc_huc3_write_extram( uint16_t address, uint8_t data ) {
+  printf("write: pc:%04X, %04X:%02X\n", state.pc, address, data);
+  cart.extram_bank[address&0x1fff] = data;
 }
 
 void mbc_huc3_cleanup() {

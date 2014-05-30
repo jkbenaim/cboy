@@ -19,12 +19,12 @@
 #ifndef _MBC_MBC2_H_
 #define _MBC_MBC2_H_
 extern void mbc_mbc2_install( void );
-void mbc_mbc2_read_ff( void );
-void mbc_mbc2_dummy( void );
-void mbc_mbc2_read_bank_0( void );
-void mbc_mbc2_read_bank_n( void );
-void mbc_mbc2_write_ram_enable();
-void mbc_mbc2_write_rom_bank_select();
-void mbc_mbc2_read_extram();
-void mbc_mbc2_write_extram();
+uint8_t mbc_mbc2_read_ff( uint16_t address );
+uint8_t mbc_mbc2_read_bank_0( uint16_t address );
+uint8_t mbc_mbc2_read_bank_n( uint16_t address );
+uint8_t mbc_mbc2_read_extram( uint16_t address );
+void mbc_mbc2_write_dummy( uint16_t address, uint8_t data );
+void mbc_mbc2_write_ram_enable( uint16_t address, uint8_t data );
+void mbc_mbc2_write_rom_bank_select( uint16_t address, uint8_t data );
+void mbc_mbc2_write_extram( uint16_t address, uint8_t data );
 #endif // _MBC_MBC2_H_

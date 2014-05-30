@@ -19,16 +19,16 @@
 #ifndef _MBC_MBC1_H_
 #define _MBC_MBC1_H_
 extern void mbc_mbc1_install( void );
-void mbc_mbc1_read_ff( void );
-void mbc_mbc1_dummy( void );
-void mbc_mbc1_read_bank_0( void );
-void mbc_mbc1_read_bank_n( void );
-void mbc_mbc1_write_ram_enable( void );
-void mbc_mbc1_write_rom_bank_select( void );
-void mbc_mbc1_write_ram_bank_select( void );
-void mbc_mbc1_write_mode_select( void );
-void mbc_mbc1_read_extram( void );
-void mbc_mbc1_write_extram( void );
-void mbc_mbc1_read_extram_disabled( void );
-void mbc_mbc1_write_extram_disabled( void );
+uint8_t mbc_mbc1_read_ff( uint16_t address );
+uint8_t mbc_mbc1_read_bank_0( uint16_t address );
+uint8_t mbc_mbc1_read_bank_n( uint16_t address );
+uint8_t mbc_mbc1_read_extram( uint16_t address );
+uint8_t mbc_mbc1_read_extram_disabled( uint16_t address );
+void mbc_mbc1_write_dummy( uint16_t address, uint8_t data );
+void mbc_mbc1_write_ram_enable( uint16_t address, uint8_t data );
+void mbc_mbc1_write_rom_bank_select( uint16_t address, uint8_t data );
+void mbc_mbc1_write_ram_bank_select( uint16_t address, uint8_t data );
+void mbc_mbc1_write_mode_select( uint16_t address, uint8_t data );
+void mbc_mbc1_write_extram( uint16_t address, uint8_t data );
+void mbc_mbc1_write_extram_disabled( uint16_t address, uint8_t data );
 #endif // _MBC_MBC1_H_

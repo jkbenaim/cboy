@@ -38,12 +38,8 @@ uint8_t *wram_bank_n;		// D000-DFFF
 uint8_t oam[0xA0];		// FE00-FE9F
 uint8_t hram[0x7F];		// FF80-FFFE
 
-void (*readmem[0x101])(void);
-void (*writemem[0x101])(void);
-
-address_t address;
-uint8_t memByte;
-uint16_t memWord;
+uint8_t (*readmem[0x101])(uint16_t address);
+void (*writemem[0x101])(uint16_t address, uint8_t data);
 
 void mem_init( void ) {
   int i;
@@ -92,13 +88,14 @@ void mem_init( void ) {
 }
 
 // nothing
-void read_nothing () {
+uint8_t read_nothing( uint16_t address ) {
   // TODO
   printf("Unimplemented memory read at address %04X, pc: %04X\n", address, state.pc);
   exit(1);
+  return 0;
 }
 
-void write_nothing() {
+void write_nothing( uint16_t address, uint8_t data ) {
   // TODO
   printf("Unimplemented memory write at address %04X, pc: %04X\n", address, state.pc);
   exit(1);
@@ -120,185 +117,189 @@ void select_vram_bank( uint8_t num ) {
     }
 }
   
-void read_vram_bank_zero() {
-  memByte = vram_bank_zero[address & 0x1FFF];
+uint8_t read_vram_bank_zero( uint16_t address ) {
+  return vram_bank_zero[address & 0x1FFF];
 }
 
-void write_vram_bank_zero() {
-  vram_bank_zero[address & 0x1FFF] = memByte;
+void write_vram_bank_zero( uint16_t address, uint8_t data) {
+  vram_bank_zero[address & 0x1FFF] = data;
 }
 
-void read_vram_bank_one() {
-  memByte = vram_bank_one[address & 0x1FFF];
+uint8_t read_vram_bank_one( uint16_t address ) {
+  return vram_bank_one[address & 0x1FFF];
 }
 
-void write_vram_bank_one() {
-  vram_bank_one[address & 0x1FFF] = memByte;
+void write_vram_bank_one( uint16_t address, uint8_t data ) {
+  vram_bank_one[address & 0x1FFF] = data;
 }
 
 
 
 
 // wram bank zero
-void read_wram_bank_zero() {
-  memByte = wram_bank_zero[address & 0x0FFF];
+uint8_t read_wram_bank_zero( uint16_t address ) {
+  return wram_bank_zero[address & 0x0FFF];
 }
 
-void write_wram_bank_zero() {
-  wram_bank_zero[address & 0x0FFF] = memByte;
+void write_wram_bank_zero( uint16_t address, uint8_t data ) {
+  wram_bank_zero[address & 0x0FFF] = data;
 }
 
 
 // wram bank n
-void read_wram_bank_n() {
-  memByte = wram_bank_n[address & 0x0FFF];
+uint8_t read_wram_bank_n( uint16_t address ) {
+  return wram_bank_n[address & 0x0FFF];
 }
 
-void write_wram_bank_n() {
-  wram_bank_n[address & 0x0FFF] = memByte;
+void write_wram_bank_n( uint16_t address, uint8_t data ) {
+  wram_bank_n[address & 0x0FFF] = data;
 }
 
 
 // echo ram
-void read_echoram() {
-  address -= 0x2000;
-  READ_BYTE();
+uint8_t read_echoram( uint16_t address ) {
+  return read_byte(address - 0x2000);
 }
 
-void write_echoram() {
-  address -= 0x2000;
-  WRITE_BYTE();
+void write_echoram( uint16_t address, uint8_t data ) {
+  write_byte(address - 0x2000, data);
 }
 
 
 // oam
-void read_oam() {
-  if(address > 0xFE9F)
-    return;
-  memByte = oam[address & 0x00FF];
+uint8_t read_oam( uint16_t address ) {
+  address &= 0xFF;
+  uint8_t data;
+  
+  if(address > 0x9F)
+    data = 0;
+  else
+    data = oam[address];
+  
+  return data;
 }
 
-void write_oam() {
-  if(address > 0xFE9F)
+void write_oam( uint16_t address, uint8_t data ) {
+  address &= 0xFF;
+  if(address > 0x9F)
     return;
-  oam[address & 0x00FF] = memByte;
+  oam[address] = data;
 }
 
 // "special" is the stuff at 0xFF00 and up
-void read_special() {
+uint8_t read_special( uint16_t address ) {
   if(address >= 0xFF80 && address <= 0xFFFE)
   {
     // hram
-    memByte = hram[address - 0xFF80];
-    return;
+    return hram[address - 0xFF80];
   }
   
   switch(address) {
     case ADDR_JOYP:
+//       printf("OMG JOYP READ\n");
       switch( state.joyp_select )
       {
 	case INPUT_SELECT_BUTTONS:
-	  memByte = state.joyp_buttons;
+	  return state.joyp_buttons;
 	  break;
 	case INPUT_SELECT_DIRECTIONS:
 	default:
-	  memByte = state.joyp_directions;
+	  return state.joyp_directions;
 	  break;
       }
-//       printf("OMG JOYP READ\n");
       break;
     case ADDR_SB:
-      memByte = state.sb;
 //       printf("SB read: %02X\n", state.sb);
+      return state.sb;
       break;
     case ADDR_SC:
-      memByte = state.sc;
 //       printf("SC read: %02X\n", state.sc);
+      return state.sc;
       break;
     case ADDR_DIV:
-      memByte = state.div;
 //       printf("TIMER: DIV read\n");
+      return state.div;
       break;
     case ADDR_TIMA:
-      memByte = state.tima;
 //       printf("TIMER: TIMA read\n");
+      return state.tima;
       break;
     case ADDR_TMA:
-      memByte = state.tma;
 //       printf("TIMER: TMA read\n");
+      return state.tma;
       break;
     case ADDR_TAC:
-      memByte = state.tac;
 //       printf("TIMER: TAC read\n");
+      return state.tac;
       break;
     case ADDR_IFLAG:
-      memByte = state.iflag;
+      return state.iflag;
       break;
     case ADDR_NR10:
-      memByte = state.nr10 | 0x80;
+      return state.nr10 | 0x80;
       break;
     case ADDR_NR11:
-      memByte = state.nr11 | 0x3F;
+      return state.nr11 | 0x3F;
       break;
     case ADDR_NR12:
-      memByte = state.nr12 | 0x00;
+      return state.nr12 | 0x00;
       break;
     case ADDR_NR13:
-      memByte = state.nr13 | 0xFF;
+      return state.nr13 | 0xFF;
       break;
     case ADDR_NR14:
-      memByte = state.nr14 | 0xBF;
+      return state.nr14 | 0xBF;
       break;
     case ADDR_NR20:
-      memByte = state.nr20 | 0xFF;
+      return state.nr20 | 0xFF;
       break;
     case ADDR_NR21:
-      memByte = state.nr21 | 0x3F;
+      return state.nr21 | 0x3F;
       break;
     case ADDR_NR22:
-      memByte = state.nr22 | 0x00;
+      return state.nr22 | 0x00;
       break;
     case ADDR_NR23:
-      memByte = state.nr23 | 0xBF;
+      return state.nr23 | 0xBF;
       break;
     case ADDR_NR24:
-      memByte = state.nr24 | 0xFF;
+      return state.nr24 | 0xFF;
       break;
     case ADDR_NR30:
-      memByte = state.nr30 | 0x7F;
+      return state.nr30 | 0x7F;
       break;
     case ADDR_NR31:
-      memByte = state.nr31 | 0xFF;
+      return state.nr31 | 0xFF;
       break;
     case ADDR_NR32:
-      memByte = state.nr32 | 0x9F;
+      return state.nr32 | 0x9F;
       break;
     case ADDR_NR33:
-      memByte = state.nr33 | 0xFF;
+      return state.nr33 | 0xFF;
       break;
     case ADDR_NR34:
-      memByte = state.nr34 | 0xBF;
+      return state.nr34 | 0xBF;
       break;
     case ADDR_NR41:
-      memByte = state.nr41 | 0xFF;
+      return state.nr41 | 0xFF;
       break;
     case ADDR_NR42:
-      memByte = state.nr42 | 0x00;
+      return state.nr42 | 0x00;
       break;
     case ADDR_NR43:
-      memByte = state.nr43 | 0x00;
+      return state.nr43 | 0x00;
       break;
     case ADDR_NR44:
-      memByte = state.nr44 | 0xBF;
+      return state.nr44 | 0xBF;
       break;
     case ADDR_NR50:
-      memByte = state.nr50 | 0x00;
+      return state.nr50 | 0x00;
       break;
     case ADDR_NR51:
-      memByte = state.nr51 | 0x00;
+      return state.nr51 | 0x00;
       break;
     case ADDR_NR52:
-      memByte = state.nr52 | 0x70;
+      return state.nr52 | 0x70;
       break;
     case ADDR_WAVERAM_0:
     case ADDR_WAVERAM_1:
@@ -316,112 +317,112 @@ void read_special() {
     case ADDR_WAVERAM_D:
     case ADDR_WAVERAM_E:
     case ADDR_WAVERAM_F:
-      memByte = state.waveram[address & 0x000F];
+      return state.waveram[address & 0x000F];
       break;
     case ADDR_LCDC:
-      memByte = state.lcdc;
+      return state.lcdc;
       break;
     case ADDR_STAT:
-      memByte = state.stat;
 //       printf("Read STAT\n");
+      return state.stat;
       break;
     case ADDR_SCY:
-      memByte = state.scy;
+      return state.scy;
       break;
     case ADDR_SCX:
-      memByte = state.scx;
+      return state.scx;
       break;
     case ADDR_LY:
-      memByte = state.ly;
+      return state.ly;
       break;
     case ADDR_BGP:
-      memByte = state.bgp;
+      return state.bgp;
       break;
     case ADDR_OBP0:
-      memByte = state.obp0;
+      return state.obp0;
       break;
     case ADDR_OBP1:
-      memByte = state.obp1;
+      return state.obp1;
       break;
     case ADDR_WX:
-      memByte = state.wx;
+      return state.wx;
       break;
     case ADDR_WY:
-      memByte = state.wy;
+      return state.wy;
       break;
     case ADDR_CAPS:
-      memByte = state.caps;
+      return state.caps;
       break;
     case ADDR_HDMA1:
-      memByte = state.hdma1;
+      return state.hdma1;
       break;
     case ADDR_HDMA2:
-      memByte = state.hdma2;
+      return state.hdma2;
       break;
     case ADDR_HDMA3:
-      memByte = state.hdma3;
+      return state.hdma3;
       break;
     case ADDR_HDMA4:
-      memByte = state.hdma4;
+      return state.hdma4;
       break;
     case ADDR_HDMA5:
-      memByte = state.hdma5;
+      return state.hdma5;
       break;
     case ADDR_VBK:
-      memByte = state.vbk;
+      return state.vbk;
       break;
     case ADDR_RP:
       // TODO
-      memByte = 0;
       printf("Read IR port\n");
+      return 0;
       break;
     case ADDR_BGPI:
-      memByte = state.bgpi;
+      return state.bgpi;
       break;
     case ADDR_BGPD:
-      memByte = state.bgpd[ state.bgpi & 0x3F ];
+      return state.bgpd[ state.bgpi & 0x3F ];
       break;
     case ADDR_OBPI:
-      memByte = state.obpi;
+      return state.obpi;
       break;
     case ADDR_OBPD:
-      memByte = state.obpd[ state.obpi & 0x3F ];
+      return state.obpd[ state.obpi & 0x3F ];
       break;
     case ADDR_SVBK:
 //       printf("Read SVBK\n");
-      memByte = state.svbk;
+      return state.svbk;
       break;
     case ADDR_IE:
-      memByte = state.ie;
+      return state.ie;
       break;
     default:
-      memByte = 0xFF;
+      return 0xFF;
       break;
   }
 }
 
-void write_special() {
+void write_special( uint16_t address, uint8_t data ) {
   if(address >= 0xFF80 && address <= 0xFFFE)
   {
     // hram
-    hram[address - 0xFF80] = memByte;
+    hram[address - 0xFF80] = data;
     return;
   }
   
   switch(address) {
     case ADDR_JOYP:
-      if( (memByte & INPUT_SELECT_BUTTONS) == 0 )
+      if( (data & INPUT_SELECT_BUTTONS) == 0 )
 	state.joyp_select = INPUT_SELECT_BUTTONS;
-      else if( (memByte & INPUT_SELECT_DIRECTIONS) == 0 )
+      else if( (data & INPUT_SELECT_DIRECTIONS) == 0 )
 	state.joyp_select = INPUT_SELECT_DIRECTIONS;
       break;
     case ADDR_SB:
-      state.sb = memByte;
+      state.sb = data;
 //       printf("SB written: %02X\n", state.sb);
       break;
     case ADDR_SC:
-//       printf("SC written: %02X\n", memByte);
-      state.sc = memByte;
+//       printf("SC written: %02X\n", data);
+      state.sc = data;
       state.serialBitsSent = 0;
       state.serialBitsSent = 0;
       if( state.sc & SC_CLOCK_SPEED )
@@ -434,36 +435,36 @@ void write_special() {
       }
       break;
     case ADDR_CBOY:
-      printf("CBOY: %02X\n", memByte);
+      printf("CBOY: %02X\n", data);
       break;
     case ADDR_DIV:
-      state.div = memByte;
+      state.div = data;
 //       printf("TIMER: DIV write\n");
       break;
     case ADDR_TIMA:
-      state.tima = memByte;
+      state.tima = data;
 //       printf("TIMER: TIMA write\n");
       break;
     case ADDR_TMA:
-      state.tma = memByte;
+      state.tma = data;
 //       printf("TIMER: TMA write\n");
       break;
     case ADDR_TAC:
-      state.tac = memByte;
+      state.tac = data;
 //       printf("TIMER: TAC write\n");
       break;
     case ADDR_IFLAG:
-      state.iflag = memByte;
+      state.iflag = data;
       break;
     case ADDR_NR10:
-      state.nr10 = memByte;
-//       printf( "wrote NR10, %02X\n", memByte );
+      state.nr10 = data;
+//       printf( "wrote NR10, %02X\n", data );
       break;
     case ADDR_NR11:
-      state.nr11 = memByte;
-//       int waveDuty = memByte>>6;
-//       int soundLength = memByte&0x3F;
-//       printf( "wrote NR11, %02X (wave pattern duty: ", memByte );
+      state.nr11 = data;
+//       int waveDuty = data>>6;
+//       int soundLength = data&0x3F;
+//       printf( "wrote NR11, %02X (wave pattern duty: ", data );
 //       switch( waveDuty )
 //       {
 // 	case 0:
@@ -488,11 +489,11 @@ void write_special() {
 //       printf( ")\n" );
       break;
     case ADDR_NR12:
-      state.nr12 = memByte;
-//       int iVolume = memByte >> 4;
-//       int direction = memByte & 0x08;
-//       int sweepNum = memByte & 0x07;
-//       printf( "wrote NR12, %02X (iVolume: ", memByte );
+      state.nr12 = data;
+//       int iVolume = data >> 4;
+//       int direction = data & 0x08;
+//       int sweepNum = data & 0x07;
+//       printf( "wrote NR12, %02X (iVolume: ", data );
 //       printf( "%d", iVolume );
 //       printf( ", direction: " );
 //       if( direction )
@@ -504,16 +505,16 @@ void write_special() {
 //       printf( ")\n" );
       break;
     case ADDR_NR13:
-      state.nr13 = memByte;
-//       printf( "wrote NR13, %02X (lower bits of frequency)\n", memByte );
+      state.nr13 = data;
+//       printf( "wrote NR13, %02X (lower bits of frequency)\n", data );
       break;
     case ADDR_NR14:
-      state.nr14 = memByte;
-//       int restart = memByte & 0x80;
-//       int counter = (memByte & 0x40) >> 6;
-//       int frequency = ((int)(memByte & 0x07) << 8) + (int)state.nr13;
+      state.nr14 = data;
+//       int restart = data & 0x80;
+//       int counter = (data & 0x40) >> 6;
+//       int frequency = ((int)(data & 0x07) << 8) + (int)state.nr13;
 //       float frequencyHz = 131072.0/(2048.0 - (float)frequency);
-//       printf( "wrote NR14, %02X (restart: ", memByte );
+//       printf( "wrote NR14, %02X (restart: ", data );
 //       if( restart )
 // 	printf( "yes" );
 //       else
@@ -525,53 +526,53 @@ void write_special() {
 //       printf( "Hz)\n" );
       break;
     case ADDR_NR20:
-      state.nr20 = memByte;
+      state.nr20 = data;
       break;
     case ADDR_NR21:
-      state.nr21 = memByte;
+      state.nr21 = data;
       break;
     case ADDR_NR22:
-      state.nr22 = memByte;
+      state.nr22 = data;
       break;
     case ADDR_NR23:
-      state.nr23 = memByte;
+      state.nr23 = data;
       break;
     case ADDR_NR24:
-      state.nr24 = memByte;
+      state.nr24 = data;
       break;
     case ADDR_NR30:
-      state.nr30 = memByte;
+      state.nr30 = data;
       break;
     case ADDR_NR31:
-      state.nr31 = memByte;
+      state.nr31 = data;
       break;
     case ADDR_NR32:
-      state.nr32 = memByte;
+      state.nr32 = data;
       break;
     case ADDR_NR33:
-      state.nr33 = memByte;
+      state.nr33 = data;
       break;
     case ADDR_NR34:
-      state.nr34 = memByte;
+      state.nr34 = data;
       break;
     case ADDR_NR41:
-      state.nr41 = memByte;
+      state.nr41 = data;
       break;
     case ADDR_NR42:
-      state.nr42 = memByte;
+      state.nr42 = data;
       break;
     case ADDR_NR43:
-      state.nr43 = memByte;
+      state.nr43 = data;
       break;
     case ADDR_NR44:
-      state.nr44 = memByte;
+      state.nr44 = data;
       break;
     case ADDR_NR50:
-      state.nr50 = memByte;
-//       int leftEnabled = memByte & 0x08;
-//       int leftVolume = memByte & 0x07;
-//       int rightEnabled = memByte & 0x80;
-//       int rightVolume = (memByte & 0x70) >> 4;
+      state.nr50 = data;
+//       int leftEnabled = data & 0x08;
+//       int leftVolume = data & 0x07;
+//       int rightEnabled = data & 0x80;
+//       int rightVolume = (data & 0x70) >> 4;
 //       printf( "wrote NR50, (left: " );
 //       if( leftEnabled )
 // 	printf( "%d", leftVolume );
@@ -585,12 +586,12 @@ void write_special() {
 //       printf(")\n" );
       break;
     case ADDR_NR51:
-      state.nr51 = memByte;
-//       printf( "wrote NR51, %02X (panning)\n", memByte );
+      state.nr51 = data;
+//       printf( "wrote NR51, %02X (panning)\n", data );
       break;
     case ADDR_NR52:
-      state.nr52 = memByte;
-//       if( memByte & 0x80 )
+      state.nr52 = data;
+//       if( data & 0x80 )
 // 	printf( "wrote NR52 (sound powered up)\n" );
 //       else
 // 	printf( "wrote NR52 (sound powered down)\n" );
@@ -611,28 +612,28 @@ void write_special() {
     case ADDR_WAVERAM_D:
     case ADDR_WAVERAM_E:
     case ADDR_WAVERAM_F:
-      state.waveram[address & 0x000F] = memByte;
+      state.waveram[address & 0x000F] = data;
       break;
     case ADDR_LCDC:
-      state.lcdc = memByte;
+      state.lcdc = data;
       if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
         state.ly = 0;
       break;
     case ADDR_STAT:
-      state.stat = memByte & 0xF8;
+      state.stat = data & 0xF8;
 //      printf("STAT: %02X\n", state.stat);
       break;
     case ADDR_SCY:
-      state.scy = memByte;
+      state.scy = data;
       break;
     case ADDR_SCX:
-      state.scx = memByte;
+      state.scx = data;
       break;
     case ADDR_LY:
       // This register is read-only.
       break;
     case ADDR_LYC:
-      state.lyc = memByte;
+      state.lyc = data;
       break;
     case ADDR_DMA:
       // OAM DMA
@@ -641,63 +642,61 @@ void write_special() {
       // TODO: restrict access to memory during DMA, etc.
       {
       int i;
-      int sourceAddress = (int)(memByte) << 8;
+      int sourceAddress = (int)(data) << 8;
       for( i=0x00; i<=0x9F; ++i)
       {
-	address = sourceAddress + i;
-	READ_BYTE();
-	address = 0xFE00 + i;
-	WRITE_BYTE();
+        uint8_t temp = read_byte(sourceAddress + i);
+	write_byte(0xFE00 + i, temp);
       }
       }
       break;
     case ADDR_BGP:
-      state.bgp = memByte;
+      state.bgp = data;
       break;
     case ADDR_OBP0:
-      state.obp0 = memByte;
+      state.obp0 = data;
       break;
     case ADDR_OBP1:
-      state.obp1 = memByte;
+      state.obp1 = data;
       break;
     case ADDR_WX:
-      state.wx = memByte;
+      state.wx = data;
       break;
     case ADDR_WY:
-      state.wy = memByte;
+      state.wy = data;
       break;
     case ADDR_CAPS:
-      printf("Wrote CAPS: %02X\n", memByte);
-      state.caps = memByte;
+      printf("Wrote CAPS: %02X\n", data);
+      state.caps = data;
       break;
     case ADDR_KEY1:
-      printf("Wrote KEY1: %02X\n", memByte);
+      printf("Wrote KEY1: %02X\n", data);
       break;
     case ADDR_VBK:
-      state.vbk = memByte;
-      select_vram_bank( memByte );
+      state.vbk = data;
+      select_vram_bank( data );
       break;
     case ADDR_ROM_DISABLE:
-      if((memByte != 0) && state.bootRomEnabled == 1)
+      if((data != 0) && state.bootRomEnabled == 1)
       {
 	state.bootRomEnabled = 0;
 	cart_reset_mbc();
       }
       break;
     case ADDR_HDMA1:
-      state.hdma1 = memByte;
+      state.hdma1 = data;
       break;
     case ADDR_HDMA2:
-      state.hdma2 = memByte;
+      state.hdma2 = data;
       break;
     case ADDR_HDMA3:
-      state.hdma3 = memByte;
+      state.hdma3 = data;
       break;
     case ADDR_HDMA4:
-      state.hdma4 = memByte;
+      state.hdma4 = data;
       break;
     case ADDR_HDMA5:
-      state.hdma5 = memByte;
+      state.hdma5 = data;
 //       if( state.hdma5 == 0xFF ) break;
       if( (state.hdma5 & 0x80) == 0 )
       {
@@ -712,10 +711,8 @@ void write_special() {
 	int i;
 	for(i=0; i<(length+1)*16; ++i)
 	{
-	  address = source + i;
-	  READ_BYTE();
-	  address = dest + i;
-	  WRITE_BYTE();
+          uint8_t temp = read_byte(source+i);
+          write_byte(dest+i, temp);
 	}
 	state.hdma5 = 0xFF;
       }
@@ -732,31 +729,31 @@ void write_special() {
       break;
     case ADDR_RP:
       // TODO
-      printf("Wrote IR port: %02X\n", memByte);
+      printf("Wrote IR port: %02X\n", data);
       break;
     case ADDR_BGPI:
-      state.bgpi = memByte;
+      state.bgpi = data;
       break;
     case ADDR_BGPD:
-      state.bgpd[ state.bgpi & 0x3F ] = memByte;
+      state.bgpd[ state.bgpi & 0x3F ] = data;
       if( state.bgpi & 0x80 )
 	state.bgpi = 0x80 + ((state.bgpi + 1) & 0x3F);
       break;
     case ADDR_OBPI:
-      state.obpi = memByte;
+      state.obpi = data;
       break;
     case ADDR_OBPD:
 //       printf("Wrote OBPD.\n");
-      state.obpd[ state.obpi & 0x3F ] = memByte;
+      state.obpd[ state.obpi & 0x3F ] = data;
       if( state.obpi & 0x80 )
 	state.obpi = 0x80 + ((state.obpi + 1) & 0x3F);
       break;
     case ADDR_SVBK:
       // this selects the WRAM bank in CGB mode
-//       printf("Wrote SVBK: %02X\n", memByte);
+//       printf("Wrote SVBK: %02X\n", data);
       
       // we're in CGB mode
-      state.svbk = memByte & 0x07;
+      state.svbk = data & 0x07;
       
       if(state.svbk == 0)
         wram_bank_n = wram + 0x1000;
@@ -765,22 +762,22 @@ void write_special() {
       
       break;
     case ADDR_IE:
-      state.ie = memByte;
+      state.ie = data;
       break;
     default:
-//       printf("%04X %02X\n",address,memByte);
+//       printf("%04X %02X\n",address,data);
       break;
   }
 }
 
 // out of bounds - results in a crash
-void read_out_of_bounds( void )
+uint8_t read_out_of_bounds( uint16_t address )
 {
   fprintf( stderr, "Out-of-bounds read, address: %04X, pc: %04X\n", address, state.pc );
   exit(1);
 }
 
-void write_out_of_bounds( void )
+void write_out_of_bounds( uint16_t address, uint8_t data )
 {
   fprintf( stderr, "Out-of-bounds write, address: %04X, pc: %04X\n", address, state.pc );
   exit(1);
@@ -791,7 +788,7 @@ int min( int n, int m )
   return n<m?n:m;
 }
 
-void vm_add( int c )
+void vm_add( uint16_t address, int c )
 {
   int ar = (visual_memory[address] & 0x00ff0000) >> 16;
   int ag = (visual_memory[address] & 0x0000ff00) >>  8;
@@ -808,36 +805,26 @@ void vm_add( int c )
   visual_memory[address] = (nr << 16) + (ng << 8) + nb ;
 }
 
-void read_byte( void ) {
-  readmem[address>>8]();
-//   vm_add(0x00002080);
+uint8_t read_byte( uint16_t address ) {
+  return readmem[address>>8](address);
 }
 
-void write_byte( void ) {
-  writemem[address>>8]();
-//   vm_add(0x00802000);
+void write_byte( uint16_t address, uint8_t data ) {
+  writemem[address>>8](address, data);
 }
 
-void read_word( void ) {
+uint16_t read_word( uint16_t address ) {
   int a, b;
-  READ_BYTE();
-  a = memByte;
-  address++;
-  READ_BYTE();
-  b = memByte;
-  address--;
-  memWord = (b<<8) + a;
+  a = read_byte(address);
+  b = read_byte(address+1);
+  return (b<<8) + a;
 }
 
-void write_word( void ) {
+void write_word(  uint16_t address, uint16_t data  ) {
   address %= 0x10000;
   int a, b;
-  a = memWord & 0xff;
-  b = (memWord>>8) & 0xff;
-  memByte = a;
-  WRITE_BYTE();
-  memByte = b;
-  address++;
-  WRITE_BYTE();
-  address--;
+  a = data & 0xff;
+  b = (data>>8) & 0xff;
+  write_byte(address  , a);
+  write_byte(address+1, b);
 }
