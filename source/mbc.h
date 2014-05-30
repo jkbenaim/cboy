@@ -26,7 +26,6 @@
 #include "mbc_mbc3.h"
 #include "mbc_mbc5.h"
 #include "mbc_mbc7.h"
-#include "mbc_sim.h"
 #include "mbc_c_boot.h"
 #include "mbc_c_none.h"
 #include "mbc_c_mbc1.h"
