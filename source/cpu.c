@@ -924,8 +924,8 @@ void INC_SP( void )
 void INC_AT_HL( void )
 {
   // opcode 34
-  int old_memByte = read_byte(state.hl);
-  int new_memByte = old_memByte+1;
+  uint8_t old_memByte = read_byte(state.hl);
+  uint8_t new_memByte = old_memByte+1;
   write_byte(state.hl, new_memByte);
   
   // flag Z
