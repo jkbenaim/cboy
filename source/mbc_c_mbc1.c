@@ -97,6 +97,10 @@ void mbc_c_mbc1_install()
   ram_bank_shadow = -1;
   cart.extram_bank_num = 0;
   
+  cart.extram_bank = cart.extram;
+  cart.extram_bank_validRead = cart.extramValidRead;
+  cart.extram_bank_validWrite = cart.extramValidWrite;
+  
   cart.cleanup = mbc_c_mbc1_cleanup;
 }
 
@@ -261,9 +265,15 @@ uint8_t mbc_c_mbc1_read_extram( uint16_t address ) {
 
 // write A000-BFFF extram
 void mbc_c_mbc1_write_extram( uint16_t address, uint8_t data ) {
-  cart.extram_bank[address&0x1fff] = data;
-  cart.extram_bank_validRead[address&0x1fff] = 1;
-  cart.extram_bank_validWrite[address&0x1fff] = 1;
+  // cache priming
+  read_byte( address );
+  
+  if(cart.extram_size >= (address&0x1fff))
+  {
+    cart.extram_bank[address&0x1fff] = data;
+    cart.extram_bank_validRead[address&0x1fff] = 1;
+    cart.extram_bank_validWrite[address&0x1fff] = 1;
+  }
 }
 
 // read A000-BFFF rtc
