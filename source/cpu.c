@@ -1183,6 +1183,7 @@ void HALT( void )
   if( state.ime == IME_DISABLED )
   {
     state.halt_glitch = 1;
+    state.halt = 1;
   }
   else
   {
