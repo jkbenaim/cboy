@@ -4,8 +4,8 @@ CFLAGS= -O3 -ggdb  -Wall -Werror `sdl-config --cflags` -DUSE_SDL -U_FORTIFY_SOUR
 
 all: cboy
 
-cboy: Makefile cart.o cart_chardev.o cartdesc.o cpu.o input.o main.o mbc_cam.o mbc_huc3.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc_c_boot.o mbc_c_none.o mbc_c_mbc1.o mbc_c_mbc2.o mbc_c_mbc3.o mbc_c_cam.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o
-	$(CC) $(CFLAGS) cart.o cart_chardev.o cartdesc.o cpu.o input.o main.o mbc_cam.o mbc_huc3.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc_c_boot.o mbc_c_none.o mbc_c_mbc1.o mbc_c_mbc2.o mbc_c_mbc3.o mbc_c_cam.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o `sdl-config --libs` -o cboy
+cboy: Makefile cart.o cart_chardev.o cartdesc.o cpu.o input.o main.o mbc_cam.o mbc_huc3.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc_c_boot.o mbc_c_none.o mbc_c_mbc1.o mbc_c_mbc2.o mbc_c_mbc3.o mbc_c_mbc5.o mbc_c_cam.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o
+	$(CC) $(CFLAGS) cart.o cart_chardev.o cartdesc.o cpu.o input.o main.o mbc_cam.o mbc_huc3.o mbc_mbc1.o mbc_mbc2.o mbc_mbc3.o mbc_mbc5.o mbc_mbc7.o mbc_boot.o mbc_c_boot.o mbc_c_none.o mbc_c_mbc1.o mbc_c_mbc2.o mbc_c_mbc3.o mbc_c_mbc5.o mbc_c_cam.o mbc.o mbc_none.o memory.o pqueue.o serial.o video.o `sdl-config --libs` -o cboy
 
 clean:
 	rm -f cboy gbinfo *.o
@@ -81,6 +81,9 @@ mbc_c_mbc2.o: Makefile mbc_c_mbc2.c mbc_c_mbc2.h memory.h cart.h
 
 mbc_c_mbc3.o: Makefile mbc_c_mbc3.c mbc_c_mbc3.h memory.h cart.h
 	$(CC) $(CFLAGS) -c mbc_c_mbc3.c
+
+mbc_c_mbc5.o: Makefile mbc_c_mbc5.c mbc_c_mbc5.h memory.h cart.h
+	$(CC) $(CFLAGS) -c mbc_c_mbc5.c
 
 mbc_c_cam.o: Makefile mbc_c_cam.c mbc_c_cam.h memory.h cart.h
 	$(CC) $(CFLAGS) -c mbc_c_cam.c

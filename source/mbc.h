@@ -31,6 +31,7 @@
 #include "mbc_c_mbc1.h"
 #include "mbc_c_mbc2.h"
 #include "mbc_c_mbc3.h"
+#include "mbc_c_mbc5.h"
 #include "mbc_c_cam.h"
 
 #ifndef _MBC_H_

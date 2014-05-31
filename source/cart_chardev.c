@@ -224,7 +224,7 @@ void cart_c_reset_mbc()
     case 0x1C:  // MBC5+RUMBLE
     case 0x1D:  // MBC5+RUMBLE+RAM
     case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
-//       mbc_c_mbc5_install();
+      mbc_c_mbc5_install();
       break;
     case 0x22:  // MBC7+?
 //       mbc_c_mbc7_install();
