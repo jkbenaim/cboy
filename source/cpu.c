@@ -3384,7 +3384,7 @@ void cpu_do_one_instruction()
     if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x10) )
     {
       state.iflag |= IMASK_LCD_STAT;
-      printf("setting IMASK_LCD_STAT (vblank)\n");
+//       printf("setting IMASK_LCD_STAT (vblank)\n");
     }
   }
   else
@@ -3402,7 +3402,7 @@ void cpu_do_one_instruction()
       if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x20) )
       {
         state.iflag |= IMASK_LCD_STAT;
-        printf("setting IMASK_LCD_STAT (oam)\n");
+//         printf("setting IMASK_LCD_STAT (oam)\n");
       }
     }
     else if(state.line_progress < (CYCLES_MODE_2 + CYCLES_MODE_3))
