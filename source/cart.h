@@ -34,7 +34,7 @@ struct cart_s {
   uint8_t* cartrom_bank_zero;
   uint8_t* cartrom_bank_n;
   uint8_t* cartromValid_bank_n;
-  uint8_t cart_bank_num;
+  uint16_t cart_bank_num;
   size_t cartromsize;
   uint8_t* extram;
   uint8_t* extramValidRead;

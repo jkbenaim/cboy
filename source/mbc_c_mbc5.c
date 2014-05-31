@@ -53,11 +53,11 @@ void mbc_c_mbc5_install()
     writemem[i] = mbc_c_mbc5_write_ram_enable;
   }
   // write 2000-2FFF: rom bank select (low bits)
-  for( i=0x20; i<=0x3F; ++i ) {
+  for( i=0x20; i<=0x2F; ++i ) {
     writemem[i] = mbc_c_mbc5_write_rom_bank_select_low;
   }
   // write 3000-3FFF: rom bank select (high bit)
-  for( i=0x20; i<=0x3F; ++i ) {
+  for( i=0x30; i<=0x3F; ++i ) {
     writemem[i] = mbc_c_mbc5_write_rom_bank_select_high;
   }
   // write 4000-5FFF: ram bank select
@@ -100,6 +100,10 @@ void mbc_c_mbc5_install()
   cart.extram_bank_num = 0;
   cart.reg_rom_bank_low = 1;
   cart.reg_rom_bank_high = 0;
+  
+  cart.extram_bank = cart.extram;
+  cart.extram_bank_validRead = cart.extramValidRead;
+  cart.extram_bank_validWrite = cart.extramValidWrite;
   
   cart.cleanup = mbc_c_mbc5_cleanup;
 }
