@@ -2708,7 +2708,7 @@ void RST_10( void )
 {
   // opcode D7
   state.sp -= 2;
-  write_byte(state.sp, state.pc+1);
+  write_word(state.sp, state.pc+1);
   
   state.pc = 0x0010;
 }
