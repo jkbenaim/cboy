@@ -523,10 +523,13 @@ inline uint32_t rgb555_to_SDL( int color )
 
 inline uint32_t rgb555_to_rgb888( int color )
 {
-  uint32_t out;
+  uint32_t out = 0;
   int r = ((color & 0x001F) >> 0      ) << 3;
+  r += (color & 0x001C)>>2;
   int g = ((color & 0x03E0) >> 5      ) << 3;
+  g += (color & 0x0380) >> 7;
   int b = ((color & 0x7C00) >> 10     ) << 3;
+  b+= (color & 0x7000) >> 12;
   out = (r<<16) + (g<<8) + b;
   return out;
 }
