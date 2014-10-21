@@ -88,6 +88,8 @@ void mbc_c_cam_install()
   ram_bank_shadow = -1;
   cart.extram_bank_num = 0;
   cart.extram_bank = cart.extram;
+  cart.extram_bank_validRead = cart.extramValidRead;
+  cart.extram_bank_validWrite = cart.extramValidWrite;
   
   cart.cleanup = mbc_c_cam_cleanup;
 }

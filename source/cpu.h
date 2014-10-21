@@ -88,7 +88,6 @@ struct state_s {
   int flag_h;
   int flag_n;
   int flag_z;
-  int vid_cycles;
   int vid_mode;
   int old_vid_mode;
   uint8_t joyp;
@@ -104,6 +103,7 @@ struct state_s {
   uint8_t sb, sc;
   uint8_t lcdc;
   uint8_t stat;
+  uint8_t pending_stat_interrupts;
   uint8_t scy;
   uint8_t scx;
   uint8_t ly;
@@ -121,6 +121,7 @@ struct state_s {
   uint8_t op;
   uint8_t cb_op;
   int halt_glitch;
+  int frame_done;
   
   // sound stuff
   uint8_t nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
@@ -219,12 +220,12 @@ extern struct state_s state;
  *    mode 0: 204 cycles  } x 144
  * mode 1: 4560 cycles
  */
-#define CYCLES_MODE_2	80
-#define CYCLES_MODE_3	172
-#define CYCLES_MODE_0	204
-#define CYCLES_MODE_1	4560
+#define CYCLES_MODE_2	80*3
+#define CYCLES_MODE_3	172*3
+#define CYCLES_MODE_0	204*3
+#define CYCLES_MODE_1	4560*3
 #define CYCLES_LINE	(CYCLES_MODE_2 + CYCLES_MODE_3 + CYCLES_MODE_0)
-#define CYCLES_FRAME	70224
+#define CYCLES_FRAME	70224*3
 #define CYCLES_RENDER_LINE	(CYCLES_MODE_2 + CYCLES_MODE_3)
 
 /*

@@ -27,6 +27,8 @@
 #include <stdio.h> // for FILE
 #include <termios.h>    // for tcflush
 
+int chardevDebugPrints = 1;
+
 void cart_init_chardev( char* bootromName, char* cartromName )
 {
   // Init bootrom
@@ -248,58 +250,62 @@ void cart_c_reset_mbc()
 
 void ca_write( FILE *fd, unsigned int address, unsigned int data )
 {
-  tcflush( fileno(cart.fd), TCIOFLUSH );
-  fprintf( stdout, "w%d %d (%04x %02x)\n", address, data, address, data );
+  tcflush( fileno(fd), TCIOFLUSH );
+  if( chardevDebugPrints)
+    fprintf( stdout, "w%d %d (%04x %02x)\n", address, data, address, data );
   fprintf( fd, "w%d %d\n", address, data );
-  fgetc(cart.fd);
-  fgetc(cart.fd);
+  fgetc(fd);
+  fgetc(fd);
 }
 
 unsigned char ca_read( FILE *fd, unsigned int address )
 {
-  tcflush( fileno(cart.fd), TCIOFLUSH );
+  tcflush( fileno(fd), TCIOFLUSH );
   fprintf( fd, "b%d\n", address );
-  unsigned char temp = fgetc(cart.fd);
-  fprintf( stdout, "b%d (%04x) (%02X)\n", address, address, temp );
-  fgetc(cart.fd);
-  fgetc(cart.fd);
+  unsigned char temp = fgetc(fd);
+  if( chardevDebugPrints)
+    fprintf( stdout, "b%d (%04x) (%02X)\n", address, address, temp );
+  fgetc(fd);
+  fgetc(fd);
   return temp;
 }
 
 void ca_read256Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )
 {
-  tcflush( fileno(cart.fd), TCIOFLUSH );
+  tcflush( fileno(fd), TCIOFLUSH );
   unsigned int data;
-  fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
-  fprintf( cart.fd, "c%d\n", startAddress );
+  if( chardevDebugPrints)
+    fprintf( stdout, "c%d (%04x)\n", startAddress, startAddress );
+  fprintf( fd, "c%d\n", startAddress );
   int i;
   for( i=0; i<256; i++ )
   {
     unsigned int temp=0;
-    temp=fgetc(cart.fd);
+    temp=fgetc(fd);
     data = (unsigned char)temp;
 //     printf("a%02x\n", temp);
     destination[i] = data;
   }
-  fgetc(cart.fd);
-  fgetc(cart.fd);
+  fgetc(fd);
+  fgetc(fd);
 }
 
 void ca_read4096Bytes( FILE *fd, const unsigned int startAddress, unsigned char *destination )
 {
-  tcflush( fileno(cart.fd), TCIOFLUSH );
+  tcflush( fileno(fd), TCIOFLUSH );
   unsigned int data;
-  fprintf( stdout, "d%d (%04x)\n", startAddress, startAddress );
-  fprintf( cart.fd, "d%d\n", startAddress );
+  if( chardevDebugPrints)
+    fprintf( stdout, "d%d (%04x)\n", startAddress, startAddress );
+  fprintf( fd, "d%d\n", startAddress );
   int i;
   for( i=0; i<4096; i++ )
   {
     unsigned int temp=0;
-    temp=fgetc(cart.fd);
+    temp=fgetc(fd);
     data = (unsigned char)temp;
 //     printf("a%02x\n", temp);
     destination[i] = data;
   }
-  fgetc(cart.fd);
-  fgetc(cart.fd);
+  fgetc(fd);
+  fgetc(fd);
 }

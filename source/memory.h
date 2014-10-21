@@ -119,6 +119,14 @@ extern pixel_t visual_memory[65536];
 #define LCDC_OBJ_DISPLAY		0x02	// 0=Off, 1=On
 #define LCDC_BG_ENABLE			0x01	// 0=Off, 1=On
 
+#define LCD_STAT_LYC_INT_ENABLED        0x40    // 0=Off, 1=On (R/W)
+#define LCD_STAT_OAM_INT_ENABLED        0x20    // 0=Off, 1=On (R/W)
+#define LCD_STAT_VBLANK_INT_ENABLED     0x10    // 0=Off, 1=On (R/W)
+#define LCD_STAT_HBLANK_INT_ENABLED     0x08    // 0=Off, 1=On (R/W)
+#define LCD_STAT_COINCIDENCE            0x04    // 1=(LYC==LY) (R  )
+#define LCD_STAT_MODE_BITMASK           0x03    // mode number (R  )
+
+
 #define SC_TRANSFER		0x80	// 0=No Transfer, 1=Start
 #define SC_CLOCK_SPEED		0x02	// 0=Normal, 1=Fast (CGB only)
 #define SC_SHIFT_CLOCK		0x01	// 0=External Clock, 1=Internal Clock

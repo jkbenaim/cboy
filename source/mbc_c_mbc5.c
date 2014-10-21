@@ -20,6 +20,7 @@
 #include "cart_chardev.h"
 #include "cart.h"
 #include "mbc_c_mbc5.h"
+#include "cpu.h"
 
 int rom_bank_shadow;
 int ram_bank_shadow;
@@ -110,6 +111,12 @@ void mbc_c_mbc5_install()
 
 uint8_t mbc_c_mbc5_read_bank_0( uint16_t address )
 {
+  if( (address >= 0x120) && (address <= 0x013f) )
+  {
+    // direct passthrough
+    return ca_read( cart.fd, address );
+  }
+  
   if( !cart.cartromValid[address] )
   {
     // fill cache
@@ -157,8 +164,40 @@ uint8_t mbc_c_mbc5_read_ff( uint16_t address ) {
 }
 
 // write 0000-1FFFF: ram enable
+uint8_t gbmembuf[0x140-0x120];
 void mbc_c_mbc5_write_ram_enable( uint16_t address, uint8_t data ) {
-  cart.extramEnabled = data;
+  if( (address >= 0x120) && (address <= 0x013f) )
+  {
+    // direct passthrough
+    ca_write( cart.fd, address, data );
+    printf("wrote %04X:%02X, pc: %04X\n", address, data, state.pc);
+    gbmembuf[address-0x120]=data;
+    if( address == 0x13f )
+      switch( gbmembuf[0] )
+      {
+        case 0x80:
+        case 0x81:
+        case 0x82:
+        case 0x83:
+        case 0x84:
+        case 0xc0:
+        case 0xc1:
+        case 0xc2:
+        case 0xc3:
+        case 0xc4:
+        {
+          int i;
+          for(i=0;i<8*1024*1024;++i)
+            cart.cartromValid[i] = 0;
+          state.pc = 0x0100;
+        }
+        break;
+        default:
+          break;
+      }
+  }
+  else
+    cart.extramEnabled = data;
 }
 
 // write 2000-2FFF: rom bank select (low bits)

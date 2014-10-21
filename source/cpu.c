@@ -3147,15 +3147,18 @@ int cpu_init() {
   state.tima = 0;
   state.tma = 0;
   state.tac = 0;
-  state.vid_cycles = 0;
   state.vid_mode = 0;
   state.lcdc = 0;
+  state.stat = 0x84;
+  state.pending_stat_interrupts = 0;
   state.ly = 0;
   state.bgp = 0;
   state.bootRomEnabled = 1;
   state.caps = 0x80;
   state.svbk = 1;
   state.halt_glitch = 0;
+  state.frame_done = 0;
+  state.iflag = 0xE0;
   
   state.pc = 0x0000;
   state.sp = 0xFFFE;
@@ -3220,12 +3223,12 @@ void cpu_set_flags_register( uint8_t flags )
 
 void cpu_do_one_frame()
 {
-  while( state.vid_cycles <= CYCLES_FRAME )
+  while( state.frame_done != 1 )
   {
     cpu_do_one_instruction();
   }
   
-  state.vid_cycles %= CYCLES_FRAME;
+  state.frame_done = 0;
   
 }
 
@@ -3257,8 +3260,20 @@ void cpu_do_one_instruction()
     }
     else if( pendingInterrupts & IMASK_LCD_STAT )
     {
-//       printf("LCD_STAT, iflag: %02X, ie: %02X, stat: %02X\n", state.iflag, state.ie, state.stat);
-      state.iflag &= ~IMASK_LCD_STAT;
+//       printf("LCD_STAT, iflag: %02X, ie: %02X, stat: %02X, ly: %d, lyc: %d\n", state.iflag, state.ie, state.stat, state.ly, state.lyc);
+      // get rid of the interrupt with highest priority
+      uint8_t i;
+      for(i=7;i>=0;--i)
+        if(state.pending_stat_interrupts & 1<<i)
+        {
+          state.pending_stat_interrupts &= ~(1<<i);
+//           printf("dequeued interrupt 0x%02x, remaining: 0x%02x\n", (1<<i), state.pending_stat_interrupts);
+          break;
+        }
+      if(state.pending_stat_interrupts == 0)
+        state.iflag &= ~IMASK_LCD_STAT;
+      else
+        printf("NOT clearing LCD STAT interrupt\n");
       state.sp -= 2;
       write_word(state.sp, state.pc);
       state.pc = 0x0048;
@@ -3294,6 +3309,7 @@ void cpu_do_one_instruction()
   
   // Fetch one instruction.
   state.op = read_byte(state.pc);
+//   printf("%04x %02x\n", state.pc, state.op);
   if( state.op == 0xCB )
     state.cb_op = read_byte(state.pc+1);
   
@@ -3336,7 +3352,6 @@ void cpu_do_one_instruction()
   }
   
   // Update vid_cycles counter.
-  state.vid_cycles += instr_time * 4;
   state.line_progress += instr_time * 4;
   
   // Update LY.
@@ -3348,28 +3363,35 @@ void cpu_do_one_instruction()
     state.ly++;
   }
   if( state.ly > 153 )
+  {
     state.ly = 0;
+    state.frame_done = 1;
+  }
   if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
     state.ly = 0;
   
   // Check LYC.
   if( (state.ly == state.lyc) && (state.ly != state.last_ly) )
   {
-    state.stat |= 0x04;	// coincidence flag
-    if( state.stat & 0x40 )
+    state.stat |= LCD_STAT_COINCIDENCE;	// coincidence flag
+    if( state.stat & LCD_STAT_LYC_INT_ENABLED )
     {
       state.iflag |= IMASK_LCD_STAT;
+      state.pending_stat_interrupts |= LCD_STAT_COINCIDENCE;
 //       printf("setting IMASK_LCD_STAT (coincidence)\n");
     }
   }
-  else
-    state.stat &= 0xFB;
+  else if (state.ly != state.lyc)
+  {
+    state.stat &= ~LCD_STAT_COINCIDENCE;
+  }
   
   // Couple of quirks when the LCD is off...
   if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
   {
-    state.ly = 0;	// always on line 0
-    state.stat |= 0x04;	// coincidence flag always set
+    state.ly = 0;
+//     state.vid_cycles = 0;
+    state.stat |= LCD_STAT_COINCIDENCE;	// coincidence flag always set
   }
   
   // Update vid_mode.
@@ -3379,12 +3401,14 @@ void cpu_do_one_instruction()
     state.vid_mode = 1;
     
     // Set the appropriate mode in the STAT register.
-    state.stat = (state.stat & 0xFC) | 0x01;
+    state.stat &= 0xFC; // set mode bits to 0
+    state.stat |= 0x01; // set mode to 1
     
     // Fire the interrupt, if enabled.
-    if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x10) )
+    if( (state.vid_mode != state.old_vid_mode) && (state.stat & LCD_STAT_VBLANK_INT_ENABLED) )
     {
       state.iflag |= IMASK_LCD_STAT;
+      state.pending_stat_interrupts |= LCD_STAT_VBLANK_INT_ENABLED;
 //       printf("setting IMASK_LCD_STAT (vblank)\n");
     }
   }
@@ -3400,9 +3424,10 @@ void cpu_do_one_instruction()
       state.stat = (state.stat & 0xFC) | 0x02;
       
       // Fire the interrupt, if enabled.
-      if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x20) )
+      if( (state.vid_mode != state.old_vid_mode) && (state.stat & LCD_STAT_OAM_INT_ENABLED) )
       {
         state.iflag |= IMASK_LCD_STAT;
+        state.pending_stat_interrupts |= LCD_STAT_OAM_INT_ENABLED;
 //         printf("setting IMASK_LCD_STAT (oam)\n");
       }
     }
@@ -3427,9 +3452,10 @@ void cpu_do_one_instruction()
       state.stat = state.stat & 0xFC;
       
       // Fire the hblank interrupt, if enabled.
-      if( (state.vid_mode != state.old_vid_mode) && (state.stat & 0x08) )
+      if( (state.vid_mode != state.old_vid_mode) && (state.stat & LCD_STAT_HBLANK_INT_ENABLED) )
       {
         state.iflag |= IMASK_LCD_STAT;
+        state.pending_stat_interrupts |= LCD_STAT_HBLANK_INT_ENABLED;
 //         printf("setting IMASK_LCD_STAT (hblank)\n");
       }
       
@@ -3478,7 +3504,7 @@ void cpu_do_one_instruction()
   state.masterClock = mc;
   
   // Update DIV.
-  if( (state.masterClock & 0x1F) < (state.lastMasterClock & 0x1F) )
+  if( (state.masterClock & 0x3F) < (state.lastMasterClock & 0x3F) )
     state.div++;
   
   // Update TIMA.
@@ -3581,4 +3607,7 @@ void cpu_do_one_instruction()
   
   // JOYPAD
   // TODO
+  
+//   if( state.ly != state.last_ly )
+//     printf("LY: %02X\n", state.ly);
 }

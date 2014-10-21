@@ -548,6 +548,8 @@ inline uint16_t rgb555_to_rgb565( pixel_t in )
 void vid_frame()
 {
     // TODO
+  if( state.ly != 0 )
+    printf("warning: in vid_frame and ly is %d instead of 0\n", state.ly);
   SDL_LockSurface( screen );
   int x,y;
   uint32_t *surfPixels = screen->pixels;
