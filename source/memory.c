@@ -323,32 +323,32 @@ uint8_t read_special( uint16_t address ) {
       return state.lcdc;
       break;
     case ADDR_STAT:
-    {
-      printf("read STAT: %02X\n", state.stat);
-      int i;
-      for(i=0;i<8;i++)
-        if(state.stat & 1<<i)
-          switch(i)
-          {
-            case 7:
-              printf("\tbit 7\n");
-              break;
-            case 6:
-              printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
-              break;
-            case 5:
-              printf("\tMode 2 OAM interrupt\n");
-              break;
-            case 4:
-              printf("\tMode 1 V-Blank Interrupt\n");
-              break;
-            case 3:
-              printf("\tMode 0 V-Blank Interrupt\n");
-              break;
-            default:
-              break;
-          }
-    }
+//     {
+//       printf("read STAT: %02X\n", state.stat);
+//       int i;
+//       for(i=0;i<8;i++)
+//         if(state.stat & 1<<i)
+//           switch(i)
+//           {
+//             case 7:
+//               printf("\tbit 7\n");
+//               break;
+//             case 6:
+//               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
+//               break;
+//             case 5:
+//               printf("\tMode 2 OAM interrupt\n");
+//               break;
+//             case 4:
+//               printf("\tMode 1 V-Blank Interrupt\n");
+//               break;
+//             case 3:
+//               printf("\tMode 0 V-Blank Interrupt\n");
+//               break;
+//             default:
+//               break;
+//           }
+//     }
       return state.stat;
       break;
     case ADDR_SCY:
