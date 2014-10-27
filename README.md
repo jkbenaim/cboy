@@ -12,10 +12,14 @@ cboy bootrom.bin game.gb
 
 ## Install
 
-You'll need SDL.
-
-Then, simply:
+You'll need a compiler and SDL. On Debian, you can install all dependencies with
 ```console
+sudo apt-get install build-essential libsdl-dev
+```
+
+Then, to build cboy:
+```console
+cd source
 make
 ```
 
