@@ -116,21 +116,32 @@ void select_vram_bank( uint8_t num ) {
       writemem[i]  = write_vram_bank_one;
     }
 }
-  
+
+extern int pause;
 uint8_t read_vram_bank_zero( uint16_t address ) {
-  return vram_bank_zero[address & 0x1FFF];
+//   if( state.vid_mode == 3 )
+//   {
+//     return 0xff;
+//   }
+//   else
+    return vram_bank_zero[address & 0x1FFF];
 }
 
 void write_vram_bank_zero( uint16_t address, uint8_t data) {
-  vram_bank_zero[address & 0x1FFF] = data;
+//   if( state.vid_mode != 3 )
+    vram_bank_zero[address & 0x1FFF] = data;
 }
 
 uint8_t read_vram_bank_one( uint16_t address ) {
-  return vram_bank_one[address & 0x1FFF];
+//   if( state.vid_mode == 3 )
+//     return 0xff;
+//   else
+    return vram_bank_one[address & 0x1FFF];
 }
 
 void write_vram_bank_one( uint16_t address, uint8_t data ) {
-  vram_bank_one[address & 0x1FFF] = data;
+//   if( state.vid_mode != 3 )
+    vram_bank_one[address & 0x1FFF] = data;
 }
 
 
@@ -374,6 +385,9 @@ uint8_t read_special( uint16_t address ) {
       break;
     case ADDR_WY:
       return state.wy;
+      break;
+    case ADDR_KEY1:
+      return state.key1 | 0x7E;
       break;
     case ADDR_CAPS:
       return state.caps;
@@ -649,30 +663,30 @@ void write_special( uint16_t address, uint8_t data ) {
       uint8_t readOnlyBits = state.stat & 0x87;
       uint8_t writableBits = data & 0x78;
       state.stat = writableBits | readOnlyBits | 0x80;
-      printf("STAT: %02X\n", state.stat);
-      int i;
-      for(i=0;i<8;i++)
-        if(state.stat & 1<<i)
-          switch(i)
-          {
-            case 7:
-              printf("\tbit 7\n");
-              break;
-            case 6:
-              printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
-              break;
-            case 5:
-              printf("\tMode 2 OAM interrupt\n");
-              break;
-            case 4:
-              printf("\tMode 1 V-Blank Interrupt\n");
-              break;
-            case 3:
-              printf("\tMode 0 V-Blank Interrupt\n");
-              break;
-            default:
-              break;
-          }
+//       printf("STAT: %02X\n", state.stat);
+//       int i;
+//       for(i=0;i<8;i++)
+//         if(state.stat & 1<<i)
+//           switch(i)
+//           {
+//             case 7:
+//               printf("\tbit 7\n");
+//               break;
+//             case 6:
+//               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
+//               break;
+//             case 5:
+//               printf("\tMode 2 OAM interrupt\n");
+//               break;
+//             case 4:
+//               printf("\tMode 1 V-Blank Interrupt\n");
+//               break;
+//             case 3:
+//               printf("\tMode 0 V-Blank Interrupt\n");
+//               break;
+//             default:
+//               break;
+//           }
     }
       break;
     case ADDR_SCY:
@@ -723,6 +737,7 @@ void write_special( uint16_t address, uint8_t data ) {
       break;
     case ADDR_KEY1:
       printf("Wrote KEY1: %02X\n", data);
+      state.key1 = (state.key1&0xFE) | (data&0x01);
       break;
     case ADDR_VBK:
       state.vbk = data;
@@ -752,8 +767,6 @@ void write_special( uint16_t address, uint8_t data ) {
 //       if( state.hdma5 == 0xFF ) break;
       if( (state.hdma5 & 0x80) == 0 )
       {
-        // TODO: dma is supposed to take time, but the current
-        //       implementation completes instantly
 	// general-purpose DMA
 	int source = state.hdma_source & 0xFFF0;
 	int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
@@ -767,6 +780,7 @@ void write_special( uint16_t address, uint8_t data ) {
           write_byte(dest+i, temp);
 	}
 	state.hdma5 = 0xFF;
+        state.instr_time += (length+1)*2;
       }
       else
       {

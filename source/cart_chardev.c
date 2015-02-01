@@ -25,7 +25,14 @@
 #include "memory.h"
 #include "cartdesc.h"
 #include <stdio.h> // for FILE
+
+// #ifndef __USE_MISC
+// #define __USE_MISC
 #include <termios.h>    // for tcflush
+// #undef __USE_MISC
+// #endif
+#include <fcntl.h>
+#include <sys/stat.h>
 
 int chardevDebugPrints = 1;
 
@@ -36,12 +43,12 @@ void cart_init_chardev( char* bootromName, char* cartromName )
   
   // Init cartrom
   // Allocate memory for the cartrom.
-  if( (cart.cartrom = (uint8_t *)malloc(8*1024*1024)) == NULL )
+  if( (cart.cartrom = (uint8_t *)calloc(1024, 8*1024)) == NULL )
   {
     fprintf( stderr, "Cart rom malloc failed.\n" );
     exit(1);
   }
-  if( (cart.cartromValid = (uint8_t *)malloc(8*1024*1024)) == NULL )
+  if( (cart.cartromValid = (uint8_t *)calloc(1024, 8*1024)) == NULL )
   {
     fprintf( stderr, "Cart rom malloc failed.\n" );
     exit(1);
@@ -163,6 +170,8 @@ void cart_c_cleanup()
 
 void cart_chardev_bringup_device( char *cartromName )
 {
+  struct termios tty;
+  
   // Open the character device.
   if( !(cart.fd = fopen( cartromName, "r+" )) )
   {
@@ -170,7 +179,31 @@ void cart_chardev_bringup_device( char *cartromName )
     exit(1);
   }
   
-  tcflush( fileno(cart.fd), TCIOFLUSH );
+  int fn = fileno(cart.fd);
+  tcflush( fn, TCIOFLUSH );
+  
+  if( tcgetattr( fn, &tty ) != 0 )
+  {
+    fprintf( stderr, "Error getting character device attributes.\n" );
+    exit(1);
+  }
+  
+  cfsetispeed(&tty, 115600);
+  cfsetospeed(&tty, 115600);
+  
+  tty.c_cflag &= ~(PARENB | PARODD | CMSPAR | CSTOPB | CRTSCTS | CSIZE);
+  tty.c_cflag |= CS8 | CLOCAL | CREAD;
+  tty.c_iflag &= ~(IGNBRK | IXON | IXOFF | IXANY | ICRNL | INLCR);
+  tty.c_lflag = 0;
+  tty.c_oflag = 0;
+  tty.c_cc[VMIN] = 0;
+  tty.c_cc[VTIME] = 10;
+  
+  if( tcsetattr( fn, TCSANOW, &tty ) != 0 )
+  {
+    fprintf( stderr, "Error setting character device attributes.\n" );
+    exit(1);
+  }
   
   // Reset the cart.
   fprintf( stdout, "R\n" );
@@ -295,8 +328,8 @@ void ca_read4096Bytes( FILE *fd, const unsigned int startAddress, unsigned char 
   tcflush( fileno(fd), TCIOFLUSH );
   unsigned int data;
   if( chardevDebugPrints)
-    fprintf( stdout, "d%d (%04x)\n", startAddress, startAddress );
-  fprintf( fd, "d%d\n", startAddress );
+    fprintf( stdout, "D%%%02X%%%02X\n", startAddress&0xff, (startAddress&0xff00)>>8 );
+  fprintf( fd, "D%c%c\n", startAddress&0xff, (startAddress&0xff00)>>8 );
   int i;
   for( i=0; i<4096; i++ )
   {

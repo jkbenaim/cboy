@@ -94,8 +94,8 @@ struct state_s {
   uint8_t joyp_buttons;
   uint8_t joyp_directions;
   uint8_t joyp_select;
-  int masterClock; // incremented at 1,048,576 Hz
-  int lastMasterClock; 
+  uint64_t masterClock; // incremented at 1,048,576 Hz
+  uint64_t lastMasterClock; 
   uint8_t div, tima, tma, tac;	// timers
   int serialBitsSent;	// bits sent over link
   int serialClocksUntilNextSend;
@@ -122,6 +122,9 @@ struct state_s {
   uint8_t cb_op;
   int halt_glitch;
   int frame_done;
+  int instr_time;
+  uint8_t key1;
+  int cpu_speed;
   
   // sound stuff
   uint8_t nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
@@ -220,12 +223,12 @@ extern struct state_s state;
  *    mode 0: 204 cycles  } x 144
  * mode 1: 4560 cycles
  */
-#define CYCLES_MODE_2	80*3
-#define CYCLES_MODE_3	172*3
-#define CYCLES_MODE_0	204*3
-#define CYCLES_MODE_1	4560*3
+#define CYCLES_MODE_2	80
+#define CYCLES_MODE_3	172
+#define CYCLES_MODE_0	204
+#define CYCLES_MODE_1	4560
 #define CYCLES_LINE	(CYCLES_MODE_2 + CYCLES_MODE_3 + CYCLES_MODE_0)
-#define CYCLES_FRAME	70224*3
+#define CYCLES_FRAME	70224
 #define CYCLES_RENDER_LINE	(CYCLES_MODE_2 + CYCLES_MODE_3)
 
 /*

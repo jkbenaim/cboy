@@ -510,9 +510,20 @@ void RRCA( void )
 void STOP( void )
 {
   // opcode 10
-  // currently implemented the same as HALT
   printf("STOP\n");
 //   state.halt = 1;
+  if(state.key1 & 0x01)
+  {
+    // switch cpu speed
+    if(state.key1 & 0x80)
+    {
+      // switch to normal speed
+      state.key1 = 0x7e;
+    } else {
+      // switch to double speed
+      state.key1 = 0xfe;
+    }
+  }
   state.pc++;
 }
 
@@ -3159,6 +3170,8 @@ int cpu_init() {
   state.halt_glitch = 0;
   state.frame_done = 0;
   state.iflag = 0xE0;
+  state.key1 = 0x7e;
+  state.cpu_speed = 0;  // normal speed
   
   state.pc = 0x0000;
   state.sp = 0xFFFE;
@@ -3304,7 +3317,7 @@ void cpu_do_one_instruction()
     }
   }
   
-  int instr_time = 0;
+  state.instr_time = 0;
 //   int instr_length = 0;
   
   // Fetch one instruction.
@@ -3315,18 +3328,18 @@ void cpu_do_one_instruction()
   
   // Set instruction time (in cycles).
   if( state.op == 0xCB ) {
-    instr_time = op_cb_times[state.cb_op];
+    state.instr_time = op_cb_times[state.cb_op];
   }
   else
   {
     if( branched )
     {
       branched = 0;
-      instr_time = op_times_taken[state.op];
+      state.instr_time = op_times_taken[state.op];
     }
     else
     {
-      instr_time = op_times[state.op];
+      state.instr_time = op_times[state.op];
     }
   }
   
@@ -3352,7 +3365,7 @@ void cpu_do_one_instruction()
   }
   
   // Update vid_cycles counter.
-  state.line_progress += instr_time * 4;
+  state.line_progress += state.instr_time * 4;
   
   // Update LY.
   state.last_ly = state.ly;
@@ -3498,7 +3511,7 @@ void cpu_do_one_instruction()
   // Update the master clock from which all timers are derived.
   // Incrememnted at 1048576 Hz (1/4 of a real gameboy).
   state.lastMasterClock = state.masterClock;
-  int mc = state.masterClock + instr_time;
+  uint64_t mc = state.masterClock + state.instr_time;
   if( mc >= 1048576 )
     mc -= 1048576;
   state.masterClock = mc;
@@ -3562,7 +3575,7 @@ void cpu_do_one_instruction()
   // update the timeout clock
   static int reset = 0;
   if( state.serialTimeoutClock <= 262144 )      // 250ms
-    state.serialTimeoutClock += instr_time;
+    state.serialTimeoutClock += state.instr_time;
   if( state.serialTimeoutClock >= 262144 )      // 250ms
   {
     reset = 1;
@@ -3572,7 +3585,7 @@ void cpu_do_one_instruction()
   
   // adjust the shift clock
   if( (state.sc & SC_TRANSFER) && (state.sc & SC_SHIFT_CLOCK))
-    state.serialClocksUntilNextSend -= instr_time * 4;
+    state.serialClocksUntilNextSend -= state.instr_time * 4;
   
   if( state.serialClocksUntilNextSend <= 0 )
   {
