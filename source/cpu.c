@@ -3344,8 +3344,6 @@ void cpu_do_one_instruction()
   }
   
   // Execute the instruction.
-  if( state.pc >= 0x10000 )
-    state.pc -= 0x10000;
   
   if(state.halt == 0)
   {
