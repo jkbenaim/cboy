@@ -24,6 +24,7 @@
 
 int rom_bank_shadow;
 int ram_bank_shadow;
+uint8_t rumble = 0;
 
 void mbc_c_mbc5_install()
 {
@@ -229,19 +230,41 @@ void mbc_c_mbc5_set_rom_bank() {
 
 // write 4000-5FFF: ram bank select
 void mbc_c_mbc5_write_ram_bank_select( uint16_t address, uint8_t data ) {
-  switch( data )
+  uint8_t bank=0;
+  switch( cart.extram_size )
   {
-    case 0x00:
-    case 0x01:
-    case 0x02:
-    case 0x03:
-      cart.extram_bank_num = data&0x03;
-      cart.extram_bank = cart.extram + data*8192;
-      cart.extram_bank_validRead = cart.extramValidRead + data*8192;
-      cart.extram_bank_validWrite = cart.extramValidWrite + data*8192;
+    case 0:
+    case 2048:
+    case 8192:
+      bank = 0;
+      break;
+    case 32768:
+      bank = data & 0x03;
+      break;
+    case 131072:
+      bank = data & 0x0f;
+      break;
+  }
+  
+  cart.extram_bank_num = bank;
+  cart.extram_bank = cart.extram + bank*8192;
+  cart.extram_bank_validRead = cart.extramValidRead + bank*8192;
+  cart.extram_bank_validWrite = cart.extramValidWrite + bank*8192;
+  
+  // handle rumble
+  switch( cart.mbc_type )
+  {
+    case 0x1C:  // MBC5+RUMBLE
+    case 0x1D:  // MBC5+RUMBLE+RAM
+    case 0x1E:  // MBC5+RUMBLE+RAM+BATTERY
+      if( (data & 0xf8) != rumble )
+      {
+        rumble = data & 0xf8;
+//         printf( "rumble changed: %02X\n", rumble );
+        ca_write( cart.fd, 0x4000, ram_bank_shadow | rumble );
+      }
       break;
     default:
-      printf("Switching to invalid extram bank %02X \n", data );
       break;
   }
 }
