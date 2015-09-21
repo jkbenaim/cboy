@@ -270,6 +270,8 @@ void cart_c_reset_mbc()
     case 0xFE:  // HuC3
 //       mbc_c_huc3_install();
       break;
+    case 0xFF:  // HuC1
+      // TODO
     default:
       // danger danger
       printf( "MBC C reset: Unhandled cart type: %02Xh %s\n", cart.mbc_type, cartdesc_carttype[cart.mbc_type] );

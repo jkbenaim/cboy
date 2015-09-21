@@ -170,6 +170,7 @@ void cart_init_file( char* bootromName, char* cartromName ) {
     case 0x22:  // MBC7+RAM+BATTERY
     case 0xFC:  // POCKET CAMERA
     case 0xFE:  // HuC3
+    case 0xFF:  // HuC1
       cart.battery_backed = 1;
       break;
     default:
@@ -339,6 +340,10 @@ void cart_reset_mbc()
       break;
     case 0xFE:  // HuC3
       mbc_huc3_install();
+      break;
+    case 0xFF:  // HuC1
+      // TODO
+      mbc_huc1_install();
       break;
     default:
       // danger danger
