@@ -17,89 +17,166 @@
  ************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 #include "../source/types.h"
 #include "../source/cartdesc.h"
 
-#define READSIZE 0x200
+struct header_s {
+    /* 0x100 */ uint8_t entry[4];
+    /* 0x104 */ uint8_t logo[48];
+    /* 0x134 */ char title[16];
+//     /* 0x13f */ char manufacturer[4];
+//     /* 0x143 */ uint8_t cgb_flag;
+    /* 0x144 */ char new_licensee_code[2];
+    /* 0x146 */ uint8_t sgb_flag;
+    /* 0x147 */ uint8_t cartridge_type;
+    /* 0x148 */ uint8_t rom_size;
+    /* 0x149 */ uint8_t ram_size;
+    /* 0x14a */ uint8_t destination;
+    /* 0x14b */ uint8_t old_licensee_code;
+    /* 0x14c */ uint8_t rom_version;
+    /* 0x14d */ uint8_t header_checksum;
+    /* 0x14e */ uint16_t rom_checksum;
+};
+
+const uint8_t logo[48] =
+{
+    0xce, 0xed, 0x66, 0x66,
+    0xcc, 0x0d, 0x00, 0x0b,
+    0x03, 0x73, 0x00, 0x83,
+    0x00, 0x0c, 0x00, 0x0d,
+    0x00, 0x08, 0x11, 0x1f,
+    0x88, 0x89, 0x00, 0x0e,
+    0xdc, 0xcc, 0x6e, 0xe6,
+    0xdd, 0xdd, 0xd9, 0x99,
+    0xbb, 0xbb, 0x67, 0x63,
+    0x6e, 0x0e, 0xec, 0xcc,
+    0xdd, 0xdc, 0x99, 0x9f,
+    0xbb, 0xb9, 0x33, 0x3e
+};
+
+static const unsigned int max_rom_size = 8 * 1024 * 1024;
 
 int main( int argc, char* argv[] )
 {
+  uint32_t rom_size = 0;
+  uint8_t *rom;
+  FILE *fd;
+  int i = 0;
+  uint16_t my_checksum = 0;
+  uint8_t my_header_checksum = 0;
+  
   if( argc < 2 )
   {
     fprintf( stderr, "need an argument\n" );
     return 1;
   }
   
-  FILE *file;
-  
-  file = fopen( argv[1], "r" );
-  
-  if( file == NULL )
+  struct stat s;
+  if( stat( argv[1], &s ) != 0 )
   {
-    fprintf( stderr, "Error opening file: %s\n", argv[1] );
+      fprintf( stderr, "Couldn't stat file: %s\n", argv[1] );
+      return 1;
+  }
+  
+  if( s.st_size > max_rom_size )
+    rom_size = max_rom_size;
+  else
+    rom_size = s.st_size;
+  
+  // Allocate memory for the cartrom.
+  if( (rom = (uint8_t *)malloc(rom_size)) == NULL )
+  {
+    fprintf( stderr, "Cart rom malloc failed.\n" );
     return 1;
   }
   
-  u8 cart[READSIZE];
-  int i=0, byte;
-  do
+  // Read the cartrom.
+  fd = fopen( argv[1], "r" );
+  if( fread( rom, rom_size, 1, fd ) != 1 )
   {
-    byte = fgetc(file);
-    cart[i] = (u8)byte;
-    ++i;
-  } while( i<READSIZE && byte != EOF );
-  if(byte == EOF) --i;
-  fclose(file);
-  
-  if( i < READSIZE )
-  {
-    fprintf( stderr, "Error reading file: %s\n", argv[1] );
-    fprintf( stderr, "File too small.\n" );
+    fprintf( stderr, "Reading cart rom failed.\n" );
     return 1;
   }
+  fclose( fd );
   
-  char title[0x11];
-  for(i=0;i<0x10;++i)
-    title[i] = cart[i + 0x134];
-  title[0x10] = '\x00';
-  printf("Title: %s\n", title);
+  struct header_s header;
+  memcpy( &header, rom+0x100, 0x50 );
   
-  u8 cgb_flag = cart[0x143];
-  switch( cgb_flag )
-  {
-    case 0x80:
-      printf("CGB compatible\n");
-      break;
-    case 0xC0:
-      printf("CGB required\n");
-      break;
-    default:
-      printf("Not CGB compatible\n");
-      break;
-  }
+//   /* 0x100 */ uint8_t entry[4];
+  printf( "Entry: " );
+  uint32_t temp = be32toh( *(uint32_t *)header.entry);
+  if( temp == 0x00c35001 )
+    printf( "normal\n" );
+  else
+    printf( "ABONRMAL: %08X\n", temp );
   
-  u8 sgb_flag = cart[0x146];
-  switch( sgb_flag )
-  {
-    case 0x00:
-      printf("No SGB functions\n");
-      break;
-    case 0x03:
-      printf("SGB enhanced\n");
-      break;
-  }
+//     /* 0x104 */ uint8_t logo[48];
+  printf( "Logo: " );
+  if( memcmp( header.logo, logo, 48 ) )
+      printf( "BAD\n" );
+  else
+      printf( "Nintendo (OK)\n");
   
-  u8 cart_type = cart[0x147];
-  printf("Cart type: %02Xh - %s\n", cart_type, cartdesc_carttype[cart_type] );
+//     /* 0x134 */ char title[16];
+//     /* 0x13f */ char manufacturer[4];
+//     /* 0x143 */ uint8_t cgb_flag;
+  // TODO: clean up title printing
+  printf( "Title: %.16s\n", header.title );
   
-  u8 rom_size = cart[0x148];
-  printf("ROM size: %02Xh - %s\n", rom_size, cartdesc_romsize[rom_size] );
+//     /* 0x144 */ char new_licensee_code[2];
+  printf( "New licensee code: %.2s\n", header.new_licensee_code );
   
-  u8 ram_size = cart[0x149];
-  printf("RAM size: %02Xh - %s\n", ram_size, cartdesc_ramsize[ram_size] );
+//     /* 0x146 */ uint8_t sgb_flag;
+  printf( "SGB flag: %02X", header.sgb_flag );
+  if( header.sgb_flag == 0x03 )
+      printf( " - SGB supported\n" );
+  else
+      printf( " - no SGB support\n" );
   
-  u8 version = cart[0x14C];
-  printf("Mask ROM version number: %02Xh\n", version);
-
+//     /* 0x147 */ uint8_t cartridge_type;
+  printf( "Cartridge type: %02X - %s\n", header.cartridge_type, cartdesc_carttype[header.cartridge_type] );
+  
+//     /* 0x148 */ uint8_t rom_size;
+  printf( "ROM size: %02X - %s\n", header.rom_size, cartdesc_romsize[header.rom_size] );
+  
+//     /* 0x149 */ uint8_t ram_size;
+  printf( "SRAM size: %02X - %s\n", header.ram_size, cartdesc_ramsize[header.ram_size] );
+  
+//     /* 0x14a */ uint8_t destination;
+  printf( "Destination: %02X - %s\n", header.destination, header.destination?"World":"Japan" );
+  
+//     /* 0x14b */ uint8_t old_licensee_code;
+  printf( "Old licensee code: %02X\n", header.old_licensee_code );
+  
+//     /* 0x14c */ uint8_t rom_version;
+  printf( "Mask ROM revision: %02X\n", header.rom_version );
+  
+//     /* 0x14d */ uint8_t header_checksum;
+  printf( "Header checksum: %02X ", header.header_checksum );
+  my_header_checksum = 0;
+  for(i=0x134;i<=0x14c;++i)
+      my_header_checksum = my_header_checksum - rom[i]-1;
+  if( my_header_checksum == header.header_checksum )
+      printf( " - OK\n" );
+  else
+      printf( " - BAD, should be %02X\n", my_header_checksum );
+  
+  
+//     /* 0x14e */ uint16_t rom_checksum;
+  printf( "ROM checksum: %04X", be16toh( header.rom_checksum ) );
+  my_checksum = 0;
+  for(i=0;i<rom_size; i++)
+    my_checksum += rom[i];
+  my_checksum -= rom[0x14e];
+  my_checksum -= rom[0x14f];
+  if( my_checksum == be16toh( header.rom_checksum ) )
+      printf( " - OK\n" );
+  else
+      printf( " - BAD, should be %X\n", my_checksum);
+  
+  free( rom );
   return 0;
 }
