@@ -262,6 +262,14 @@ void (*cb_ops[0x100])(void) = {
   /* FC */ CB_SET_B_R, 	CB_SET_B_R,	CB_SET_B_HL,	CB_SET_B_R
 };
 
+void trash_OAM( void )
+{
+    int i;
+    if( state.lcdc & LCDC_LCD_ENABLE )
+      for(i=0x08; i<=0x9F; ++i)
+        oam[i] = rand()%0xFF;
+}
+
 void UNDEF( void )
 {
   printf("Undefined opcode %02X at address %04X\n", state.op, state.pc);
@@ -308,6 +316,10 @@ void LD_BC_A( void )
 void INC_BC( void )
 {
   // opcode 03
+  
+  if( state.bc >= 0xFE00 && state.bc <= 0xFEFF )
+      trash_OAM();
+  
   state.bc++;
   state.pc++;
   // no flags affected
@@ -470,6 +482,10 @@ void LD_A_BC( void )
 void DEC_BC( void )
 {
   // opcode 0B
+  
+  if( state.bc >= 0xFE00 && state.bc <= 0xFEFF )
+      trash_OAM();
+  
   state.bc--;
   state.pc++;
 }
@@ -547,6 +563,10 @@ void INC_DE( void )
 {
   // opcode 13
   // no flags affected
+  
+  if( state.de >= 0xFE00 && state.de <= 0xFEFF )
+      trash_OAM();
+  
   state.de++;
   state.pc++;
 }
@@ -668,6 +688,10 @@ uint8_t* cpu_getReg( int regNumber )
 void DEC_DE( void )
 {
   // opcode 1B
+  
+  if( state.de >= 0xFE00 && state.de <= 0xFEFF )
+      trash_OAM();
+  
   state.de--;
   state.pc++;
 }
@@ -742,6 +766,10 @@ void INC_HL( void )
 {
   // opcode 23
   // no flags affected
+  
+  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+      trash_OAM();
+  
   state.hl++;
   state.pc++;
 }
@@ -850,6 +878,10 @@ void ADD_HL_HL( void )
 void LDI_A_HL( void )
 {
   // opcode 2A
+  
+  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+      trash_OAM();
+  
   state.a = read_byte(state.hl);
   
   state.hl++;
@@ -860,6 +892,10 @@ void LDI_A_HL( void )
 void DEC_HL( void )
 {
   // opcode 2B
+  
+  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+      trash_OAM();
+  
   state.hl--;
   state.pc++;
 }
@@ -925,6 +961,10 @@ void LDD_HL_A( void )
 void INC_SP( void )
 {
   // opcode 33
+  
+  if( state.sp >= 0xFE00 && state.sp <= 0xFEFF )
+      trash_OAM();
+  
   state.sp++;
   
   // no flags affected
@@ -1065,6 +1105,10 @@ void ADD_HL_SP( void )
 void LDD_A_HL( void )
 {
   // opcode 3A
+  
+  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+      trash_OAM();
+  
   state.a = read_byte(state.hl);
   
   state.hl--;
@@ -1074,6 +1118,10 @@ void LDD_A_HL( void )
 void DEC_SP( void )
 {
   // opcode 3B
+  
+  if( state.sp >= 0xFE00 && state.sp <= 0xFEFF )
+      trash_OAM();
+  
   state.sp--;
   
   // no flags affected
@@ -1802,6 +1850,10 @@ void RET_CC( void)
 void POP_BC( void )
 {
   // opcode C1
+  
+  if( state.sp >= 0xFDFF && state.sp <= 0xFEFF )
+      trash_OAM();
+  
   state.bc = read_word(state.sp);
   
   state.sp += 2;
@@ -1845,6 +1897,10 @@ void CALL_NZ( void )
 void PUSH_BC( void )
 {
   // opcode C5
+  
+  if( state.sp >= 0xFE00 && state.sp <= 0xFEFF )
+      trash_OAM();
+  
   state.sp -= 2;
   write_word(state.sp, state.bc);
   
