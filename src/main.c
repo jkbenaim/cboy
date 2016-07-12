@@ -45,7 +45,7 @@ int pause = 0;
 int main ( int argc, char* argv[] ) {
   printf( " ----------------------- \n" );
   printf( " --- Welcome to cboy --- \n" );
-  printf( " ---    (c) 2014     --- \n" );
+  printf( " ---  (c) 2012-2016  --- \n" );
   printf( " ----------------------- \n" );
   
   if(argc < 3)
