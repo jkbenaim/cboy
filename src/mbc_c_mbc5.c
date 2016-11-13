@@ -121,12 +121,12 @@ uint8_t mbc_c_mbc5_read_bank_0( uint16_t address )
   if( !cart.cartromValid[address] )
   {
     // fill cache
-    unsigned int startAddress = address & 0xF000;
-    ca_read4096Bytes( cart.fd, startAddress, cart.cartrom+startAddress );
+    unsigned int startAddress = address & 0xFF00;
+    ca_read256Bytes( cart.fd, startAddress, cart.cartrom+startAddress );
     
     // mark cache as valid
     int i;
-    for( i=0; i<4096; i++ )
+    for( i=0; i<256; i++ )
       cart.cartromValid[startAddress+i] = 1;
   }
   // read from cache
@@ -144,12 +144,12 @@ uint8_t mbc_c_mbc5_read_bank_n( uint16_t address ) {
       rom_bank_shadow = cart.cart_bank_num;
     }
     // fill cache
-    unsigned int startAddress = address & 0xF000;
-    ca_read4096Bytes( cart.fd, startAddress, cart.cartrom_bank_n+startAddress-0x4000 );
+    unsigned int startAddress = address & 0xFF00;
+    ca_read256Bytes( cart.fd, startAddress, cart.cartrom_bank_n+startAddress-0x4000 );
     
     // mark cache as valid
     int i;
-    for( i=0; i<4096; i++ )
+    for( i=0; i<256; i++ )
       cart.cartromValid_bank_n[startAddress+i-0x4000] = 1;
   }
   // read from cache
@@ -284,18 +284,18 @@ uint8_t mbc_c_mbc5_read_extram( uint16_t address ) {
       ram_bank_shadow = cart.extram_bank_num;
     }
     // fill cache
-    unsigned int startAddress = address & 0xF000;
-    uint8_t buf[4096];
-    ca_read4096Bytes( cart.fd, startAddress, buf );
+    unsigned int startAddress = address & 0xFF00;
+    uint8_t buf[256];
+    ca_read256Bytes( cart.fd, startAddress, buf );
     int i;
-    for( i=0; i<4096; i++ )
+    for( i=0; i<256; i++ )
     {
       if( cart.extram_bank_validRead[startAddress+i-0xA000] == 0 )
 	cart.extram_bank[startAddress+i-0xA000] = buf[i];
     }
     
     // mark cache as valid
-    for( i=0; i<4096; i++ )
+    for( i=0; i<256; i++ )
       cart.extram_bank_validRead[startAddress+i-0xA000] = 1;
   }
   // read from cache
