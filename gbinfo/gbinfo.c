@@ -20,8 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "../source/types.h"
-#include "../source/cartdesc.h"
+#include "../src/types.h"
+#include "../src/cartdesc.h"
 
 struct header_s {
     /* 0x100 */ uint8_t entry[4];

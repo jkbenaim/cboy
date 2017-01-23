@@ -1,2 +1,4 @@
+*.d
 *.o
 cboy
+gbinfo
