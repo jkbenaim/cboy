@@ -21,15 +21,6 @@
 #include "mbc_cam.h"
 #include <stdio.h>
 
-#ifdef __ANDROID__
-#include <jni.h>
-#include <android/log.h>
-#include <android/bitmap.h>
-#define  LOG_TAG    "libcboy"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-#endif // __ANDROID__
-
 int cam_mode;   // 0=RAM accessible, 1=CAM registers accessible
 
 void mbc_cam_install()
@@ -168,9 +159,6 @@ void mbc_cam_write_extram( uint16_t address, uint8_t data ) {
               // i don't act on these.
             } else {
 //               printf( "Picture taken! [%d]\n", pics_taken );
-#ifdef __ANDROID__
-              mbc_cam_getCameraImage();
-#else
               // write a checkerboard pattern to photo ram
               int tile_x, tile_y;
               int row_in_tile;
@@ -212,7 +200,6 @@ void mbc_cam_write_extram( uint16_t address, uint8_t data ) {
                   ram_address_offset +=2;
                 }
               }
-#endif // __ANDROID__
             }
             }
             break;
@@ -225,10 +212,3 @@ void mbc_cam_write_extram( uint16_t address, uint8_t data ) {
     }
   }
 }
-
-#ifdef __ANDROID__
-void mbc_cam_getCameraImage() {
-  LOGI( "picture taken!" );
-}
-#endif // __ANDROID__
-

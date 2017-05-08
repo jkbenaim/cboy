@@ -16,10 +16,6 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
-#ifdef __ANDROID__
-#include <jni.h>
-#endif // __ANDROID__
-
 #include "types.h"
 #include "main.h"
 #include "memory.h"
@@ -146,22 +142,6 @@ int input_event_filter(const SDL_Event *event)
   return 0;
 }
 #endif // USE_SDL
-
-#ifdef __ANDROID__
-JNIEXPORT void JNICALL Java_org_trashfolder_cboy_ControllerView_cboyPressAButton(JNIEnv * env)
-{
-  state.joyp_buttons &= ~INPUT_BUTTONS_A;
-  state.iflag |= IMASK_JOYPAD;
-  state.halt = 0;
-}
-
-JNIEXPORT void JNICALL Java_org_trashfolder_cboy_ControllerView_cboyUnpressAButton(JNIEnv * env)
-{
-  state.joyp_buttons |= INPUT_BUTTONS_A;
-  state.iflag |= IMASK_JOYPAD;
-  state.halt = 0;
-}
-#endif // __ANDROID__
 
 void input_init()
 {

@@ -23,18 +23,7 @@
 #ifdef USE_SDL
 #include <SDL/SDL.h>
 #endif
-#ifdef __ANDROID__
-#include <jni.h>
-#include <android/log.h>
-#include <android/bitmap.h>
-#endif // __ANDROID__
 #include "assert.h"
-
-#ifdef __ANDROID__
-#define  LOG_TAG    "libcboy"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-#endif // __ANDROID__
 
 pixel_t pixmem[160*144];
 pixel_t colormem[160*144];
@@ -591,51 +580,3 @@ void vid_frame()
   SDL_UpdateRect( screen, 0, 0, 0, 0 );
 }
 #endif // USE_SDL
-
-#ifdef __ANDROID__
-void vid_frame( AndroidBitmapInfo* info, void* pixels )
-{
-    // TODO
-  int x,y;
-  const int width = info->width;
-  int srcStartOfLine=0, dstStartOfLine=0;
-  for( y=0; y<144; ++y )
-  {
-    for( x=0; x<160; ++x )
-    {
-      ((uint16_t*)pixels)[dstStartOfLine + x] = rgb555_to_rgb565( pixmem[srcStartOfLine + x] );
-    }
-    srcStartOfLine += 160;
-    dstStartOfLine += width;
-  }
-}
-#endif // __ANDROID__
-
-#ifdef __ANDROID__
-JNIEXPORT void JNICALL Java_org_trashfolder_cboy_CboyView_cboyFrame(JNIEnv * env, jobject  obj, jobject bitmap)
-{
-    AndroidBitmapInfo  info;
-    void*              pixels;
-    int                ret;
-
-    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
-        return;
-    }
-
-    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
-        LOGE("Bitmap format is not RGB_565 !");
-        return;
-    }
-
-    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
-        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
-    }
-
-    input_handle();
-    cpu_do_one_frame();
-    vid_frame( &info, pixels );
-
-    AndroidBitmap_unlockPixels(env, bitmap);
-}
-#endif // __ANDROID__
