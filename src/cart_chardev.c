@@ -16,6 +16,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
+#define _GNU_SOURCE 1
+
 #include "cart_chardev.h"
 #include "cart.h"
 #include "main.h"
