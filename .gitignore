@@ -1,6 +1,7 @@
 *.d
 *.o
 *.swp
+*.a
 cboy
 gbinfo
 roms
