@@ -25,6 +25,7 @@
 #include "input.h"
 #include "cart.h"
 #include "mbc.h"
+#include "audio.h"
 
 // usage statistics
 pixel_t visual_memory[65536];
@@ -247,71 +248,27 @@ uint8_t read_special( uint16_t address ) {
       return state.iflag;
       break;
     case ADDR_NR10:
-      return state.nr10 | 0x80;
-      break;
     case ADDR_NR11:
-      return state.nr11 | 0x3F;
-      break;
     case ADDR_NR12:
-      return state.nr12 | 0x00;
-      break;
     case ADDR_NR13:
-      return state.nr13 | 0xFF;
-      break;
     case ADDR_NR14:
-      return state.nr14 | 0xBF;
-      break;
     case ADDR_NR20:
-      return state.nr20 | 0xFF;
-      break;
     case ADDR_NR21:
-      return state.nr21 | 0x3F;
-      break;
     case ADDR_NR22:
-      return state.nr22 | 0x00;
-      break;
     case ADDR_NR23:
-      return state.nr23 | 0xBF;
-      break;
     case ADDR_NR24:
-      return state.nr24 | 0xFF;
-      break;
     case ADDR_NR30:
-      return state.nr30 | 0x7F;
-      break;
     case ADDR_NR31:
-      return state.nr31 | 0xFF;
-      break;
     case ADDR_NR32:
-      return state.nr32 | 0x9F;
-      break;
     case ADDR_NR33:
-      return state.nr33 | 0xFF;
-      break;
     case ADDR_NR34:
-      return state.nr34 | 0xBF;
-      break;
     case ADDR_NR41:
-      return state.nr41 | 0xFF;
-      break;
     case ADDR_NR42:
-      return state.nr42 | 0x00;
-      break;
     case ADDR_NR43:
-      return state.nr43 | 0x00;
-      break;
     case ADDR_NR44:
-      return state.nr44 | 0xBF;
-      break;
     case ADDR_NR50:
-      return state.nr50 | 0x00;
-      break;
     case ADDR_NR51:
-      return state.nr51 | 0x00;
-      break;
     case ADDR_NR52:
-      return state.nr52 | 0x70;
-      break;
     case ADDR_WAVERAM_0:
     case ADDR_WAVERAM_1:
     case ADDR_WAVERAM_2:
@@ -328,7 +285,7 @@ uint8_t read_special( uint16_t address ) {
     case ADDR_WAVERAM_D:
     case ADDR_WAVERAM_E:
     case ADDR_WAVERAM_F:
-      return state.waveram[address & 0x000F];
+      return audio_read( address );
       break;
     case ADDR_LCDC:
       return state.lcdc;
@@ -496,145 +453,27 @@ void write_special( uint16_t address, uint8_t data ) {
       state.iflag = data;
       break;
     case ADDR_NR10:
-      state.nr10 = data;
-//       printf( "wrote NR10, %02X\n", data );
-      break;
     case ADDR_NR11:
-      state.nr11 = data;
-//       int waveDuty = data>>6;
-//       int soundLength = data&0x3F;
-//       printf( "wrote NR11, %02X (wave pattern duty: ", data );
-//       switch( waveDuty )
-//       {
-// 	case 0:
-// 	  printf( "12.5%%" );
-// 	  break;
-// 	case 1:
-// 	  printf( "25%%" );
-// 	  break;
-// 	case 2:
-// 	  printf( "50%%" );
-// 	  break;
-// 	case 3:
-// 	  printf( "75%%" );
-// 	  break;
-// 	default:
-// 	  printf( "unknown" );
-// 	  break;
-//       }
-//       printf( ", sound length: " );
-//       float soundLengthCalculated = (64.0 - (float)soundLength) / 256.0;
-//       printf( "%f seconds", soundLengthCalculated );
-//       printf( ")\n" );
-      break;
     case ADDR_NR12:
-      state.nr12 = data;
-//       int iVolume = data >> 4;
-//       int direction = data & 0x08;
-//       int sweepNum = data & 0x07;
-//       printf( "wrote NR12, %02X (iVolume: ", data );
-//       printf( "%d", iVolume );
-//       printf( ", direction: " );
-//       if( direction )
-// 	printf( "increasing" );
-//       else
-// 	printf( "decreasing" );
-//       printf( ", sweepNum: " );
-//       printf( "%d", sweepNum );
-//       printf( ")\n" );
-      break;
     case ADDR_NR13:
-      state.nr13 = data;
-//       printf( "wrote NR13, %02X (lower bits of frequency)\n", data );
-      break;
     case ADDR_NR14:
-      state.nr14 = data;
-//       int restart = data & 0x80;
-//       int counter = (data & 0x40) >> 6;
-//       int frequency = ((int)(data & 0x07) << 8) + (int)state.nr13;
-//       float frequencyHz = 131072.0/(2048.0 - (float)frequency);
-//       printf( "wrote NR14, %02X (restart: ", data );
-//       if( restart )
-// 	printf( "yes" );
-//       else
-// 	printf( "no" );
-//       printf( ", counter: " );
-//       printf( "%d", counter );
-//       printf( ", frequency: " );
-//       printf( "%f", frequencyHz );
-//       printf( "Hz)\n" );
-      break;
     case ADDR_NR20:
-      state.nr20 = data;
-      break;
     case ADDR_NR21:
-      state.nr21 = data;
-      break;
     case ADDR_NR22:
-      state.nr22 = data;
-      break;
     case ADDR_NR23:
-      state.nr23 = data;
-      break;
     case ADDR_NR24:
-      state.nr24 = data;
-      break;
     case ADDR_NR30:
-      state.nr30 = data;
-      break;
     case ADDR_NR31:
-      state.nr31 = data;
-      break;
     case ADDR_NR32:
-      state.nr32 = data;
-      break;
     case ADDR_NR33:
-      state.nr33 = data;
-      break;
     case ADDR_NR34:
-      state.nr34 = data;
-      break;
     case ADDR_NR41:
-      state.nr41 = data;
-      break;
     case ADDR_NR42:
-      state.nr42 = data;
-      break;
     case ADDR_NR43:
-      state.nr43 = data;
-      break;
     case ADDR_NR44:
-      state.nr44 = data;
-      break;
     case ADDR_NR50:
-      state.nr50 = data;
-//       int leftEnabled = data & 0x08;
-//       int leftVolume = data & 0x07;
-//       int rightEnabled = data & 0x80;
-//       int rightVolume = (data & 0x70) >> 4;
-//       printf( "wrote NR50, (left: " );
-//       if( leftEnabled )
-// 	printf( "%d", leftVolume );
-//       else
-// 	printf( "off" );
-//       printf( ", right: " );
-//       if( rightEnabled )
-// 	printf( "%d", rightVolume );
-//       else
-// 	printf( "off" );
-//       printf(")\n" );
-      break;
     case ADDR_NR51:
-      state.nr51 = data;
-//       printf( "wrote NR51, %02X (panning)\n", data );
-      break;
     case ADDR_NR52:
-      state.nr52 = data;
-//       if( data & 0x80 )
-// 	printf( "wrote NR52 (sound powered up)\n" );
-//       else
-// 	printf( "wrote NR52 (sound powered down)\n" );
-      break;
     case ADDR_WAVERAM_0:
     case ADDR_WAVERAM_1:
     case ADDR_WAVERAM_2:
@@ -651,7 +490,7 @@ void write_special( uint16_t address, uint8_t data ) {
     case ADDR_WAVERAM_D:
     case ADDR_WAVERAM_E:
     case ADDR_WAVERAM_F:
-      state.waveram[address & 0x000F] = data;
+      audio_write( address, data );
       break;
     case ADDR_LCDC:
       state.lcdc = data;

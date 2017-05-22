@@ -23,6 +23,6 @@
 
 typedef uint16_t pc_t;
 typedef uint16_t address_t;
-typedef uint32_t pixel_t;
+typedef uint16_t pixel_t;
 
 #endif // _TYPES_H_

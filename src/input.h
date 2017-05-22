@@ -21,8 +21,12 @@
 
 #include "types.h"
 #ifdef USE_SDL
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #endif // USE_SDL
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define INPUT_SELECT_BUTTONS	0x20
 #define INPUT_SELECT_DIRECTIONS	0x10
@@ -37,8 +41,12 @@
 
 void input_init();
 #ifdef USE_SDL
-int input_event_filter(const SDL_Event *event);
+int input_event_filter(void *dontcare, SDL_Event *event);
 #endif // USE_SDL
 void input_handle();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _INPUT_H_

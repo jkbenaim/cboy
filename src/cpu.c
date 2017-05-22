@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include "cpu.h"
 #include "memory.h"
-#include "assert.h"
 #include "video.h"
 #include "serial.h"
 
@@ -3403,7 +3402,7 @@ void cpu_do_one_instruction()
   
   if(state.halt == 0)
   {
-    assert("Op address in range", state.pc <= 0xFFFE);
+    //assert("Op address in range", state.pc <= 0xFFFE);
     if( state.halt_glitch == 1 )
     {
       state.halt_glitch = 0;

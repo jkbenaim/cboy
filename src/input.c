@@ -22,11 +22,11 @@
 #include "input.h"
 #include "cpu.h"
 #ifdef USE_SDL
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #endif
 
 #ifdef USE_SDL
-int input_event_filter(const SDL_Event *event)
+int input_event_filter(void *dontcare, SDL_Event *event)
 {
   switch( event->type ) {
     // close button clicked
@@ -147,7 +147,8 @@ void input_init()
 {
 #ifdef USE_SDL
   // set up event filtering
-  SDL_SetEventFilter( input_event_filter );
+  // TODO
+  SDL_SetEventFilter( input_event_filter, NULL );
 #endif // USE_SDL
   state.joyp = 0xFF;
   state.joyp_buttons = 0xFF;

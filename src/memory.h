@@ -21,8 +21,10 @@
 
 #include "types.h"
 #include "cart.h"
-#include "assert.h"
-#include <SDL/SDL.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern uint8_t  read_byte( uint16_t address );
 extern uint16_t read_word( uint16_t address );
@@ -188,5 +190,9 @@ void write_special( uint16_t address, uint8_t data );
 // out of bounds
 uint8_t read_out_of_bounds( uint16_t address );
 void write_out_of_bounds( uint16_t address, uint8_t data );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !_MEMORY_H_

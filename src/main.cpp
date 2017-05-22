@@ -21,6 +21,7 @@
 #include "input.h"
 #include "cpu.h"
 #include "memory.h"
+#include "audio.h"
 #include "video.h"
 #include "cart.h"
 #include "main.h"
@@ -33,7 +34,7 @@ int pause = 0;
 int main ( int argc, char* argv[] ) {
   printf( " ----------------------- \n" );
   printf( " --- Welcome to cboy --- \n" );
-  printf( " ---  (c) 2012-2016  --- \n" );
+  printf( " ---  (c) 2012-2017  --- \n" );
   printf( " ----------------------- \n" );
   
   if(argc < 3)
@@ -44,7 +45,7 @@ int main ( int argc, char* argv[] ) {
   }
   
   mem_init();
-//   audio_init();
+  audio_init();
   if( ! cpu_init() )
   {
     fprintf( stderr, "cpu init failed\n" );
@@ -61,11 +62,12 @@ int main ( int argc, char* argv[] ) {
     {
       cpu_do_one_frame();
       vid_frame();
+      audio_frame();
     }
   }
   
   cart_cleanup();
-//   audio_cleanup();
+   audio_cleanup();
   
   return 0;
 }

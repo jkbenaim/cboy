@@ -156,7 +156,6 @@ void mbc_c_cam_write_rom_bank_select( uint16_t address, uint8_t data ) {
   offset = (size_t)data*16384 % cart.cartromsize;
   
 //   printf( "switch cart bank num: %02X\n", cart.cart_bank_num );
-  assert("MBC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
   cart.cartromValid_bank_n = cart.cartromValid + offset;
 }

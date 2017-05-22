@@ -20,7 +20,6 @@
 #include "cart.h"
 #include "mbc_mbc7.h"
 #include <stdio.h>
-#include "assert.h"
 
 void mbc_mbc7_install()
 {
@@ -120,8 +119,6 @@ void mbc_mbc7_write_rom_bank_select( uint16_t address, uint8_t data )
   
   size_t offset = (size_t)bank*16384;
   cart.cartrom_bank_n = cart.cartrom + offset;
-  assert( "MBC7 rom bank select: bank number", bank <= cart.cartrom_num_banks );
-  assert( "MBC7 rom bank select: offset computation", offset <= (cart.cartromsize - 16384) );
 //   printf("wrote ROM, address: %04X, byte: %02X: set ROM bank to %d\n", address, data, bank);
 }
 

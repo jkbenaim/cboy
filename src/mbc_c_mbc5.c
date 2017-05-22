@@ -21,6 +21,7 @@
 #include "cart.h"
 #include "mbc_c_mbc5.h"
 #include "cpu.h"
+#include <stdlib.h>
 
 int rom_bank_shadow;
 int ram_bank_shadow;
@@ -223,7 +224,6 @@ void mbc_c_mbc5_set_rom_bank() {
   offset = (size_t)bank*16384 % cart.cartromsize;
   
 //   printf( "switch cart bank num: %02X\n", cart.cart_bank_num );
-  assert("MBC5 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
   cart.cartromValid_bank_n = cart.cartromValid + offset;
 }

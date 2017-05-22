@@ -22,6 +22,10 @@
 #include "types.h"
 #include "endian.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct state_s {
   pc_t pc;
   uint16_t sp;
@@ -421,5 +425,10 @@ extern int stop;
 extern int op_lengths[0x100];
 extern int op_times[0x100];
 extern int op_cb_times[0x100];
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // !_CPU_H_

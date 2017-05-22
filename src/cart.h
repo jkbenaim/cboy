@@ -22,6 +22,10 @@
 #include <stddef.h> // for size_t
 #include <stdio.h> // for FILE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct cart_s {
   int mbc_type;
   int cartrom_num_banks;
@@ -67,5 +71,9 @@ void cart_init_bootrom( char* bootromName );
 void cart_default_cleanup( void );
 extern void cart_reset_mbc( void );
 extern struct cart_s cart;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _CART_H_

@@ -162,7 +162,6 @@ void mbc_c_mbc2_write_rom_bank_select( uint16_t address, uint8_t data ) {
   cart.cart_bank_num = data;
   offset = (size_t)data*16384 % cart.cartromsize;
   
-  assert("MBC2 rom bank select: offset computation", offset <= (cart.cartromsize - 16384));
   cart.cartrom_bank_n = cart.cartrom + offset;
   cart.cartromValid_bank_n = cart.cartromValid + offset;
 }

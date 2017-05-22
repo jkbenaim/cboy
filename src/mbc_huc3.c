@@ -20,7 +20,6 @@
 #include "cart.h"
 #include "mbc_huc3.h"
 #include <stdio.h>
-#include "assert.h"
 #include "cpu.h"
 
 int huc3_ram_mode = 0;
@@ -132,8 +131,6 @@ void mbc_huc3_write_rom_bank_select_low( uint16_t address, uint8_t data ) {
   
   size_t offset = (size_t)bank*16384;
   cart.cartrom_bank_n = cart.cartrom + offset;
-  assert( "HUC3 rom bank select: bank number", bank <= cart.cartrom_num_banks );
-  assert( "HUC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384) );
 }
 
 // write 3000-3FFF
@@ -150,8 +147,6 @@ void mbc_huc3_write_rom_bank_select_high( uint16_t address, uint8_t data ) {
   
   size_t offset = (size_t)bank*16384;
   cart.cartrom_bank_n = cart.cartrom + offset;
-  assert( "HUC3 rom bank select: bank number", bank <= cart.cartrom_num_banks );
-  assert( "HUC3 rom bank select: offset computation", offset <= (cart.cartromsize - 16384) );
 }
 
 // write 4000-40FF

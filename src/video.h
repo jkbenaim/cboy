@@ -15,13 +15,14 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
-#ifdef USE_SDL
-#include <SDL/SDL.h>
-#endif // USE_SDL
-#ifdef __ANDROID__
-#include <android/bitmap.h>
-#endif // __ANDROID__
 #include "types.h"
+
+#ifndef _VIDEO_H_
+#define _VIDEO_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Sprite attribute flags
 #define	SPRITE_PRIORITY		0x80    // 0=Sprite above BG, 1=Sprite behind BG color 1-3
@@ -42,12 +43,12 @@
 void vid_init( void );
 void vid_waitForNextFrame();
 void vid_render_line();
-#ifdef USE_SDL
 void vid_frame();
-#endif
-#ifdef __ANDROID__
-void vid_frame( AndroidBitmapInfo* info, void* pixels );
-#endif
 extern pixel_t palette[4];
 extern pixel_t pixmem[160*144];
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _VIDEO_H_
