@@ -1,5 +1,33 @@
+General:
+    - cboy sometimes unresponsive to close requests when game has frozen
+
 Zelda DX:
     - In the inventory menu, when holding select, there is an extra half-a-
       heart on the right edge of the screen.
     - In the map, when highlighting a square with a note (such as a dungeon),
       the icon for the type of note is black.
+
+Pokemon Gold/Silver/Crystal:
+    - Freezes when entering a battle. This used to work...
+    - Crystal only: trash occasionally flashes on-sceen, usually between scenes
+
+Command Master:
+    - (MBC7) Unplayable
+
+Kirby's Tilt'n'Tumble:
+    - (MBC7) Unplayable
+
+Perfect Dark:
+    - Shows lots of garbage in-game, probably due to lack of double-speed mode
+
+Donkey Kong Country:
+    - Doesn't get in-game
+
+Pokemon TCG (Japanese version):
+    - Produces loads of debug output, wtf?
+
+Motal Kombat I & II:
+    - Cannot select a game.
+    - Multicarts like this one need extra work to function.
+
+
