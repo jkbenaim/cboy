@@ -7,6 +7,9 @@ Zelda DX:
     - In the map, when highlighting a square with a note (such as a dungeon),
       the icon for the type of note is black.
 
+Zelda Oracle of Ages:
+    - Some sprited appear on top of text boxes.      
+
 Pokemon Gold/Silver/Crystal:
     - Freezes when entering a battle. This used to work...
     - Crystal only: trash occasionally flashes on-sceen, usually between scenes
@@ -30,4 +33,14 @@ Motal Kombat I & II:
     - Cannot select a game.
     - Multicarts like this one need extra work to function.
 
+Batman:
+    - Logo flickers instead of "coinlfipping".
 
+Cliffhanger:
+    - Hangs during intro.
+
+Densha de Go 2:
+    - Hangs when starting game. (GBC double speed?)
+
+X:
+    - Crashes during intro, audio continues. This game used to work.
