@@ -185,7 +185,11 @@ void cart_init_file( char* bootromName, char* cartromName ) {
     f = fopen( cart.savename, "r" );
     if( f != NULL )
     {
-      fread( cart.extram, cart.extram_size, 1, f );
+      if( 1 != fread( cart.extram, cart.extram_size, 1, f ) )
+      {
+        fprintf( stderr, "Couldn't read save file.\n" );
+        exit(1);
+      }
       fclose( f );
     }
   }

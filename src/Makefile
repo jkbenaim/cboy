@@ -1,8 +1,8 @@
 target = cboy
 csources = $(wildcard *.c)
 cppsources = $(wildcard *.cpp)
-CFLAGS= -std=c99 -O3 -ggdb -Wall -Werror `sdl2-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
-CXXFLAGS= -O3 -ggdb -Wall `sdl2-config --cflags` -DUSE_SDL -U_FORTIFY_SOURCE
+CFLAGS= -std=c99 -O3 -ggdb -Wall -Werror `sdl2-config --cflags` -DUSE_SDL
+CXXFLAGS= -O3 -ggdb -Wall `sdl2-config --cflags` -DUSE_SDL
 
 .PHONY: all
 all: $(target)
