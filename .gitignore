@@ -2,6 +2,9 @@
 *.o
 *.swp
 *.a
+*.gb
+*.gbc
+*.sav
 cboy
 gbinfo
 roms
