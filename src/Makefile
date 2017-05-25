@@ -1,6 +1,7 @@
 target = cboy
 csources = $(wildcard *.c)
 cppsources = $(wildcard *.cpp)
+objects = $(csources:.c=.o) $(cppsources:.cpp=.o) bootrom.o gb_apu/libgb_apu.a
 CFLAGS= -std=c99 -O3 -ggdb -Wall -Werror `sdl2-config --cflags` -DUSE_SDL
 CXXFLAGS= -O3 -ggdb -Wall `sdl2-config --cflags` -DUSE_SDL
 
@@ -12,8 +13,8 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(sources:%.c=deps/%.d)
 endif
 
-$(target): Makefile $(csources:.c=.o) $(cppsources:.cpp=.o) gb_apu/libgb_apu.a
-	$(CXX) $(CFLAGS) $(csources:.c=.o) $(cppsources:.cpp=.o) gb_apu/libgb_apu.a `sdl2-config --libs` -o $(target)
+$(target): Makefile $(objects)
+	$(CXX) $(CFLAGS) $(objects) `sdl2-config --libs` -o $(target)
 
 .PHONY: clean
 clean:
