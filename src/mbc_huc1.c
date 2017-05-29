@@ -100,7 +100,7 @@ void mbc_huc1_regs_changed()
     // RAM mode
     rambank = huc1_bank_high & 0x03;
 //   }
-  printf( "rombank: %x, rambank: %x\n", rombank, rambank );
+  //printf( "rombank: %x, rambank: %x\n", rombank, rambank );
   size_t cartoffset;
   cartoffset = (rombank*16384) % cart.cartromsize;
   cart.cartrom_bank_n = cart.cartrom + cartoffset;
@@ -118,7 +118,7 @@ uint8_t mbc_huc1_read_bank_n( uint16_t address ) {
 
 // write 0000-1FFF
 void mbc_huc1_write_ram_enable( uint16_t address, uint8_t data ) {
-  printf( "Wrote %04X:%02X\n", address, data );
+  //printf( "Wrote %04X:%02X\n", address, data );
   int i;
   if( /*data == 0x0A*/ 1 )
   {
@@ -149,50 +149,50 @@ uint8_t mbc_huc1_read_ff( uint16_t address )
 
 void mbc_huc1_write_dummy( uint16_t address, uint8_t data )
 {
-  printf( "Wrote %04X:%02X\n", address, data );
+  //printf( "Wrote %04X:%02X\n", address, data );
 }
 
 // write 2000-3FFF
 void mbc_huc1_write_rom_bank_select( uint16_t address, uint8_t data ) {
-  if( address != 0x2000 || data > 0x1F )
-    printf( "Wrote %04X:%02X\n", address, data );
+  //if( address != 0x2000 || data > 0x1F )
+  //  printf( "Wrote %04X:%02X\n", address, data );
   huc1_bank_low = data;
   mbc_huc1_regs_changed();
 }
 
 // write 4000-5FFF
 void mbc_huc1_write_ram_bank_select( uint16_t address, uint8_t data ) {
-  printf( "Wrote %04X:%02X\n", address, data );
+  //printf( "Wrote %04X:%02X\n", address, data );
   huc1_bank_high = data;
   mbc_huc1_regs_changed();
 }
 
 // write 6000-7FFF
 void mbc_huc1_write_mode_select( uint16_t address, uint8_t data ) {
-  printf( "Wrote %04X:%02X\n", address, data );
+  //printf( "Wrote %04X:%02X\n", address, data );
   huc1_mode_select = data;
   mbc_huc1_regs_changed();
 }
 
 // read A000-BFFF
 uint8_t mbc_huc1_read_extram( uint16_t address ) {
-  printf( "Read extram %04X:%02X\n", address, cart.extram_bank[address&0x1fff] );
+  //printf( "Read extram %04X:%02X\n", address, cart.extram_bank[address&0x1fff] );
   return cart.extram_bank[address&0x1fff];
 }
 
 // write A000-BFFF
 void mbc_huc1_write_extram( uint16_t address, uint8_t data ) {
-  printf( "Wrote %04X:%02X\n", address, data );
+  //printf( "Wrote %04X:%02X\n", address, data );
   cart.extram_bank[address&0x1fff] = data;
 }
 
 // read A000-BFFF when extram is disabled
 uint8_t mbc_huc1_read_extram_disabled( uint16_t address ) {
-  printf( "Read %04X:%02X while extram disabled\n", address, 0xff );
+  //printf( "Read %04X:%02X while extram disabled\n", address, 0xff );
   return 0xFF;
 }
 
 // write A000-BFFF when extram is disabled
 void mbc_huc1_write_extram_disabled( uint16_t address, uint8_t data ) {
-  printf( "Wrote %04X:%02X while extram disabled\n", address, data );
+  //printf( "Wrote %04X:%02X while extram disabled\n", address, data );
 }
