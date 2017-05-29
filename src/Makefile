@@ -8,6 +8,7 @@ CXXFLAGS= -O3 -ggdb -Wall `sdl2-config --cflags` -DUSE_SDL
 .PHONY: all
 all: $(target)
 
+.INTERMEDIATE: bootrom.c
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(sources:%.c=deps/%.d)
@@ -20,6 +21,7 @@ $(target): Makefile $(objects)
 clean:
 	rm -Rf $(target) *.o deps
 	make -C gb_apu clean
+	make -C tools clean
 
 deps/%.d: %.c
 	@mkdir -p deps
@@ -31,3 +33,9 @@ deps/%.d: %.c
 apu_sources = $(wildcard gb_apu/*.cpp)
 gb_apu/libgb_apu.a: Makefile
 	make -C gb_apu
+
+tools/bin2c: Makefile
+	make -C tools
+
+bootrom.c: ../bootrom/bootrom.bin tools/bin2c
+	tools/bin2c bootrom_bin < $< > $@

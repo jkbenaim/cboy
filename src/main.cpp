@@ -37,10 +37,9 @@ int main ( int argc, char* argv[] ) {
   printf( " ---  (c) 2012-2017  --- \n" );
   printf( " ----------------------- \n" );
   
-  if(argc < 3)
+  if(argc < 2)
   {
-    fprintf(stderr, "Usage: cboy boot.bin game.gb\n");
-    fprintf(stderr, "If you don't have a bootrom, use quickboot.bin.\n");
+    fprintf(stderr, "Usage: cboy game.gb\n");
     exit(1);
   }
   
@@ -51,7 +50,7 @@ int main ( int argc, char* argv[] ) {
     fprintf( stderr, "cpu init failed\n" );
     return 1;
   }
-  cart_init( argv[1], argv[2] );
+  cart_init( NULL, argv[1] );
   vid_init();
   input_init();
   while(!stop)

@@ -26,6 +26,7 @@
 #include "cpu.h"
 #include <string.h>
 #include "cart_chardev.h"
+#include "bootrom.h"
 
 struct cart_s cart;
 
@@ -246,6 +247,12 @@ void cart_init_cartrom( char* cartromName )
 
 void cart_init_bootrom( char* bootromName )
 {
+  if( bootromName == NULL )
+  {
+      cart.bootromsize = bootrom_bin_len;
+      cart.bootrom = (uint8_t *)bootrom_bin;
+      return;
+  }
   struct stat sb;
   FILE *fd;
   // Load the boot rom.
@@ -385,7 +392,7 @@ void cart_cleanup()
   // free cartrom, bootrom, and extram
   free( cart.cartrom );
   cart.cartrom = NULL;
-  free( cart.bootrom );
+  //free( cart.bootrom );
   cart.bootrom = NULL;
   free( cart.extram );
   cart.extram = NULL;
