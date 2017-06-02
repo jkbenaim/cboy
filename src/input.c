@@ -21,11 +21,8 @@
 #include "memory.h"
 #include "input.h"
 #include "cpu.h"
-#ifdef USE_SDL
 #include <SDL2/SDL.h>
-#endif
 
-#ifdef USE_SDL
 int input_event_filter(void *dontcare, SDL_Event *event)
 {
   switch( event->type ) {
@@ -141,15 +138,12 @@ int input_event_filter(void *dontcare, SDL_Event *event)
   
   return 0;
 }
-#endif // USE_SDL
 
 void input_init()
 {
-#ifdef USE_SDL
   // set up event filtering
   // TODO
   SDL_SetEventFilter( input_event_filter, NULL );
-#endif // USE_SDL
   state.joyp = 0xFF;
   state.joyp_buttons = 0xFF;
   state.joyp_directions = 0xFF;
@@ -158,8 +152,6 @@ void input_init()
 
 void input_handle()
 {
-#ifdef USE_SDL
   // Pump events through the filter.
   SDL_PumpEvents();
-#endif // USE_SDL
 }

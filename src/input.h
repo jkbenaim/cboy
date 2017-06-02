@@ -20,9 +20,7 @@
 #define _INPUT_H_
 
 #include "types.h"
-#ifdef USE_SDL
 #include <SDL2/SDL.h>
-#endif // USE_SDL
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,9 +38,7 @@ extern "C" {
 #define INPUT_DIRECTIONS_RIGHT	0x01
 
 void input_init();
-#ifdef USE_SDL
 int input_event_filter(void *dontcare, SDL_Event *event);
-#endif // USE_SDL
 void input_handle();
 
 #ifdef __cplusplus

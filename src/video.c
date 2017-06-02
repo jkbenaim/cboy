@@ -462,7 +462,6 @@ void vid_render_line()
 
 }
 
-#ifdef USE_SDL
 inline uint32_t rgb555_to_SDL( int color )
 {
     int r = ((color & 0x001F) >> 0      ) << 3;
@@ -472,7 +471,6 @@ inline uint32_t rgb555_to_SDL( int color )
     // TODO
     return g+b+r;
 }
-#endif  // USE_SDL
 
 inline uint32_t rgb555_to_rgb888( int color )
 {

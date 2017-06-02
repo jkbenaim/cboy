@@ -30,7 +30,6 @@
 int stop = 0;
 int pause = 0;
 
-#ifdef USE_SDL
 int main ( int argc, char* argv[] ) {
   printf( " ----------------------- \n" );
   printf( " --- Welcome to cboy --- \n" );
@@ -70,4 +69,3 @@ int main ( int argc, char* argv[] ) {
   
   return 0;
 }
-#endif // USE_SDL
