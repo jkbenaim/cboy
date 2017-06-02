@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include "Basic_Gb_Apu.h"
-#include "Sound_Queue.h"
 #include "audio.h"
 #include <stdio.h>
 #define debugprintf printf
