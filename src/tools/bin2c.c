@@ -11,7 +11,7 @@ int main( int argc, char *argv[] )
     else
         name = "__blob";
 
-    printf( "const char %s[] = {", name );
+    printf( "const unsigned char %s[] = {", name );
     i = 0;
     length = 0;
     while( EOF != (c=getchar()) )
