@@ -29,6 +29,12 @@
 int stop = 0;
 int pause = 0;
 
+/*  If you want to add a new command:
+        1. Declare a function that takes argc and argv as arguments.
+        2. Add an entry to the cmds[] array.
+        3. Implement the function at the end of this file.
+*/
+
 struct command {
     const char *name;
     int (*func)(int, char**);
