@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "Basic_Gb_Apu.h"
 #include "audio.h"
 #include <stdio.h>
