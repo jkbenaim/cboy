@@ -55,7 +55,6 @@ struct cart_s {
   char savename[256];
   int huc3_ram_mode;
   FILE *fd;
-  int chardev_mode;
 };
 
 #define MAX_CARTROM_SIZE	8388608

@@ -25,7 +25,6 @@
 #include "cartdesc.h"
 #include "cpu.h"
 #include <string.h>
-#include "cart_chardev.h"
 #include "bootrom.h"
 
 struct cart_s cart;
@@ -79,22 +78,7 @@ void cart_init( char* bootromName, char* cartromName )
     printf("Couldn't stat cartrom %s\n", cartromName);
     exit(1);
   }
-  
-  
-  if( S_ISREG(s.st_mode) )
-  {
-    cart.chardev_mode = 0;
-    cart_init_file(bootromName, cartromName);
-  }
-  else if( S_ISCHR(s.st_mode) )
-  {
-    cart.chardev_mode = 1;
-    printf("Opening %s...\n", cartromName);
-    cart_init_chardev(bootromName, cartromName);
-  }
-  
-  
-  
+  cart_init_file(bootromName, cartromName);
 }
 
 void cart_init_file( char* bootromName, char* cartromName ) {
@@ -294,12 +278,6 @@ void cart_init_bootrom( char* bootromName )
  */
 void cart_reset_mbc()
 {
-  if( cart.chardev_mode == 1 )
-  {
-    cart_c_reset_mbc();
-    return;
-  }
-    
   if( cart.cleanup != NULL )
     cart.cleanup();
   
@@ -368,12 +346,6 @@ void cart_reset_mbc()
   
 void cart_cleanup()
 {
-  if( cart.chardev_mode == 1 )
-  {
-    cart_c_cleanup();
-    return;
-  }
-  
   // call the mbc handler's cleanup function
   cart.cleanup();
   

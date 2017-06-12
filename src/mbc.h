@@ -27,13 +27,6 @@
 #include "mbc_mbc3.h"
 #include "mbc_mbc5.h"
 #include "mbc_mbc7.h"
-#include "mbc_c_boot.h"
-#include "mbc_c_none.h"
-#include "mbc_c_mbc1.h"
-#include "mbc_c_mbc2.h"
-#include "mbc_c_mbc3.h"
-#include "mbc_c_mbc5.h"
-#include "mbc_c_cam.h"
 
 #ifndef _MBC_H_
 #define _MBC_H_
