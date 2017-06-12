@@ -20,7 +20,7 @@
 #include "video.h"
 #include "memory.h"
 #include "cpu.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 pixel_t pixmem[160*144];
 pixel_t colormem[160*144];

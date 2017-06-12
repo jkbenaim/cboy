@@ -20,7 +20,7 @@
 #define _INPUT_H_
 
 #include "types.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #ifdef __cplusplus
 extern "C" {

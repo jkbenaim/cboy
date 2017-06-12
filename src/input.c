@@ -21,7 +21,7 @@
 #include "memory.h"
 #include "input.h"
 #include "cpu.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 int input_event_filter(void *dontcare, SDL_Event *event)
 {
