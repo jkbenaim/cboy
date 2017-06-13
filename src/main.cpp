@@ -46,6 +46,7 @@ void print_usage();
 int cmd_run(int, char**);
 int cmd_help(int, char**);
 int cmd_exit(int, char**);
+int cmd_info(int, char**);
 
 struct command cmds[] = {
     {
@@ -59,6 +60,12 @@ struct command cmds[] = {
         .func = cmd_run,
         .help_short = "Run a Game Boy ROM in the emulator.",
         .help_long = "run <romfile>\n\trun romfile in the Game Boy emulator",
+    },
+    {
+        .name = "info",
+        .func = cmd_info,
+        .help_short = "Print ROM header info.",
+        .help_long = "info <romfile>\n\tprint meaning of header fields in romfile",
     },
     {
         .name = "",
@@ -184,4 +191,11 @@ int cmd_run( int argc, char *argv[] )
 int cmd_exit( int argc, char *argv[] )
 {
     return 0;
+}
+
+int cmd_info( int argc, char *argv[] )
+{
+    // implemented in gbinfo.c
+    extern int cmd_info_impl(int, char**);
+    return cmd_info_impl( argc, argv );
 }

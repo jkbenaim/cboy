@@ -16,15 +16,17 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ************************************************************************/
 
+#define _BSD_SOURCE
+#include <endian.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "../src/types.h"
-#include "../src/cartdesc.h"
+#include "types.h"
+#include "cartdesc.h"
 
 struct header_s {
-    /* 0x100 */ uint8_t entry[4];
+    /* 0x100 */ uint32_t entry;
     /* 0x104 */ uint8_t logo[48];
     /* 0x134 */ char title[16];
 //     /* 0x13f */ char manufacturer[4];
@@ -59,7 +61,7 @@ const uint8_t logo[48] =
 
 static const unsigned int max_rom_size = 8 * 1024 * 1024;
 
-int main( int argc, char* argv[] )
+int cmd_info_impl( int argc, char *argv[] )
 {
   uint32_t rom_size = 0;
   uint8_t *rom;
@@ -68,16 +70,16 @@ int main( int argc, char* argv[] )
   uint16_t my_checksum = 0;
   uint8_t my_header_checksum = 0;
   
-  if( argc < 2 )
+  if( argc < 3 )
   {
     fprintf( stderr, "need an argument\n" );
     return 1;
   }
   
   struct stat s;
-  if( stat( argv[1], &s ) != 0 )
+  if( stat( argv[2], &s ) != 0 )
   {
-      fprintf( stderr, "Couldn't stat file: %s\n", argv[1] );
+      fprintf( stderr, "Couldn't stat file: %s\n", argv[2] );
       return 1;
   }
   
@@ -94,7 +96,7 @@ int main( int argc, char* argv[] )
   }
   
   // Read the cartrom.
-  fd = fopen( argv[1], "r" );
+  fd = fopen( argv[2], "r" );
   if( fread( rom, rom_size, 1, fd ) != 1 )
   {
     fprintf( stderr, "Reading cart rom failed.\n" );
@@ -107,7 +109,7 @@ int main( int argc, char* argv[] )
   
 //   /* 0x100 */ uint8_t entry[4];
   printf( "Entry: " );
-  uint32_t temp = be32toh( *(uint32_t *)header.entry);
+  uint32_t temp = be32toh(header.entry);
   if( temp == 0x00c35001 )
     printf( "normal\n" );
   else
