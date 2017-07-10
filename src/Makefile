@@ -20,8 +20,8 @@ $(target): Makefile $(objects)
 .PHONY: clean
 clean:
 	rm -Rf $(target) *.o deps
-	make -C gb_apu clean
-	make -C tools clean
+	$(MAKE) -C gb_apu clean
+	$(MAKE) -C tools clean
 
 deps/%.d: %.c
 	@mkdir -p deps
@@ -32,10 +32,10 @@ deps/%.d: %.c
 
 apu_sources = $(wildcard gb_apu/*.cpp)
 gb_apu/libgb_apu.a: Makefile
-	make -C gb_apu
+	$(MAKE) -C gb_apu
 
 tools/bin2c: Makefile
-	make -C tools
+	$(MAKE) -C tools
 
 bootrom.c: ../bootrom/bootrom.bin tools/bin2c
 	tools/bin2c bootrom_bin < $< > $@
