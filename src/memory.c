@@ -27,9 +27,6 @@
 #include "mbc.h"
 #include "audio.h"
 
-// usage statistics
-pixel_t visual_memory[65536];
-
 uint8_t ram[0x1];
 uint8_t vram_bank_zero[0x2000];	// 8000-9FFF
 uint8_t vram_bank_one[0x2000];	// 8000-9FFF
@@ -686,28 +683,6 @@ void write_out_of_bounds( uint16_t address, uint8_t data )
 {
   fprintf( stderr, "Out-of-bounds write, address: %04X, pc: %04X\n", address, state.pc );
   exit(1);
-}
-
-int min( int n, int m )
-{
-  return n<m?n:m;
-}
-
-void vm_add( uint16_t address, int c )
-{
-  int ar = (visual_memory[address] & 0x00ff0000) >> 16;
-  int ag = (visual_memory[address] & 0x0000ff00) >>  8;
-  int ab = (visual_memory[address] & 0x000000ff) >>  0;
-  
-  int cr = (                     c & 0x00ff0000) >> 16;
-  int cg = (                     c & 0x0000ff00) >>  8;
-  int cb = (                     c & 0x000000ff) >>  0;
-  
-  int nr = min(ar+cr, 255);
-  int ng = min(ag+cg, 255);
-  int nb = min(ab+cb, 255);
-  
-  visual_memory[address] = (nr << 16) + (ng << 8) + nb ;
 }
 
 uint8_t read_byte( uint16_t address ) {
