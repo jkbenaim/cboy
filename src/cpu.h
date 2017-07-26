@@ -130,11 +130,6 @@ struct state_s {
   uint8_t key1;
   int cpu_speed;
   
-  // sound stuff
-  uint8_t nr10, nr11, nr12, nr13, nr14, nr20, nr21, nr22, nr23, nr24, nr30, nr31;
-  uint8_t nr32, nr33, nr34, nr41, nr42, nr43, nr44, nr50, nr51, nr52;
-  uint8_t waveram[0x10];
-  
   //cgb stuff
   uint8_t bgpi;
   uint8_t bgpd[0x40];
