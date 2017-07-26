@@ -111,22 +111,6 @@ int op_cb_times[0x100] = {
 	2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2
 };
 
-#define LD(X,Y) void LD_ ## X ## _ ## Y( void ) { (state.X) = (state.Y); state.pc++; }
-LD(b,b);LD(b,c);LD(b,d);LD(b,e);
-LD(b,h);LD(b,l);LD(b,a);
-LD(c,b);LD(c,c);LD(c,d);LD(c,e);
-LD(c,h);LD(c,l);LD(c,a);
-LD(d,b);LD(d,c);LD(d,d);LD(d,e);
-LD(d,h);LD(d,l);LD(d,a);
-LD(e,b);LD(e,c);LD(e,d);LD(e,e);
-LD(e,h);LD(e,l);LD(e,a);
-LD(h,b);LD(h,c);LD(h,d);LD(h,e);
-LD(h,h);LD(h,l);LD(h,a);
-LD(l,b);LD(l,c);LD(l,d);LD(l,e);
-LD(l,h);LD(l,l);LD(l,a);
-LD(a,b);LD(a,c);LD(a,d);LD(a,e);
-LD(a,h);LD(a,l);LD(a,a);
-
 void (*ops[0x100])(void) = {
   /* 00 */ NOP, 	LD_BC_WORD,	LD_BC_A,	INC_BC,
   /* 04 */ INC_R, 	DEC_R, 		LD_B_BYTE,	RLCA, 
@@ -144,22 +128,22 @@ void (*ops[0x100])(void) = {
   /* 34 */ INC_AT_HL,	DEC_AT_HL,	LD_HL_BYTE,	SCF,
   /* 38 */ JR_C_INDEX, 	ADD_HL_SP,	LDD_A_HL,	DEC_SP,
   /* 3C */ INC_R,	DEC_R,		LD_A_BYTE, 	CCF,
-  /* 40 */ LD_b_b,      LD_b_c,         LD_b_d,         LD_b_e,
-  /* 44 */ LD_b_h, 	LD_b_l,		LD_B_HL,	LD_b_a,
-  /* 48 */ LD_c_b, 	LD_c_c,		LD_c_d, 	LD_c_e,
-  /* 4C */ LD_c_h, 	LD_c_l,		LD_C_HL,	LD_c_a,
-  /* 50 */ LD_d_b, 	LD_d_c,		LD_d_d, 	LD_d_e,
-  /* 54 */ LD_d_h, 	LD_d_l,		LD_D_HL,	LD_d_a,
-  /* 58 */ LD_e_b, 	LD_e_c,		LD_e_d, 	LD_e_e,
-  /* 5C */ LD_e_h, 	LD_e_l,		LD_E_HL,	LD_e_a,
-  /* 60 */ LD_h_b, 	LD_h_c,		LD_h_d,		LD_h_e,
-  /* 64 */ LD_h_h, 	LD_h_l,		LD_H_HL,	LD_h_a,
-  /* 68 */ LD_l_b, 	LD_l_c,		LD_l_d, 	LD_l_e,
-  /* 6C */ LD_l_h, 	LD_l_l,		LD_L_HL,	LD_l_a,
+  /* 40 */ LD_R_R,      LD_R_R,         LD_R_R,         LD_R_R,
+  /* 44 */ LD_R_R, 	LD_R_R,		LD_B_HL,	LD_R_R,
+  /* 48 */ LD_R_R, 	LD_R_R,		LD_R_R, 	LD_R_R,
+  /* 4C */ LD_R_R, 	LD_R_R,		LD_C_HL,	LD_R_R,
+  /* 50 */ LD_R_R, 	LD_R_R,		LD_R_R, 	LD_R_R,
+  /* 54 */ LD_R_R, 	LD_R_R,		LD_D_HL,	LD_R_R,
+  /* 58 */ LD_R_R, 	LD_R_R,		LD_R_R, 	LD_R_R,
+  /* 5C */ LD_R_R, 	LD_R_R,		LD_E_HL,	LD_R_R,
+  /* 60 */ LD_R_R, 	LD_R_R,		LD_R_R,		LD_R_R,
+  /* 64 */ LD_R_R, 	LD_R_R,		LD_H_HL,	LD_R_R,
+  /* 68 */ LD_R_R, 	LD_R_R,		LD_R_R, 	LD_R_R,
+  /* 6C */ LD_R_R, 	LD_R_R,		LD_L_HL,	LD_R_R,
   /* 70 */ LD_HL_R, 	LD_HL_R,	LD_HL_R, 	LD_HL_R,
   /* 74 */ LD_HL_R, 	LD_HL_R,	HALT, 		LD_HL_R,
-  /* 78 */ LD_a_b, 	LD_a_c,		LD_a_d,		LD_a_e,
-  /* 7C */ LD_a_h, 	LD_a_l,		LD_A_HL,	LD_a_a,
+  /* 78 */ LD_R_R, 	LD_R_R,		LD_R_R,		LD_R_R,
+  /* 7C */ LD_R_R, 	LD_R_R,		LD_A_HL,	LD_R_R,
   /* 80 */ ADD_A_R, 	ADD_A_R,	ADD_A_R, 	ADD_A_R,
   /* 84 */ ADD_A_R, 	ADD_A_R,	ADD_A_HL,	ADD_A_R,
   /* 88 */ ADC_A_R, 	ADC_A_R,	ADC_A_R,	ADC_A_R,
