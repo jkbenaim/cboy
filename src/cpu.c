@@ -253,6 +253,39 @@ void trash_OAM( void )
         oam[i] = rand()%0xFF;
 }
 
+void set_f_reg( uint8_t bitfield )
+{
+    if( bitfield & FLAGS_Z )
+        SET_Z();
+    else
+        RESET_Z();
+
+    if( bitfield & FLAGS_N )
+        SET_N();
+    else
+        RESET_N();
+
+    if( bitfield & FLAGS_H )
+        SET_H();
+    else
+        RESET_H();
+
+    if( bitfield & FLAGS_C )
+        SET_C();
+    else
+        RESET_C();
+}
+
+uint8_t get_f_reg()
+{
+    uint8_t f = 0;
+    if( ISSET_Z() ) f |= FLAGS_Z;
+    if( ISSET_N() ) f |= FLAGS_N;
+    if( ISSET_H() ) f |= FLAGS_H;
+    if( ISSET_C() ) f |= FLAGS_C;
+    return f;
+}
+
 void UNDEF( void )
 {
   printf("Undefined opcode %02X at address %04X\n", state.op, state.pc);
@@ -3017,7 +3050,12 @@ void LD_A_FF_BYTE( void )
 void POP_AF( void )
 {
   // opcode F1
-  state.af = read_word(state.sp);
+  uint16_t af = read_word(state.sp);
+  uint8_t a = af >> 8;
+  uint8_t f = af & 0xFF;
+
+  state.a = a;
+  set_f_reg(f);
   
   // no flags affected
   
@@ -3045,7 +3083,12 @@ void PUSH_AF( void )
 {
   // opcode F5
   state.sp -= 2;
-  write_word(state.sp, state.af);
+
+  // The F flag is no longer directly available, so
+  // we have to fake it.
+  uint16_t af;
+  af = state.a<<8 | get_f_reg();
+  write_word(state.sp, af);
   
   state.pc++;
 }
@@ -3221,10 +3264,6 @@ int cpu_init() {
   state.h  = 0;
   state.l  = 0;
   state.a  = 0;
-  state.flag_c = 0;
-  state.flag_h = 0;
-  state.flag_n = 0;
-  state.flag_z = 0;
   RESET_C();
   RESET_H();
   RESET_N();
@@ -3397,8 +3436,6 @@ void cpu_do_one_instruction()
     {
       ops[state.op]();
     }
-    // Reset the unused bits in the flags register
-    state.f &= 0xF0;
   }
   
   // Update vid_cycles counter.

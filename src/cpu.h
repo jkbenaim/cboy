@@ -51,13 +51,6 @@ struct state_s {
     };
     uint16_t bc;
   };
-  union {
-    struct {
-      uint8_t a;
-      uint8_t f;
-    };
-    uint16_t af;
-  };
 #else	// __LITTLE_ENDIAN__
   union {
     struct {
@@ -80,18 +73,13 @@ struct state_s {
     };
     uint16_t bc;
   };
-  union {
-    struct {
-      uint8_t f;
-      uint8_t a;
-    };
-    uint16_t af;
-  };
 #endif
-  int flag_c;
-  int flag_h;
-  int flag_n;
-  int flag_z;
+  uint8_t a;
+  uint_least16_t flag_c;
+  uint_least8_t flag_h1;
+  uint_least8_t flag_h2;
+  uint_least8_t flag_n;
+  uint8_t flag_z;
   int vid_mode;
   int old_vid_mode;
   uint8_t joyp;
@@ -190,30 +178,21 @@ extern struct state_s state;
 /*
  * Flag (re)set macros
  */
-// #define SET_C()			(state.flag_c = 1)
-// #define SET_H()			(state.flag_h = 1)
-// #define SET_N()			(state.flag_n = 1)
-// #define SET_Z()			(state.flag_z = 1)
-// #define RESET_C()		(state.flag_c = 0)
-// #define RESET_H()		(state.flag_h = 0)
-// #define RESET_N()		(state.flag_n = 0)
-// #define RESET_Z()		(state.flag_z = 0)
-// #define ISSET_C()		(state.flag_c != 0)
-// #define ISSET_H()               (state.flag_h != 0)
-// #define ISSET_N()               (state.flag_n != 0)
-// #define ISSET_Z()               (state.flag_z != 0)
-#define SET_C()                 (state.f |= FLAGS_C)
-#define SET_H()                 (state.f |= FLAGS_H)
-#define SET_N()                 (state.f |= FLAGS_N)
-#define SET_Z()                 (state.f |= FLAGS_Z)
-#define RESET_C()               (state.f &= ~FLAGS_C)
-#define RESET_H()               (state.f &= ~FLAGS_H)
-#define RESET_N()               (state.f &= ~FLAGS_N)
-#define RESET_Z()               (state.f &= ~FLAGS_Z)
-#define ISSET_C()               (state.f & FLAGS_C)
-#define ISSET_H()               (state.f & FLAGS_H)
-#define ISSET_N()               (state.f & FLAGS_N)
-#define ISSET_Z()               (state.f & FLAGS_Z)
+#define SET_Z()                 (state.flag_z = 0)
+#define RESET_Z()               (state.flag_z = 1)
+#define ISSET_Z()               (state.flag_z == 0)
+
+#define SET_N()                 (state.flag_n = 1)
+#define RESET_N()               (state.flag_n = 0)
+#define ISSET_N()               (state.flag_n != 0)
+
+#define SET_H()                 (state.flag_h1 = state.flag_h2 = 0xff)
+#define RESET_H()               (state.flag_h1 = state.flag_h2 = 0x00)
+#define ISSET_H()               (((state.flag_h1&0xf)+(state.flag_h2&0x0f))&0xf0)
+
+#define SET_C()                 (state.flag_c = 0x100)
+#define RESET_C()               (state.flag_c = 0)
+#define ISSET_C()               (state.flag_c & 0x100)
 
 /*
  * Number of cycles for each video mode.
