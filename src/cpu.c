@@ -838,6 +838,7 @@ void DAA( void )
   // flag C
   if ((temp & 0x100) == 0x100)
     SET_C();
+  // will never reset C
   
   state.pc++;
 }
