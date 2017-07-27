@@ -351,23 +351,17 @@ void INC_R( void )
   uint8_t *reg = cpu_getReg(regNumber);
   
   int old_r = (*reg);
-  (*reg)++;
-  int new_r = (*reg);
+  int new_r = ++(*reg);
   
   // flag Z
-  if((*reg) == 0)
-    SET_Z();
-  else
-    RESET_Z();
+  state.flag_z = new_r;
   
   // flag N
   RESET_N();
   
   // flag H
-  if( (new_r & 0xF0) != (old_r & 0xF0) )
-    SET_H();
-  else
-    RESET_H();
+  state.flag_h1 = old_r;
+  state.flag_h2 = 1;
   
   // flag C is not affected
   
@@ -383,24 +377,18 @@ void DEC_R( void )
   int regNumber = ((int)(state.op) & 0x38) >> 3;
   uint8_t *reg = cpu_getReg(regNumber);
   
-  int old_r = (*reg);
-  (*reg)--;
-  int new_r = (*reg);
+  //int old_r = (*reg);
+  int new_r = --(*reg);
   
   // flag Z
-  if(new_r == 0)
-    SET_Z();
-  else
-    RESET_Z();
+  state.flag_z = new_r;
   
   // flag N
   SET_N();
   
   // flag H
-  if( (new_r & 0xF0) != (old_r & 0xF0) )
-    SET_H();
-  else
-    RESET_H();
+  state.flag_h1 = new_r;
+  state.flag_h2 = 1;
   
   // flag C is not affected
   
@@ -825,10 +813,7 @@ void DAA( void )
   state.a = temp;
   
   // flag Z
-  if (state.a == 0)
-    SET_Z();
-  else
-    RESET_Z();
+  state.flag_z = state.a;
   
   // flag N is not affected
   
@@ -997,19 +982,14 @@ void INC_AT_HL( void )
   write_byte(state.hl, new_memByte);
   
   // flag Z
-  if( new_memByte == 0 )
-    SET_Z();
-  else
-    RESET_Z();
+  state.flag_z = new_memByte;
   
   // flag N
   RESET_N();
   
   // flag H
-  if( (new_memByte & 0xF0) != (old_memByte & 0xF0) )
-    SET_H();
-  else
-    RESET_H();
+  state.flag_h1 = old_memByte;
+  state.flag_h2 = 1;
   
   // flag C is not affected
   
