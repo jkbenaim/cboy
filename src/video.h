@@ -40,6 +40,7 @@ extern "C" {
 #define BG_VRAM_BANK		0x08	// 0=Bank 0, 1=Bank 1
 #define BG_CGB_PAL_MASK		0x07	// BGP0-7
 
+extern char inval_palette;
 void vid_init( void );
 void vid_waitForNextFrame();
 void vid_render_line();

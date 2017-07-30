@@ -25,6 +25,7 @@
 static pixel_t pixmem[160*144];
 static pixel_t colormem[160*144];
 
+char inval_palette = 1;
 static pixel_t myCachedPalettes[8][8];
 static pixel_t pixels[8];
 static pixel_t colors[8];
@@ -169,46 +170,50 @@ void vid_render_line()
         return;
 
     // Set up cached palettes.
-    if( state.caps & 0x04 )
-    {
-        pixel_t tempPalette[4];
-        // DMG mode
-        // colors need to be translated through BOTH the DMG and CGB palettes
-        for (int i = 0; i < 8; i++) {
-          tempPalette[0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
-          tempPalette[1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
-          tempPalette[2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
-          tempPalette[3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
+    if (inval_palette) {
+      if( state.caps & 0x04 )
+      {
+          pixel_t tempPalette[4];
+          // DMG mode
+          // colors need to be translated through BOTH the DMG and CGB palettes
+          for (int i = 0; i < 8; i++) {
+            tempPalette[0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
+            tempPalette[1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
+            tempPalette[2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
+            tempPalette[3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
 
-          myCachedPalettes[i][0] = tempPalette[((state.bgp)      & 0x3) ];
-          myCachedPalettes[i][1] = tempPalette[((state.bgp >> 2) & 0x3) ];
-          myCachedPalettes[i][2] = tempPalette[((state.bgp >> 4) & 0x3) ];
-          myCachedPalettes[i][3] = tempPalette[((state.bgp >> 6) & 0x3) ];
+            myCachedPalettes[i][0] = tempPalette[((state.bgp)      & 0x3) ];
+            myCachedPalettes[i][1] = tempPalette[((state.bgp >> 2) & 0x3) ];
+            myCachedPalettes[i][2] = tempPalette[((state.bgp >> 4) & 0x3) ];
+            myCachedPalettes[i][3] = tempPalette[((state.bgp >> 6) & 0x3) ];
 
-          tempPalette[0] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
-          tempPalette[1] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
-          tempPalette[2] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
-          tempPalette[3] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
+            tempPalette[0] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
+            tempPalette[1] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
+            tempPalette[2] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
+            tempPalette[3] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
 
-          int dmgPalette = (i==0) ? state.obp0 : state.obp1;
+            int dmgPalette = (i==0) ? state.obp0 : state.obp1;
 
-          myCachedPalettes[i][4] = tempPalette[((dmgPalette)      & 0x3) ];
-          myCachedPalettes[i][5] = tempPalette[((dmgPalette >> 2) & 0x3) ];
-          myCachedPalettes[i][6] = tempPalette[((dmgPalette >> 4) & 0x3) ];
-          myCachedPalettes[i][7] = tempPalette[((dmgPalette >> 6) & 0x3) ];
-        }
-    } else {
-        // CGB mode
-        for (int i = 0; i < 8; i++) {
-          myCachedPalettes[i][0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
-          myCachedPalettes[i][1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
-          myCachedPalettes[i][2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
-          myCachedPalettes[i][3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
-          myCachedPalettes[i][4] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
-          myCachedPalettes[i][5] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
-          myCachedPalettes[i][6] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
-          myCachedPalettes[i][7] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
-        }
+            myCachedPalettes[i][4] = tempPalette[((dmgPalette)      & 0x3) ];
+            myCachedPalettes[i][5] = tempPalette[((dmgPalette >> 2) & 0x3) ];
+            myCachedPalettes[i][6] = tempPalette[((dmgPalette >> 4) & 0x3) ];
+            myCachedPalettes[i][7] = tempPalette[((dmgPalette >> 6) & 0x3) ];
+          }
+      } else {
+          // CGB mode
+          for (int i = 0; i < 8; i++) {
+            myCachedPalettes[i][0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
+            myCachedPalettes[i][1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
+            myCachedPalettes[i][2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
+            myCachedPalettes[i][3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
+            myCachedPalettes[i][4] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
+            myCachedPalettes[i][5] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
+            myCachedPalettes[i][6] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
+            myCachedPalettes[i][7] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
+          }
+      }
+
+      inval_palette = 0;
     }
 
     int backLineToRender = ((int)state.ly + (int)state.scy) % 256;
