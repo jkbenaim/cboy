@@ -176,7 +176,7 @@ void vid_render_line()
           pixel_t tempPalette[4];
           // DMG mode
           // colors need to be translated through BOTH the DMG and CGB palettes
-          for (int i = 0; i < 8; i++) {
+          for (int i = 0; i < 2; i++) {
             tempPalette[0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
             tempPalette[1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
             tempPalette[2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
