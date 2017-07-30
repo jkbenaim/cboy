@@ -22,59 +22,35 @@
 #include "cpu.h"
 #include <SDL.h>
 
-pixel_t pixmem[160*144];
-pixel_t colormem[160*144];
+static pixel_t pixmem[160*144];
+static pixel_t colormem[160*144];
+
+static pixel_t myCachedPalettes[8][8];
+static pixel_t pixels[8];
+static pixel_t colors[8];
 
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *gametex;
 
-void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int updateColormem ) {
+static int vid_drawSpanCommon(pixel_t *palette, int vramAddr, int x, int y, int vramBank,
+        int xFlip, int *lineStart, int *spanStart, int *spanEnd) {
 
     // Is this span off the left of the screen?
     if(x<-7)
-        return;
+        return 1;
 
     // Is this span off the top of the screen?
     if(y<0)
-        return;
+        return 1;
 
     if((x-8)>160)
-        return;
+        return 1;
 
-    // Set up local palette.
-    // FIXME The names of these variables are fucking confusing
-    pixel_t myPalette[4];
-    if( state.caps & 0x04 )
-    {
-        // DMG mode
-        // colors need to be translated through BOTH the DMG and CGB palettes
-        pixel_t cgbPalette[4];
-        cgbPalette[0] = state.bgpd[(pal*8)+0] + (state.bgpd[(pal*8)+1]<<8);
-        cgbPalette[1] = state.bgpd[(pal*8)+2] + (state.bgpd[(pal*8)+3]<<8);
-        cgbPalette[2] = state.bgpd[(pal*8)+4] + (state.bgpd[(pal*8)+5]<<8);
-        cgbPalette[3] = state.bgpd[(pal*8)+6] + (state.bgpd[(pal*8)+7]<<8);
-
-        myPalette[0] = cgbPalette[ (state.bgp)      & 0x3 ];
-        myPalette[1] = cgbPalette[ (state.bgp >> 2) & 0x3 ];
-        myPalette[2] = cgbPalette[ (state.bgp >> 4) & 0x3 ];
-        myPalette[3] = cgbPalette[ (state.bgp >> 6) & 0x3 ];
-    } else {
-        // CGB mode
-        myPalette[0] = state.bgpd[(pal*8)+0] + (state.bgpd[(pal*8)+1]<<8);
-        myPalette[1] = state.bgpd[(pal*8)+2] + (state.bgpd[(pal*8)+3]<<8);
-        myPalette[2] = state.bgpd[(pal*8)+4] + (state.bgpd[(pal*8)+5]<<8);
-        myPalette[3] = state.bgpd[(pal*8)+6] + (state.bgpd[(pal*8)+7]<<8);
-    }
-
-
-    int lineStart = 160 * y;
+    *lineStart = 160 * y;
     //   uint32_t *pixmem = (uint32_t*) screen->pixels;
 
-
     // fill pixel array with span
-    pixel_t pixels[8];    // pixel 7 at the left, pixel 0 at the right
-    pixel_t colors[8];
     int lowBits, highBits;
     if( vramBank == 0 )
     {
@@ -87,6 +63,7 @@ void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramB
         highBits = vram_bank_one[vramAddr + 1];
     }
 
+    // pixel 7 at the left, pixel 0 at the right
     int p;
     for( p=0; p<8; ++p )
     {
@@ -98,19 +75,19 @@ void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramB
             color = 1;
         if( highBits & mask )
             color += 2;
-        pixels[p] = myPalette[color];
+        pixels[p] = palette[color];
         colors[p] = color;
     }
 
     // Is the span partially offscreen?
-    int spanStart = 0;
-    int spanEnd = 7;
+    *spanStart = 0;
+    *spanEnd = 7;
     // Partially off the left side of the screen
     if( x < 0 )
-        spanStart = -x;
+        *spanStart = -x;
     // Partially off the right side of the screen
     if( x > (160-8) )
-        spanEnd = 159 - x;
+        *spanEnd = 159 - x;
 
     // xFlip?
     if( xFlip )
@@ -133,128 +110,36 @@ void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramB
         }
     }
 
-    // Draw the span from left to right.
-    for( p=spanStart; p<=spanEnd; ++p )
-    {
-        pixmem[ lineStart + x + p ] = pixels[ 7-p ];
-    }
-    if( updateColormem )
-    {
-        for( p=spanStart; p<=spanEnd; ++p )
-        {
-            colormem[ lineStart + x + p ] = colors[ 7-p ];
-        }
-    }
-
+    return 0;
 }
 
-void vid_drawTransparentSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int priority ) {
 
-    // Is this span off the left of the screen?
-    if(x<-7)
-        return;
-
-    // Is this span off the top of the screen?
-    if(y<0)
-        return;
-
-    if((x-8)>160)
-        return;
-
-    // Set up local palette.
-    // FIXME The names of these variables are fucking confusing
-    pixel_t myPalette[4];
-    if( state.caps & 0x04 )
-    {
-        // DMG mode
-        // colors need to be translated through BOTH the DMG and CGB palettes
-        pixel_t cgbPalette[4];
-        cgbPalette[0] = state.obpd[(pal*8)+0] + (state.obpd[(pal*8)+1]<<8);
-        cgbPalette[1] = state.obpd[(pal*8)+2] + (state.obpd[(pal*8)+3]<<8);
-        cgbPalette[2] = state.obpd[(pal*8)+4] + (state.obpd[(pal*8)+5]<<8);
-        cgbPalette[3] = state.obpd[(pal*8)+6] + (state.obpd[(pal*8)+7]<<8);
-
-        int dmgPalette = (pal==0) ? state.obp0 : state.obp1;
-
-        myPalette[0] = cgbPalette[ (dmgPalette)      & 0x3 ];
-        myPalette[1] = cgbPalette[ (dmgPalette >> 2) & 0x3 ];
-        myPalette[2] = cgbPalette[ (dmgPalette >> 4) & 0x3 ];
-        myPalette[3] = cgbPalette[ (dmgPalette >> 6) & 0x3 ];
-    } else {
-        // CGB mode
-        myPalette[0] = state.obpd[(pal*8)+0] + (state.obpd[(pal*8)+1]<<8);
-        myPalette[1] = state.obpd[(pal*8)+2] + (state.obpd[(pal*8)+3]<<8);
-        myPalette[2] = state.obpd[(pal*8)+4] + (state.obpd[(pal*8)+5]<<8);
-        myPalette[3] = state.obpd[(pal*8)+6] + (state.obpd[(pal*8)+7]<<8);
-    }
-
-
-    int lineStart = 160 * y;
-
-
-    // fill pixel array with span
-    pixel_t pixels[8];    // pixel 7 at the left, pixel 0 at the right
-    pixel_t colors[8];
-    int lowBits, highBits;
-    if( vramBank == 0 )
-    {
-        lowBits = vram_bank_zero[vramAddr];
-        highBits = vram_bank_zero[vramAddr + 1];
-    }
-    else
-    {
-        lowBits = vram_bank_one[vramAddr];
-        highBits = vram_bank_one[vramAddr + 1];
-    }
-
-    int p;
-    for( p=0; p<8; ++p )
-    {
-        int color;
-        int mask;
-        color = 0;
-        mask = 1<<p;
-        if( lowBits & mask )
-            color = 1;
-        if( highBits & mask )
-            color += 2;
-        colors[p] = color;
-        pixels[p] = myPalette[color];
-    }
-
-    // Is the span partially offscreen?
-    int spanStart = 0;
-    int spanEnd = 7;
-    // Partially off the left side of the screen
-    if( x < 0 )
-        spanStart = -x;
-    // Partially off the right side of the screen
-    if( x > (160-8) )
-        spanEnd = 159 - x;
-
-    // xFlip?
-    if( xFlip )
-    {
-        // Flip the span.
-        pixel_t temp_pixels[8];
-        pixel_t temp_colors[8];
-
-        int i;
-        for(i=0; i<8; ++i)
-        {
-            // Copy pixels to a temporary place, in reverse order.
-            temp_pixels[i] = pixels[7-i];
-            temp_colors[i] = colors[7-i];
-        }
-        for(i=0; i<8; ++i)
-        {
-            pixels[i] = temp_pixels[i];
-            colors[i] = temp_colors[i];
-        }
-    }
-
+static void vid_drawOpaqueSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int updateColormem ) {
+    int lineStart, spanStart, spanEnd;
+    if (vid_drawSpanCommon(&myCachedPalettes[pal][0], vramAddr, x, y, vramBank, xFlip, &lineStart, &spanStart, &spanEnd))
+      return;
 
     // Draw the span from left to right.
+    unsigned didx = lineStart + x + spanStart;
+    unsigned sidx = 7 - spanStart;
+
+    for( int p=spanStart; p<=spanEnd; ++p )
+    {
+        if( updateColormem ) {
+          colormem[ didx ] = colors[ sidx ];
+        }
+
+        pixmem[ didx++ ] = pixels[ sidx-- ];
+    }
+}
+
+static void vid_drawTransparentSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int vramBank, int xFlip, int priority ) {
+    int lineStart, spanStart, spanEnd;
+    if (vid_drawSpanCommon(&myCachedPalettes[pal][4], vramAddr, x, y, vramBank, xFlip, &lineStart, &spanStart, &spanEnd))
+      return;
+
+    // Draw the span from left to right.
+    int p;
     for( p=spanStart; p<=spanEnd; ++p )
     {
         if( colors[7-p] != 0 )
@@ -274,7 +159,6 @@ void vid_drawTransparentSpan( uint8_t pal, uint16_t vramAddr, int x, int y, int 
             }
         }
     }
-
 }
 
 void vid_render_line()
@@ -283,6 +167,49 @@ void vid_render_line()
     // We should probably blank the line instead...
     if( (state.lcdc & LCDC_LCD_ENABLE) == 0 )
         return;
+
+    // Set up cached palettes.
+    if( state.caps & 0x04 )
+    {
+        pixel_t tempPalette[4];
+        // DMG mode
+        // colors need to be translated through BOTH the DMG and CGB palettes
+        for (int i = 0; i < 8; i++) {
+          tempPalette[0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
+          tempPalette[1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
+          tempPalette[2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
+          tempPalette[3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
+
+          myCachedPalettes[i][0] = tempPalette[((state.bgp)      & 0x3) ];
+          myCachedPalettes[i][1] = tempPalette[((state.bgp >> 2) & 0x3) ];
+          myCachedPalettes[i][2] = tempPalette[((state.bgp >> 4) & 0x3) ];
+          myCachedPalettes[i][3] = tempPalette[((state.bgp >> 6) & 0x3) ];
+
+          tempPalette[0] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
+          tempPalette[1] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
+          tempPalette[2] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
+          tempPalette[3] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
+
+          int dmgPalette = (i==0) ? state.obp0 : state.obp1;
+
+          myCachedPalettes[i][4] = tempPalette[((dmgPalette)      & 0x3) ];
+          myCachedPalettes[i][5] = tempPalette[((dmgPalette >> 2) & 0x3) ];
+          myCachedPalettes[i][6] = tempPalette[((dmgPalette >> 4) & 0x3) ];
+          myCachedPalettes[i][7] = tempPalette[((dmgPalette >> 6) & 0x3) ];
+        }
+    } else {
+        // CGB mode
+        for (int i = 0; i < 8; i++) {
+          myCachedPalettes[i][0] = state.bgpd[(i*8)+0] + (state.bgpd[(i*8)+1]<<8);
+          myCachedPalettes[i][1] = state.bgpd[(i*8)+2] + (state.bgpd[(i*8)+3]<<8);
+          myCachedPalettes[i][2] = state.bgpd[(i*8)+4] + (state.bgpd[(i*8)+5]<<8);
+          myCachedPalettes[i][3] = state.bgpd[(i*8)+6] + (state.bgpd[(i*8)+7]<<8);
+          myCachedPalettes[i][4] = state.obpd[(i*8)+0] + (state.obpd[(i*8)+1]<<8);
+          myCachedPalettes[i][5] = state.obpd[(i*8)+2] + (state.obpd[(i*8)+3]<<8);
+          myCachedPalettes[i][6] = state.obpd[(i*8)+4] + (state.obpd[(i*8)+5]<<8);
+          myCachedPalettes[i][7] = state.obpd[(i*8)+6] + (state.obpd[(i*8)+7]<<8);
+        }
+    }
 
     int backLineToRender = ((int)state.ly + (int)state.scy) % 256;
     int backTileRow = backLineToRender / 8;
