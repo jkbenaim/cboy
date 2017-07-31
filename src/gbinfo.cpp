@@ -58,7 +58,7 @@ const uint8_t logo[48] =
     0xbb, 0xb9, 0x33, 0x3e
 };
 
-static const unsigned int max_rom_size = 8 * 1024 * 1024;
+#define MAX_ROM_SIZE (8*1024*1024)
 
 int cmd_info_impl( int argc, char *argv[] )
 {
@@ -82,8 +82,8 @@ int cmd_info_impl( int argc, char *argv[] )
         return 1;
     }
 
-    if( s.st_size > max_rom_size )
-        rom_size = max_rom_size;
+    if( s.st_size > MAX_ROM_SIZE )
+        rom_size = MAX_ROM_SIZE;
     else
         rom_size = s.st_size;
 
@@ -169,8 +169,9 @@ int cmd_info_impl( int argc, char *argv[] )
     //     /* 0x14e */ uint16_t rom_checksum;
     printf( "ROM checksum: %04X", be16toh( header.rom_checksum ) );
     my_checksum = 0;
-    for(i=0;i<rom_size; i++)
-        my_checksum += rom[i];
+    size_t index;
+    for(index=0;index<rom_size; index++)
+        my_checksum += rom[index];
     my_checksum -= rom[0x14e];
     my_checksum -= rom[0x14f];
     if( my_checksum == be16toh( header.rom_checksum ) )

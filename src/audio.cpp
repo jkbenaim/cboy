@@ -2,7 +2,7 @@
 #include "Basic_Gb_Apu.h"
 #include "audio.h"
 #include <stdio.h>
-#define debugprintf printf
+// #define debugprintf printf
 #define debugprintf(...)
 
 Basic_Gb_Apu *apu;
