@@ -37,8 +37,8 @@ void fill_audio( void *userdata, uint8_t *stream, int len )
 {
     debugprintf( "fill_audio( %p, %p, %d );\n", userdata, stream, len );
     memset( stream, 0, len );
-    long count = apu->read_samples( (blip_sample_t *)stream, len/2 );
-    debugprintf( "%d\n", count );
+    /* long count =*/ apu->read_samples( (blip_sample_t *)stream, len/2 );
+    // debugprintf( "%d\n", count );
 }
 
 void audio_cleanup()
