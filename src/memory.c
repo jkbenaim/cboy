@@ -197,201 +197,201 @@ void write_oam( uint16_t address, uint8_t data ) {
 
 // "special" is the stuff at 0xFF00 and up
 uint8_t read_special( uint16_t address ) {
-  if(address >= 0xFF80 && address <= 0xFFFE)
-  {
-    // hram
-    return hram[address - 0xFF80];
-  }
-  
-  switch(address) {
-    case ADDR_JOYP:
-//       printf("OMG JOYP READ\n");
-      switch( state.joyp_select )
-      {
-	case INPUT_SELECT_BUTTONS:
-	  return state.joyp_buttons;
-	  break;
-	case INPUT_SELECT_DIRECTIONS:
-	default:
-	  return state.joyp_directions;
-	  break;
-      }
-      break;
-    case ADDR_SB:
-//       printf("SB read: %02X\n", state.sb);
-      return state.sb;
-      break;
-    case ADDR_SC:
-//       printf("SC read: %02X\n", state.sc);
-      return state.sc;
-      break;
-    case ADDR_DIV:
-//       printf("TIMER: DIV read\n");
-      return state.div;
-      break;
-    case ADDR_TIMA:
-//       printf("TIMER: TIMA read\n");
-      return state.tima;
-      break;
-    case ADDR_TMA:
-//       printf("TIMER: TMA read\n");
-      return state.tma;
-      break;
-    case ADDR_TAC:
-//       printf("TIMER: TAC read\n");
-      return state.tac;
-      break;
-    case ADDR_IFLAG:
-      return state.iflag;
-      break;
-    case ADDR_NR10:
-    case ADDR_NR11:
-    case ADDR_NR12:
-    case ADDR_NR13:
-    case ADDR_NR14:
-    case ADDR_NR20:
-    case ADDR_NR21:
-    case ADDR_NR22:
-    case ADDR_NR23:
-    case ADDR_NR24:
-    case ADDR_NR30:
-    case ADDR_NR31:
-    case ADDR_NR32:
-    case ADDR_NR33:
-    case ADDR_NR34:
-    case ADDR_NR41:
-    case ADDR_NR42:
-    case ADDR_NR43:
-    case ADDR_NR44:
-    case ADDR_NR50:
-    case ADDR_NR51:
-    case ADDR_NR52:
-    case ADDR_WAVERAM_0:
-    case ADDR_WAVERAM_1:
-    case ADDR_WAVERAM_2:
-    case ADDR_WAVERAM_3:
-    case ADDR_WAVERAM_4:
-    case ADDR_WAVERAM_5:
-    case ADDR_WAVERAM_6:
-    case ADDR_WAVERAM_7:
-    case ADDR_WAVERAM_8:
-    case ADDR_WAVERAM_9:
-    case ADDR_WAVERAM_A:
-    case ADDR_WAVERAM_B:
-    case ADDR_WAVERAM_C:
-    case ADDR_WAVERAM_D:
-    case ADDR_WAVERAM_E:
-    case ADDR_WAVERAM_F:
-      return audio_read( address );
-      break;
-    case ADDR_LCDC:
-      return state.lcdc;
-      break;
-    case ADDR_STAT:
-//     {
-//       printf("read STAT: %02X\n", state.stat);
-//       int i;
-//       for(i=0;i<8;i++)
-//         if(state.stat & 1<<i)
-//           switch(i)
-//           {
-//             case 7:
-//               printf("\tbit 7\n");
-//               break;
-//             case 6:
-//               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
-//               break;
-//             case 5:
-//               printf("\tMode 2 OAM interrupt\n");
-//               break;
-//             case 4:
-//               printf("\tMode 1 V-Blank Interrupt\n");
-//               break;
-//             case 3:
-//               printf("\tMode 0 V-Blank Interrupt\n");
-//               break;
-//             default:
-//               break;
-//           }
-//     }
-      return state.stat;
-      break;
-    case ADDR_SCY:
-      return state.scy;
-      break;
-    case ADDR_SCX:
-      return state.scx;
-      break;
-    case ADDR_LY:
-      return state.ly;
-      break;
-    case ADDR_BGP:
-      return state.bgp;
-      break;
-    case ADDR_OBP0:
-      return state.obp0;
-      break;
-    case ADDR_OBP1:
-      return state.obp1;
-      break;
-    case ADDR_WX:
-      return state.wx;
-      break;
-    case ADDR_WY:
-      return state.wy;
-      break;
-    case ADDR_KEY1:
-      return state.key1 | 0x7E;
-      break;
-    case ADDR_CAPS:
-      return state.caps;
-      break;
-    case ADDR_HDMA1:
-      return state.hdma1;
-      break;
-    case ADDR_HDMA2:
-      return state.hdma2;
-      break;
-    case ADDR_HDMA3:
-      return state.hdma3;
-      break;
-    case ADDR_HDMA4:
-      return state.hdma4;
-      break;
-    case ADDR_HDMA5:
-      return state.hdma5;
-      break;
-    case ADDR_VBK:
-      return state.vbk;
-      break;
-    case ADDR_RP:
-      // TODO
-      printf("Read IR port\n");
-      return 0;
-      break;
-    case ADDR_BGPI:
-      return state.bgpi;
-      break;
-    case ADDR_BGPD:
-      return state.bgpd[ state.bgpi & 0x3F ];
-      break;
-    case ADDR_OBPI:
-      return state.obpi;
-      break;
-    case ADDR_OBPD:
-      return state.obpd[ state.obpi & 0x3F ];
-      break;
-    case ADDR_SVBK:
-//       printf("Read SVBK\n");
-      return state.svbk;
-      break;
-    case ADDR_IE:
-      return state.ie;
-      break;
-    default:
-      return 0xFF;
-      break;
-  }
+    if(address >= 0xFF80 && address <= 0xFFFE)
+    {
+        // hram
+        return hram[address - 0xFF80];
+    }
+
+    switch(address) {
+        case ADDR_JOYP:
+            //       printf("OMG JOYP READ\n");
+            switch( state.joyp_select )
+            {
+                case INPUT_SELECT_BUTTONS:
+                    return state.joyp_buttons;
+                    break;
+                case INPUT_SELECT_DIRECTIONS:
+                default:
+                    return state.joyp_directions;
+                    break;
+            }
+            break;
+        case ADDR_SB:
+            //       printf("SB read: %02X\n", state.sb);
+            return state.sb;
+            break;
+        case ADDR_SC:
+            //       printf("SC read: %02X\n", state.sc);
+            return state.sc;
+            break;
+        case ADDR_DIV:
+            //       printf("TIMER: DIV read\n");
+            return state.div;
+            break;
+        case ADDR_TIMA:
+            //       printf("TIMER: TIMA read\n");
+            return state.tima;
+            break;
+        case ADDR_TMA:
+            //       printf("TIMER: TMA read\n");
+            return state.tma;
+            break;
+        case ADDR_TAC:
+            //       printf("TIMER: TAC read\n");
+            return state.tac;
+            break;
+        case ADDR_IFLAG:
+            return state.iflag;
+            break;
+        case ADDR_NR10:
+        case ADDR_NR11:
+        case ADDR_NR12:
+        case ADDR_NR13:
+        case ADDR_NR14:
+        case ADDR_NR20:
+        case ADDR_NR21:
+        case ADDR_NR22:
+        case ADDR_NR23:
+        case ADDR_NR24:
+        case ADDR_NR30:
+        case ADDR_NR31:
+        case ADDR_NR32:
+        case ADDR_NR33:
+        case ADDR_NR34:
+        case ADDR_NR41:
+        case ADDR_NR42:
+        case ADDR_NR43:
+        case ADDR_NR44:
+        case ADDR_NR50:
+        case ADDR_NR51:
+        case ADDR_NR52:
+        case ADDR_WAVERAM_0:
+        case ADDR_WAVERAM_1:
+        case ADDR_WAVERAM_2:
+        case ADDR_WAVERAM_3:
+        case ADDR_WAVERAM_4:
+        case ADDR_WAVERAM_5:
+        case ADDR_WAVERAM_6:
+        case ADDR_WAVERAM_7:
+        case ADDR_WAVERAM_8:
+        case ADDR_WAVERAM_9:
+        case ADDR_WAVERAM_A:
+        case ADDR_WAVERAM_B:
+        case ADDR_WAVERAM_C:
+        case ADDR_WAVERAM_D:
+        case ADDR_WAVERAM_E:
+        case ADDR_WAVERAM_F:
+            return audio_read( address );
+            break;
+        case ADDR_LCDC:
+            return state.lcdc;
+            break;
+        case ADDR_STAT:
+            //     {
+            //       printf("read STAT: %02X\n", state.stat);
+            //       int i;
+            //       for(i=0;i<8;i++)
+            //         if(state.stat & 1<<i)
+            //           switch(i)
+            //           {
+            //             case 7:
+            //               printf("\tbit 7\n");
+            //               break;
+            //             case 6:
+            //               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
+            //               break;
+            //             case 5:
+            //               printf("\tMode 2 OAM interrupt\n");
+            //               break;
+            //             case 4:
+            //               printf("\tMode 1 V-Blank Interrupt\n");
+            //               break;
+            //             case 3:
+            //               printf("\tMode 0 V-Blank Interrupt\n");
+            //               break;
+            //             default:
+            //               break;
+            //           }
+            //     }
+            return state.stat;
+            break;
+        case ADDR_SCY:
+            return state.scy;
+            break;
+        case ADDR_SCX:
+            return state.scx;
+            break;
+        case ADDR_LY:
+            return state.ly;
+            break;
+        case ADDR_BGP:
+            return state.bgp;
+            break;
+        case ADDR_OBP0:
+            return state.obp0;
+            break;
+        case ADDR_OBP1:
+            return state.obp1;
+            break;
+        case ADDR_WX:
+            return state.wx;
+            break;
+        case ADDR_WY:
+            return state.wy;
+            break;
+        case ADDR_KEY1:
+            return state.key1 | 0x7E;
+            break;
+        case ADDR_CAPS:
+            return state.caps;
+            break;
+        case ADDR_HDMA1:
+            return state.hdma1;
+            break;
+        case ADDR_HDMA2:
+            return state.hdma2;
+            break;
+        case ADDR_HDMA3:
+            return state.hdma3;
+            break;
+        case ADDR_HDMA4:
+            return state.hdma4;
+            break;
+        case ADDR_HDMA5:
+            return state.hdma5;
+            break;
+        case ADDR_VBK:
+            return state.vbk;
+            break;
+        case ADDR_RP:
+            // TODO
+            printf("Read IR port\n");
+            return 0;
+            break;
+        case ADDR_BGPI:
+            return state.bgpi;
+            break;
+        case ADDR_BGPD:
+            return state.bgpd[ state.bgpi & 0x3F ];
+            break;
+        case ADDR_OBPI:
+            return state.obpi;
+            break;
+        case ADDR_OBPD:
+            return state.obpd[ state.obpi & 0x3F ];
+            break;
+        case ADDR_SVBK:
+            //       printf("Read SVBK\n");
+            return state.svbk;
+            break;
+        case ADDR_IE:
+            return state.ie;
+            break;
+        default:
+            return 0xFF;
+            break;
+    }
 }
 
 void write_special( uint16_t address, uint8_t data ) {
