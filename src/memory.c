@@ -205,7 +205,6 @@ uint8_t read_special( uint16_t address ) {
 
     switch(address) {
         case ADDR_JOYP:
-            //       printf("OMG JOYP READ\n");
             switch( state.joyp_select )
             {
                 case INPUT_SELECT_BUTTONS:
@@ -218,27 +217,21 @@ uint8_t read_special( uint16_t address ) {
             }
             break;
         case ADDR_SB:
-            //       printf("SB read: %02X\n", state.sb);
             return state.sb;
             break;
         case ADDR_SC:
-            //       printf("SC read: %02X\n", state.sc);
             return state.sc;
             break;
         case ADDR_DIV:
-            //       printf("TIMER: DIV read\n");
             return state.div;
             break;
         case ADDR_TIMA:
-            //       printf("TIMER: TIMA read\n");
             return state.tima;
             break;
         case ADDR_TMA:
-            //       printf("TIMER: TMA read\n");
             return state.tma;
             break;
         case ADDR_TAC:
-            //       printf("TIMER: TAC read\n");
             return state.tac;
             break;
         case ADDR_IFLAG:
@@ -288,32 +281,6 @@ uint8_t read_special( uint16_t address ) {
             return state.lcdc;
             break;
         case ADDR_STAT:
-            //     {
-            //       printf("read STAT: %02X\n", state.stat);
-            //       int i;
-            //       for(i=0;i<8;i++)
-            //         if(state.stat & 1<<i)
-            //           switch(i)
-            //           {
-            //             case 7:
-            //               printf("\tbit 7\n");
-            //               break;
-            //             case 6:
-            //               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
-            //               break;
-            //             case 5:
-            //               printf("\tMode 2 OAM interrupt\n");
-            //               break;
-            //             case 4:
-            //               printf("\tMode 1 V-Blank Interrupt\n");
-            //               break;
-            //             case 3:
-            //               printf("\tMode 0 V-Blank Interrupt\n");
-            //               break;
-            //             default:
-            //               break;
-            //           }
-            //     }
             return state.stat;
             break;
         case ADDR_SCY:
@@ -365,8 +332,7 @@ uint8_t read_special( uint16_t address ) {
             return state.vbk;
             break;
         case ADDR_RP:
-            // TODO
-            printf("Read IR port\n");
+            // IR port - TODO
             return 0;
             break;
         case ADDR_BGPI:
@@ -382,7 +348,6 @@ uint8_t read_special( uint16_t address ) {
             return state.obpd[ state.obpi & 0x3F ];
             break;
         case ADDR_SVBK:
-            //       printf("Read SVBK\n");
             return state.svbk;
             break;
         case ADDR_IE:
