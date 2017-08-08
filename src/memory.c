@@ -505,12 +505,10 @@ void write_special( uint16_t address, uint8_t data ) {
             state.wy = data;
             break;
         case ADDR_CAPS:
-            printf("Wrote CAPS: %02X\n", data);
             inval_palette = 1;
             state.caps = data;
             break;
         case ADDR_KEY1:
-            printf("Wrote KEY1: %02X\n", data);
             state.key1 = (state.key1&0xFE) | (data&0x01);
             break;
         case ADDR_VBK:
