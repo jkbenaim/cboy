@@ -6,7 +6,7 @@ cboy is a Game Boy emulator written in C for GNU/Linux.
 ## Usage
 
 ```console
-cboy bootrom.bin game.gb
+cboy run game.gb
 ```
 
 
