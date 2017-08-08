@@ -376,10 +376,8 @@ void write_special( uint16_t address, uint8_t data ) {
             break;
         case ADDR_SB:
             state.sb = data;
-            //       printf("SB written: %02X\n", state.sb);
             break;
         case ADDR_SC:
-            //       printf("SC written: %02X\n", data);
             state.sc = data;
             state.serialBitsSent = 0;
             state.serialBitsSent = 0;
@@ -397,19 +395,15 @@ void write_special( uint16_t address, uint8_t data ) {
             break;
         case ADDR_DIV:
             state.div = data;
-            //       printf("TIMER: DIV write\n");
             break;
         case ADDR_TIMA:
             state.tima = data;
-            //       printf("TIMER: TIMA write\n");
             break;
         case ADDR_TMA:
             state.tma = data;
-            //       printf("TIMER: TMA write\n");
             break;
         case ADDR_TAC:
             state.tac = data;
-            //       printf("TIMER: TAC write\n");
             break;
         case ADDR_IFLAG:
             state.iflag = data;
@@ -464,30 +458,6 @@ void write_special( uint16_t address, uint8_t data ) {
                 uint8_t readOnlyBits = state.stat & 0x87;
                 uint8_t writableBits = data & 0x78;
                 state.stat = writableBits | readOnlyBits | 0x80;
-                //       printf("STAT: %02X\n", state.stat);
-                //       int i;
-                //       for(i=0;i<8;i++)
-                //         if(state.stat & 1<<i)
-                //           switch(i)
-                //           {
-                //             case 7:
-                //               printf("\tbit 7\n");
-                //               break;
-                //             case 6:
-                //               printf("\tLYC=LY interrupt (ly=%d, lyc=%d)\n", state.ly, state.lyc);
-                //               break;
-                //             case 5:
-                //               printf("\tMode 2 OAM interrupt\n");
-                //               break;
-                //             case 4:
-                //               printf("\tMode 1 V-Blank Interrupt\n");
-                //               break;
-                //             case 3:
-                //               printf("\tMode 0 V-Blank Interrupt\n");
-                //               break;
-                //             default:
-                //               break;
-                //           }
             }
             break;
         case ADDR_SCY:
@@ -568,7 +538,6 @@ void write_special( uint16_t address, uint8_t data ) {
             break;
         case ADDR_HDMA5:
             state.hdma5 = data;
-            //       if( state.hdma5 == 0xFF ) break;
             if( (state.hdma5 & 0x80) == 0 )
             {
                 // general-purpose DMA
@@ -598,8 +567,7 @@ void write_special( uint16_t address, uint8_t data ) {
             }
             break;
         case ADDR_RP:
-            // TODO
-            printf("Wrote IR port: %02X\n", data);
+            // IR port - TODO
             break;
         case ADDR_BGPI:
             state.bgpi = data;
@@ -614,7 +582,6 @@ void write_special( uint16_t address, uint8_t data ) {
             state.obpi = data;
             break;
         case ADDR_OBPD:
-            //       printf("Wrote OBPD.\n");
             inval_palette = 1;
             state.obpd[ state.obpi & 0x3F ] = data;
             if( state.obpi & 0x80 )
@@ -622,7 +589,6 @@ void write_special( uint16_t address, uint8_t data ) {
             break;
         case ADDR_SVBK:
             // this selects the WRAM bank in CGB mode
-            //       printf("Wrote SVBK: %02X\n", data);
 
             // we're in CGB mode
             state.svbk = data & 0x07;
@@ -637,7 +603,6 @@ void write_special( uint16_t address, uint8_t data ) {
             state.ie = data;
             break;
         default:
-            //       printf("%04X %02X\n",address,data);
             break;
     }
 }
