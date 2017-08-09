@@ -56,21 +56,21 @@ struct state_s {
     struct {
       uint8_t l;
       uint8_t h;
-    };
+    } b;
     uint16_t w;
   } hl;
   union {
     struct {
       uint8_t e;
       uint8_t d;
-    };
+    } b;
     uint16_t w;
   } de;
   union {
     struct {
       uint8_t c;
       uint8_t b;
-    };
+    } b;
     uint16_t w;
   } bc;
 #endif
