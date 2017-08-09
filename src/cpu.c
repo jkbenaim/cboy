@@ -316,7 +316,7 @@ void NOP( void )
 void LD_BC_WORD( void )
 {
   // opcode 01
-  state.bc = read_word(state.pc+1);
+  state.bc.w = read_word(state.pc+1);
   
   state.pc += 3;
 }
@@ -324,7 +324,7 @@ void LD_BC_WORD( void )
 void LD_BC_A( void )
 {
   // opcode 02
-  write_byte(state.bc, state.a);
+  write_byte(state.bc.w, state.a);
   // no flags affected
   state.pc++;
 }
@@ -333,10 +333,10 @@ void INC_BC( void )
 {
   // opcode 03
   
-  if( state.bc >= 0xFE00 && state.bc <= 0xFEFF )
+  if( state.bc.w >= 0xFE00 && state.bc.w <= 0xFEFF )
       trash_OAM();
   
-  state.bc++;
+  state.bc.w++;
   state.pc++;
   // no flags affected
 }
@@ -398,7 +398,7 @@ void DEC_R( void )
 void LD_B_BYTE( void )
 {
   // opcode 06
-  state.b = read_byte(state.pc+1);
+  state.bc.b.b = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -446,7 +446,7 @@ void LD_WORD_SP( void )
 void ADD_HL_BC( void )
 {
   // opcode 09
-  int result = (int)(state.hl) + (int)(state.bc);
+  int result = (int)(state.hl.w) + (int)(state.bc.w);
   
   // flag Z in not affected
   
@@ -454,13 +454,13 @@ void ADD_HL_BC( void )
   RESET_N();
   
   // flag H
-  int c = (int)state.l + (int)state.c;
+  int c = (int)state.hl.b.l + (int)state.bc.b.c;
   if( c > 0xFF )
     c = 1;
   else
     c = 0;
   
-  if( ((state.h & 0x0f) + (state.b & 0x0f) + c) & 0x10 )
+  if( ((state.hl.b.h & 0x0f) + (state.bc.b.b & 0x0f) + c) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -471,7 +471,7 @@ void ADD_HL_BC( void )
   else
     RESET_C();
   
-  state.hl = result;
+  state.hl.w = result;
   
   state.pc++;
 }
@@ -479,7 +479,7 @@ void ADD_HL_BC( void )
 void LD_A_BC( void )
 {
   // opcode 0A
-  state.a = read_byte(state.bc);
+  state.a = read_byte(state.bc.w);
   state.pc++;
 }
 
@@ -487,17 +487,17 @@ void DEC_BC( void )
 {
   // opcode 0B
   
-  if( state.bc >= 0xFE00 && state.bc <= 0xFEFF )
+  if( state.bc.w >= 0xFE00 && state.bc.w <= 0xFEFF )
       trash_OAM();
   
-  state.bc--;
+  state.bc.w--;
   state.pc++;
 }
 
 void LD_C_BYTE( void )
 {
   // opcode 0E
-  state.c = read_byte(state.pc+1);
+  state.bc.b.c = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -550,7 +550,7 @@ void STOP( void )
 void LD_DE_WORD( void )
 {
   // opcode 11
-  state.de = read_word(state.pc+1);
+  state.de.w = read_word(state.pc+1);
   
   state.pc+=3;
 }
@@ -558,7 +558,7 @@ void LD_DE_WORD( void )
 void LD_DE_A( void )
 {
   // opcode 12
-  write_byte(state.de, state.a);
+  write_byte(state.de.w, state.a);
   // no flags modified
   state.pc++;
 }
@@ -568,17 +568,17 @@ void INC_DE( void )
   // opcode 13
   // no flags affected
   
-  if( state.de >= 0xFE00 && state.de <= 0xFEFF )
+  if( state.de.w >= 0xFE00 && state.de.w <= 0xFEFF )
       trash_OAM();
   
-  state.de++;
+  state.de.w++;
   state.pc++;
 }
 
 void LD_D_BYTE( void )
 {
   // opcode 16
-  state.d = read_byte(state.pc+1);
+  state.de.b.d = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -618,7 +618,7 @@ void JR_INDEX( void )
 void ADD_HL_DE( void )
 {
   // opcode 19
-  int result = (int)(state.hl) + (int)(state.de);
+  int result = (int)(state.hl.w) + (int)(state.de.w);
   
   // flag Z in not affected
   
@@ -626,13 +626,13 @@ void ADD_HL_DE( void )
   RESET_N();
   
   // flag H
-  int c = (int)state.l + (int)state.e;
+  int c = (int)state.hl.b.l + (int)state.de.b.e;
   if( c > 0xFF )
     c = 1;
   else
     c = 0;
   
-  if( ((state.h & 0x0f) + (state.d & 0x0f) + c) & 0x10 )
+  if( ((state.hl.b.h & 0x0f) + (state.de.b.d & 0x0f) + c) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -643,7 +643,7 @@ void ADD_HL_DE( void )
   else
     RESET_C();
   
-  state.hl = result;
+  state.hl.w = result;
   
   state.pc++;
 }
@@ -652,7 +652,7 @@ void ADD_HL_DE( void )
 void LD_A_DE( void )
 {
   // opcode 1A
-  state.a = read_byte(state.de);
+  state.a = read_byte(state.de.w);
   state.pc++;
 }
 
@@ -661,22 +661,22 @@ uint8_t* cpu_getReg( int regNumber )
   switch(regNumber)
   {
     case 0:
-      return &(state.b);
+      return &(state.bc.b.b);
       break;
     case 1:
-      return &(state.c);
+      return &(state.bc.b.c);
       break;
     case 2:
-      return &(state.d);
+      return &(state.de.b.d);
       break;
     case 3:
-      return &(state.e);
+      return &(state.de.b.e);
       break;
     case 4:
-      return &(state.h);
+      return &(state.hl.b.h);
       break;
     case 5:
-      return &(state.l);
+      return &(state.hl.b.l);
       break;
     case 7:
       return &(state.a);
@@ -693,17 +693,17 @@ void DEC_DE( void )
 {
   // opcode 1B
   
-  if( state.de >= 0xFE00 && state.de <= 0xFEFF )
+  if( state.de.w >= 0xFE00 && state.de.w <= 0xFEFF )
       trash_OAM();
   
-  state.de--;
+  state.de.w--;
   state.pc++;
 }
 
 void LD_E_BYTE( void )
 {
   // opcode 1E
-  state.e = read_byte(state.pc+1);
+  state.de.b.e = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -750,7 +750,7 @@ void JR_NZ_INDEX( void )
 void LD_HL_WORD( void )
 {
   // opcode 21
-  state.hl = read_word(state.pc+1);
+  state.hl.w = read_word(state.pc+1);
   
   state.pc+=3;
   return;
@@ -759,8 +759,8 @@ void LD_HL_WORD( void )
 void LDI_HL_A( void )
 {
   // opcode 22
-  write_byte(state.hl, state.a);
-  state.hl++;
+  write_byte(state.hl.w, state.a);
+  state.hl.w++;
   
   state.pc++;
   return;
@@ -771,17 +771,17 @@ void INC_HL( void )
   // opcode 23
   // no flags affected
   
-  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+  if( state.hl.w >= 0xFE00 && state.hl.w <= 0xFEFF )
       trash_OAM();
   
-  state.hl++;
+  state.hl.w++;
   state.pc++;
 }
 
 void LD_H_BYTE( void )
 {
   // opcode 26
-  state.h = read_byte(state.pc+1);
+  state.hl.b.h = read_byte(state.pc+1);
   // no flags changed
   state.pc += 2;
 }
@@ -846,7 +846,7 @@ void JR_Z_INDEX( void )
 void ADD_HL_HL( void )
 {
   // opcode 29
-  int result = (int)(state.hl) + (int)(state.hl);
+  int result = (int)(state.hl.w) + (int)(state.hl.w);
   
   // flag Z in not affected
   
@@ -854,13 +854,13 @@ void ADD_HL_HL( void )
   RESET_N();
   
   // flag H
-  int c = (int)state.l + (int)state.l;
+  int c = (int)state.hl.b.l + (int)state.hl.b.l;
   if( c > 0xFF )
     c = 1;
   else
     c = 0;
   
-  if( ((state.h & 0x0f) + (state.h & 0x0f) + c) & 0x10 )
+  if( ((state.hl.b.h & 0x0f) + (state.hl.b.h & 0x0f) + c) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -871,7 +871,7 @@ void ADD_HL_HL( void )
   else
     RESET_C();
   
-  state.hl = result;
+  state.hl.w = result;
   
   state.pc++;
 }
@@ -881,12 +881,12 @@ void LDI_A_HL( void )
 {
   // opcode 2A
   
-  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+  if( state.hl.w >= 0xFE00 && state.hl.w <= 0xFEFF )
       trash_OAM();
   
-  state.a = read_byte(state.hl);
+  state.a = read_byte(state.hl.w);
   
-  state.hl++;
+  state.hl.w++;
   
   state.pc++;
 }
@@ -895,17 +895,17 @@ void DEC_HL( void )
 {
   // opcode 2B
   
-  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+  if( state.hl.w >= 0xFE00 && state.hl.w <= 0xFEFF )
       trash_OAM();
   
-  state.hl--;
+  state.hl.w--;
   state.pc++;
 }
 
 void LD_L_BYTE( void )
 {
   // opcode 2E
-  state.l = read_byte(state.pc+1);
+  state.hl.b.l = read_byte(state.pc+1);
   state.pc += 2;
 }
 
@@ -953,9 +953,9 @@ void LD_SP_WORD( void )
 void LDD_HL_A( void )
 {
   // opcode 32
-  write_byte(state.hl, state.a);
+  write_byte(state.hl.w, state.a);
   
-  state.hl--;
+  state.hl.w--;
   state.pc++;
   return;
 }
@@ -977,9 +977,9 @@ void INC_SP( void )
 void INC_AT_HL( void )
 {
   // opcode 34
-  uint8_t old_memByte = read_byte(state.hl);
+  uint8_t old_memByte = read_byte(state.hl.w);
   uint8_t new_memByte = old_memByte+1;
-  write_byte(state.hl, new_memByte);
+  write_byte(state.hl.w, new_memByte);
   
   // flag Z
   state.flag_z = new_memByte;
@@ -999,9 +999,9 @@ void INC_AT_HL( void )
 void DEC_AT_HL( void )
 {
   // opcode 35
-  int old_memByte = read_byte(state.hl);
+  int old_memByte = read_byte(state.hl.w);
   int new_memByte = old_memByte-1;
-  write_byte(state.hl, new_memByte);
+  write_byte(state.hl.w, new_memByte);
   
   // flag Z
   if( new_memByte == 0 )
@@ -1027,7 +1027,7 @@ void LD_HL_BYTE( void )
 {
   // opcode 36
   // ld [hl], $memByte
-  write_byte(state.hl, read_byte(state.pc+1));
+  write_byte(state.hl.w, read_byte(state.pc+1));
   state.pc += 2;
 }
 
@@ -1069,7 +1069,7 @@ void JR_C_INDEX( void )
 void ADD_HL_SP( void )
 {
   // opcode 39
-  int result = (int)(state.hl) + (int)(state.sp);
+  int result = (int)(state.hl.w) + (int)(state.sp);
   
   // flag Z in not affected
   
@@ -1077,13 +1077,13 @@ void ADD_HL_SP( void )
   RESET_N();
   
   // flag H
-  int c = (int)state.l + (int)(state.sp & 0x00ff);
+  int c = (int)state.hl.b.l + (int)(state.sp & 0x00ff);
   if( c > 0xFF )
     c = 1;
   else
     c = 0;
   
-  if( ((state.h & 0x0f) + ((state.sp & 0xff00) >> 8 & 0x0f) + c) & 0x10 )
+  if( ((state.hl.b.h & 0x0f) + ((state.sp & 0xff00) >> 8 & 0x0f) + c) & 0x10 )
     SET_H();
   else
     RESET_H();
@@ -1094,7 +1094,7 @@ void ADD_HL_SP( void )
   else
     RESET_C();
   
-  state.hl = result;
+  state.hl.w = result;
   
   state.pc++;
 }
@@ -1103,12 +1103,12 @@ void LDD_A_HL( void )
 {
   // opcode 3A
   
-  if( state.hl >= 0xFE00 && state.hl <= 0xFEFF )
+  if( state.hl.w >= 0xFE00 && state.hl.w <= 0xFEFF )
       trash_OAM();
   
-  state.a = read_byte(state.hl);
+  state.a = read_byte(state.hl.w);
   
-  state.hl--;
+  state.hl.w--;
   state.pc++;
 }
 
@@ -1177,42 +1177,42 @@ void LD_R_R( void )
 void LD_B_HL( void )
 {
   // opcode 46
-  state.b = read_byte(state.hl);
+  state.bc.b.b = read_byte(state.hl.w);
   state.pc++;
 }
 
 void LD_C_HL( void )
 {
   // opcode 4E
-  state.c = read_byte(state.hl);
+  state.bc.b.c = read_byte(state.hl.w);
   state.pc++;
 }
 
 void LD_D_HL( void )
 {
   // opcode 56
-  state.d = read_byte(state.hl);
+  state.de.b.d = read_byte(state.hl.w);
   state.pc++;
 }
 
 void LD_E_HL( void )
 {
   // opcode 5E
-  state.e = read_byte(state.hl);
+  state.de.b.e = read_byte(state.hl.w);
   state.pc++;
 }
 
 void LD_H_HL( void )
 {
   // opcode 66
-  state.h = read_byte(state.hl);
+  state.hl.b.h = read_byte(state.hl.w);
   state.pc++;
 }
 
 void LD_L_HL( void )
 {
   // opcode 6E
-  state.l = read_byte(state.hl);
+  state.hl.b.l = read_byte(state.hl.w);
   state.pc++;
 }
 
@@ -1225,7 +1225,7 @@ void LD_HL_R( void )
   int regNumber = ((int)(state.op) & 0x07);
   uint8_t* reg = cpu_getReg(regNumber);
   
-  write_byte(state.hl, *reg);
+  write_byte(state.hl.w, *reg);
   state.pc++;
   return;
 }
@@ -1251,7 +1251,7 @@ void HALT( void )
 void LD_A_HL( void )
 {
   // opcode 7E
-  state.a = read_byte(state.hl);
+  state.a = read_byte(state.hl.w);
   state.pc++;
 }
 
@@ -1295,7 +1295,7 @@ void ADD_A_R( void )
 void ADD_A_HL( void )
 {
   // opcode 86
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   int new_a = (int)(state.a) + (int)(data);
   
@@ -1379,7 +1379,7 @@ void ADC_A_HL( void )
   else
     c = 0;
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   temp = state.a + data + c;
   int old_a = state.a;
@@ -1450,7 +1450,7 @@ void SUB_HL( void )
 {
   // opcode 96
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   int old_a = (int)(state.a);
   int new_a = (int)(state.a) - (int)(data);
@@ -1535,7 +1535,7 @@ void SBC_A_HL( void )
   else
     c = 0;
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   temp = state.a - data - c;
   int old_a = state.a;
@@ -1596,7 +1596,7 @@ void AND_R( void )
 void AND_HL( void )
 {
   // opcode A6
-  state.a &= read_byte(state.hl);
+  state.a &= read_byte(state.hl.w);
   
   // flag Z
   if( state.a == 0 )
@@ -1647,7 +1647,7 @@ void XOR_R( void )
 void XOR_HL( void )
 {
   // opcode AE
-  state.a ^= read_byte(state.hl);
+  state.a ^= read_byte(state.hl.w);
   
   // flag Z
   if( state.a == 0 )
@@ -1701,7 +1701,7 @@ void OR_HL( void )
   // opcode B6
   // OR (HL)
   
-  state.a |= read_byte(state.hl);
+  state.a |= read_byte(state.hl.w);
   
   // flag Z
   if( state.a == 0 )
@@ -1762,7 +1762,7 @@ void CP_HL( void )
   // CP (HL)
   // 10111110
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   int temp = (int)state.a - (int)(data);
   
@@ -1851,7 +1851,7 @@ void POP_BC( void )
   if( state.sp >= 0xFDFF && state.sp <= 0xFEFF )
       trash_OAM();
   
-  state.bc = read_word(state.sp);
+  state.bc.w = read_word(state.sp);
   
   state.sp += 2;
   
@@ -1899,7 +1899,7 @@ void PUSH_BC( void )
       trash_OAM();
   
   state.sp -= 2;
-  write_word(state.sp, state.bc);
+  write_word(state.sp, state.bc.w);
   
   // no flags affected
   
@@ -1999,7 +1999,7 @@ void CB_RLC_R( void )
 void CB_RLC_HL( void )
 {
   // opcode CB 06
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   if( (data & 0x80) == 0 )
   {
@@ -2010,7 +2010,7 @@ void CB_RLC_HL( void )
     data = (data << 1) | 1;
   }
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   // flag Z
   if( data == 0 )
@@ -2064,7 +2064,7 @@ void CB_RRC_R( void )
 void CB_RRC_HL( void )
 {
   // opcode CB 0E
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   if( (data & 0x01) == 0 )
   {
@@ -2075,7 +2075,7 @@ void CB_RRC_HL( void )
     data = (data >> 1) | 0x80;
   }
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   // flag Z
   if( data == 0 )
@@ -2133,7 +2133,7 @@ void CB_RL_HL( void )
   // 11001011 CB
   // 00010110
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   int old_cy = ISSET_C();
   if( data & 0x80 )
@@ -2158,7 +2158,7 @@ void CB_RL_HL( void )
   // flag H
   RESET_H();
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2202,7 +2202,7 @@ void CB_RR_HL( void )
 {
   // opcode CB 1E
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   int old_cy = ISSET_C();
   if( data & 0x01 )
@@ -2227,7 +2227,7 @@ void CB_RR_HL( void )
   // flag H
   RESET_H();
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2267,7 +2267,7 @@ void CB_SLA_HL( void )
 {
   // opcode CB 26
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   if( data & 0x80 )
     SET_C();
@@ -2288,7 +2288,7 @@ void CB_SLA_HL( void )
   // flag H
   RESET_H();
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2329,7 +2329,7 @@ void CB_SRA_R( void )
 void CB_SRA_HL( void )
 {
   // opcode CB 2E
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   int bit7 = data & 0x80;
   
   // flag C
@@ -2340,7 +2340,7 @@ void CB_SRA_HL( void )
   
   data = data >> 1 | bit7;
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   // flag Z
   if( data == 0 )
@@ -2391,7 +2391,7 @@ void CB_SWAP_HL( void )
 {
   // opcode CB 36
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   uint8_t temp = (data & 0xF0) >> 4;
   data = (data << 4) | temp;
@@ -2411,7 +2411,7 @@ void CB_SWAP_HL( void )
   // flag C
   RESET_C();
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2450,7 +2450,7 @@ void CB_SRL_R( void )
 void CB_SRL_HL( void )
 {
   // opcode CB 38-3D,3F
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   
   if( data & 0x01 )
     SET_C();
@@ -2459,7 +2459,7 @@ void CB_SRL_HL( void )
   
   data = data >> 1;
   
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   // flag Z
   if( data == 0 )
@@ -2518,7 +2518,7 @@ void CB_BIT_HL( void )
   int bitToTest = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = 1 << bitToTest;
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   int temp = data & bitMask;
   
   // flag Z
@@ -2568,9 +2568,9 @@ void CB_RES_B_HL( void )
   int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = ~(1 << bitToReset);
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   data &= bitMask;
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2605,9 +2605,9 @@ void CB_SET_B_HL( void )
   int bitToReset = ((int)(state.cb_op) & 0x38) >> 3;
   int bitMask = 1 << bitToReset;
   
-  uint8_t data = read_byte(state.hl);
+  uint8_t data = read_byte(state.hl.w);
   data |= bitMask;
-  write_byte(state.hl, data);
+  write_byte(state.hl.w, data);
   
   state.pc += 2;
 }
@@ -2685,7 +2685,7 @@ void RST_8( void )
 void POP_DE( void )
 {
   // opcode D1
-  state.de = read_word(state.sp);
+  state.de.w = read_word(state.sp);
   state.sp += 2;
   
   state.pc++;
@@ -2732,7 +2732,7 @@ void PUSH_DE( void )
 {
   // opcode D5
   state.sp -= 2;
-  write_word(state.sp, state.de);
+  write_word(state.sp, state.de.w);
   state.pc++;
 }
 
@@ -2874,7 +2874,7 @@ void LD_FF_BYTE_A( void )
 void POP_HL( void )
 {
   // opcode E1
-  state.hl = read_word(state.sp);
+  state.hl.w = read_word(state.sp);
   
   state.sp += 2;
   
@@ -2884,7 +2884,7 @@ void POP_HL( void )
 void LD_FF_C_A( void )
 {
   // opcode E2
-  write_byte(0xFF00+state.c, state.a);
+  write_byte(0xFF00+state.bc.b.c, state.a);
   state.pc++;
   return;
 }
@@ -2893,7 +2893,7 @@ void PUSH_HL( void )
 {
   // opcode E5
   state.sp -= 2;
-  write_word(state.sp, state.hl);
+  write_word(state.sp, state.hl.w);
   state.pc++;
 }
 
@@ -2978,7 +2978,7 @@ void ADD_SP_OFFSET( void )
 void JP_HL( void )
 {
   // opcode E9
-  state.pc = state.hl;
+  state.pc = state.hl.w;
 }
 
 void LD_WORD_A( void )
@@ -3048,7 +3048,7 @@ void LD_A_FF_C( void )
 {
   // opcode F2
   // ld a,(ff00+c)
-  state.a = read_byte(0xFF00+(int)(state.c));
+  state.a = read_byte(0xFF00+(int)(state.bc.b.c));
   
   state.pc++;
 }
@@ -3112,7 +3112,7 @@ void LDHL_SP_OFFSET( void )
   // ld hl, sp + SIGNED_OFFSET
   int offset = (int)((int8_t)read_byte(state.pc+1));
   int temp = (int)state.sp + offset;
-  state.hl = temp;
+  state.hl.w = temp;
   
   // flag Z
   RESET_Z();
@@ -3154,7 +3154,7 @@ void LDHL_SP_OFFSET( void )
 void LD_SP_HL( void )
 {
   // opcode F9
-  state.sp = state.hl;
+  state.sp = state.hl.w;
   
   // no flags affected
   
@@ -3238,12 +3238,9 @@ int cpu_init() {
   
   state.pc = 0x0000;
   state.sp = 0xFFFE;
-  state.b  = 0;
-  state.c  = 0;
-  state.d  = 0;
-  state.e  = 0;
-  state.h  = 0;
-  state.l  = 0;
+  state.bc.w = 0;
+  state.de.w = 0;
+  state.hl.w = 0;
   state.a  = 0;
   RESET_C();
   RESET_H();

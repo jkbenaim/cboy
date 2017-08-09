@@ -34,45 +34,45 @@ struct state_s {
     struct {
       uint8_t h;
       uint8_t l;
-    };
-    uint16_t hl;
-  };
+    } b;
+    uint16_t w;
+  } hl;
   union {
     struct {
       uint8_t d;
       uint8_t e;
-    };
-    uint16_t de;
-  };
+    } b;
+    uint16_t w;
+  } de;
   union {
     struct {
       uint8_t b;
       uint8_t c;
-    };
-    uint16_t bc;
-  };
+    } b;
+    uint16_t w;
+  } bc;
 #else	// __LITTLE_ENDIAN__
   union {
     struct {
       uint8_t l;
       uint8_t h;
     };
-    uint16_t hl;
-  };
+    uint16_t w;
+  } hl;
   union {
     struct {
       uint8_t e;
       uint8_t d;
     };
-    uint16_t de;
-  };
+    uint16_t w;
+  } de;
   union {
     struct {
       uint8_t c;
       uint8_t b;
     };
-    uint16_t bc;
-  };
+    uint16_t w;
+  } bc;
 #endif
   uint8_t a;
   uint_least16_t flag_c;
@@ -131,31 +131,31 @@ struct state_s {
     struct {
       uint8_t hdma1;
       uint8_t hdma2;
-    };
-    uint16_t hdma_source;
-  };
+    } b;
+    uint16_t w;
+  } hdma_source;
   union {
     struct {
       uint8_t hdma3;
       uint8_t hdma4;
-    };
-    uint16_t hdma_destination;
-  };
+    } b;
+    uint16_t w;
+  } hdma_destination;
 #else	// __LITTLE_ENDIAN__
   union {
     struct {
       uint8_t hdma2;
       uint8_t hdma1;
-    };
-    uint16_t hdma_source;
-  };
+    } b;
+    uint16_t w;
+  } hdma_source;
   union {
     struct {
       uint8_t hdma4;
       uint8_t hdma3;
-    };
-    uint16_t hdma_destination;
-  };
+    } b;
+    uint16_t w;
+  } hdma_destination;
 #endif
   uint8_t hdma5;
 }; // state
