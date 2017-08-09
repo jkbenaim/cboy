@@ -314,16 +314,16 @@ uint8_t read_special( uint16_t address ) {
             return state.caps;
             break;
         case ADDR_HDMA1:
-            return state.hdma1;
+            return state.hdma_source.b.hdma1;
             break;
         case ADDR_HDMA2:
-            return state.hdma2;
+            return state.hdma_source.b.hdma2;
             break;
         case ADDR_HDMA3:
-            return state.hdma3;
+            return state.hdma_destination.b.hdma3;
             break;
         case ADDR_HDMA4:
-            return state.hdma4;
+            return state.hdma_destination.b.hdma4;
             break;
         case ADDR_HDMA5:
             return state.hdma5;
@@ -523,24 +523,24 @@ void write_special( uint16_t address, uint8_t data ) {
             }
             break;
         case ADDR_HDMA1:
-            state.hdma1 = data;
+            state.hdma_source.b.hdma1 = data;
             break;
         case ADDR_HDMA2:
-            state.hdma2 = data;
+            state.hdma_source.b.hdma2 = data;
             break;
         case ADDR_HDMA3:
-            state.hdma3 = data;
+            state.hdma_destination.b.hdma3 = data;
             break;
         case ADDR_HDMA4:
-            state.hdma4 = data;
+            state.hdma_destination.b.hdma4 = data;
             break;
         case ADDR_HDMA5:
             state.hdma5 = data;
             if( (state.hdma5 & 0x80) == 0 )
             {
                 // general-purpose DMA
-                int source = state.hdma_source & 0xFFF0;
-                int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
+                int source = state.hdma_source.w & 0xFFF0;
+                int dest = 0x8000 + (state.hdma_destination.w & 0x1FF0);
                 int length = state.hdma5 & 0x7F;
                 printf("general HDMA: source=%04X, dest=%04X, length=%02X\n", source, dest, length);
 
@@ -557,8 +557,8 @@ void write_special( uint16_t address, uint8_t data ) {
             {
                 // h-blank DMA
                 // TODO
-                int source = state.hdma_source & 0xFFF0;
-                int dest = 0x8000 + (state.hdma_destination & 0x1FF0);
+                int source = state.hdma_source.w & 0xFFF0;
+                int dest = 0x8000 + (state.hdma_destination.w & 0x1FF0);
                 int length = state.hdma5 & 0x7F;
                 printf("h-blank HDMA: source=%04X, dest=%04X, length=%02X\n", source, dest, length);
                 // 	state.hdma5 &= 0x7F;
