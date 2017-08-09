@@ -3331,7 +3331,7 @@ void cpu_do_one_instruction()
     {
 //       printf("LCD_STAT, iflag: %02X, ie: %02X, stat: %02X, ly: %d, lyc: %d\n", state.iflag, state.ie, state.stat, state.ly, state.lyc);
       // get rid of the interrupt with highest priority
-      uint8_t i;
+      int i;
       for(i=7;i>=0;--i)
         if(state.pending_stat_interrupts & 1<<i)
         {
