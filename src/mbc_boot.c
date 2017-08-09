@@ -75,3 +75,4 @@ uint8_t mbc_boot_read_bank_n( uint16_t address ) {
 void mbc_boot_write_bank_n( uint16_t address, uint8_t data ) {
   // do nothing
 }
+
