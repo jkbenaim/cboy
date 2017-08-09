@@ -610,6 +610,7 @@ uint8_t read_out_of_bounds( uint16_t address )
 {
     fprintf( stderr, "Out-of-bounds read, address: %04X, pc: %04X\n", address, state.pc );
     exit(1);
+    return 0;
 }
 
 void write_out_of_bounds( uint16_t address, uint8_t data )
