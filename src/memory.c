@@ -488,6 +488,7 @@ void write_special( uint16_t address, uint8_t data ) {
             }
             break;
         case ADDR_BGP:
+            inval_palette = 1;
             state.bgp = data;
             break;
         case ADDR_OBP0:
