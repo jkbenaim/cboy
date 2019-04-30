@@ -86,6 +86,12 @@ int mbc_ramSize2numBytes( uint8_t ramSize )
     case 0x03:
       return 32768;
       break;
+    case 0x04:
+      return 131072;
+      break;
+    case 0x05:
+      return 65536;
+      break;
     default:
       return 0;
       break;

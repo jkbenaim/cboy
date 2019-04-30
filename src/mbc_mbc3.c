@@ -121,10 +121,7 @@ void mbc_mbc3_write_ram_bank_select( uint16_t address, uint8_t data ) {
   int i;
   switch( data )
   {
-    case 0x00:
-    case 0x01:
-    case 0x02:
-    case 0x03:
+    case 0 ... 7 :
 //       printf("Switching to RAM bank %02X \n", data );
       cart.extram_bank_num = data;
       cart.extram_bank = cart.extram + data*8192;

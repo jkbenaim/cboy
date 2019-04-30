@@ -110,6 +110,9 @@ void cart_init_file( char* bootromName, char* cartromName ) {
     case 4:
       cart.extram_size = 131072;
       break;
+    case 5:
+      cart.extram_size = 65536;
+      break;
   }
   // exception: MBC2 and MBC7 always have extram
   switch( cart.mbc_type )

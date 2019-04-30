@@ -144,9 +144,9 @@ void mbc_mbc5_write_rom_bank_select_high( uint16_t address, uint8_t data )
 // write 4000-5FFF
 void mbc_mbc5_write_ram_bank_select( uint16_t address, uint8_t data )
 {
-  if( cart.extram_size == 32768 )
+  if( cart.extram_size > 0 )
   {
-    int bank = data & 0x03;
+    int bank = data & 0x07;
     cart.extram_bank = cart.extram + bank*8192;
   }
   
