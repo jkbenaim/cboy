@@ -31,6 +31,6 @@
 #ifndef _MBC_H_
 #define _MBC_H_
 
-extern int mbc_romSize2numBanks( uint8_t romSize );
+extern int mbc_romSize2numBanks(uint8_t romSize);
 
 #endif // _MBC_H_

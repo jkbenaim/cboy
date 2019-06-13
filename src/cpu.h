@@ -27,172 +27,171 @@ extern "C" {
 #endif
 
 struct state_s {
-  pc_t pc;
-  uint16_t sp;
+	pc_t pc;
+	uint16_t sp;
 #ifdef __BIG_ENDIAN__
-  union {
-    struct {
-      uint8_t h;
-      uint8_t l;
-    } b;
-    uint16_t w;
-  } hl;
-  union {
-    struct {
-      uint8_t d;
-      uint8_t e;
-    } b;
-    uint16_t w;
-  } de;
-  union {
-    struct {
-      uint8_t b;
-      uint8_t c;
-    } b;
-    uint16_t w;
-  } bc;
-#else	// __LITTLE_ENDIAN__
-  union {
-    struct {
-      uint8_t l;
-      uint8_t h;
-    } b;
-    uint16_t w;
-  } hl;
-  union {
-    struct {
-      uint8_t e;
-      uint8_t d;
-    } b;
-    uint16_t w;
-  } de;
-  union {
-    struct {
-      uint8_t c;
-      uint8_t b;
-    } b;
-    uint16_t w;
-  } bc;
+	union {
+		struct {
+			uint8_t h;
+			uint8_t l;
+		} b;
+		uint16_t w;
+	} hl;
+	union {
+		struct {
+			uint8_t d;
+			uint8_t e;
+		} b;
+		uint16_t w;
+	} de;
+	union {
+		struct {
+			uint8_t b;
+			uint8_t c;
+		} b;
+		uint16_t w;
+	} bc;
+#else				// __LITTLE_ENDIAN__
+	union {
+		struct {
+			uint8_t l;
+			uint8_t h;
+		} b;
+		uint16_t w;
+	} hl;
+	union {
+		struct {
+			uint8_t e;
+			uint8_t d;
+		} b;
+		uint16_t w;
+	} de;
+	union {
+		struct {
+			uint8_t c;
+			uint8_t b;
+		} b;
+		uint16_t w;
+	} bc;
 #endif
-  uint8_t a;
-  uint_least16_t flag_c;
-  uint_least8_t flag_h1;
-  uint_least8_t flag_h2;
-  uint_least8_t flag_n;
-  uint8_t flag_z;
-  int vid_mode;
-  int old_vid_mode;
-  uint8_t joyp;
-  uint8_t joyp_buttons;
-  uint8_t joyp_directions;
-  uint8_t joyp_select;
-  uint64_t masterClock; // incremented at 1,048,576 Hz
-  uint64_t lastMasterClock; 
-  uint8_t div, tima, tma, tac;	// timers
-  int serialBitsSent;	// bits sent over link
-  int serialClocksUntilNextSend;
-  int serialTimeoutClock;
-  uint8_t sb, sc;
-  uint8_t lcdc;
-  uint8_t stat;
-  uint8_t pending_stat_interrupts;
-  uint8_t scy;
-  uint8_t scx;
-  uint8_t ly;
-  int line_progress;
-  uint8_t lyc;
-  uint8_t last_ly;
-  uint8_t bgp;
-  uint8_t obp0, obp1;
-  uint8_t wx,wy;
-  uint8_t last_line_rendered;
-  int bootRomEnabled;	// 0 = disabled, 1 = enabled
-  int ime;		// set to IME_ENABLED or IME_DISABLED
-  int ie, iflag;
-  int halt;		// 0 = not halted, 1 = halted
-  uint8_t op;
-  uint8_t cb_op;
-  int halt_glitch;
-  int frame_done;
-  int instr_time;
-  uint8_t key1;
-  int cpu_speed;
-  
-  //cgb stuff
-  uint8_t bgpi;
-  uint8_t bgpd[0x40];
-  uint8_t obpi;
-  uint8_t obpd[0x40];
-  uint8_t vbk;
-  uint8_t caps;
-  uint8_t svbk;
+	uint8_t a;
+	uint_least16_t flag_c;
+	uint_least8_t flag_h1;
+	uint_least8_t flag_h2;
+	uint_least8_t flag_n;
+	uint8_t flag_z;
+	int vid_mode;
+	int old_vid_mode;
+	uint8_t joyp;
+	uint8_t joyp_buttons;
+	uint8_t joyp_directions;
+	uint8_t joyp_select;
+	uint64_t masterClock;	// incremented at 1,048,576 Hz
+	uint64_t lastMasterClock;
+	uint8_t div, tima, tma, tac;	// timers
+	int serialBitsSent;	// bits sent over link
+	int serialClocksUntilNextSend;
+	int serialTimeoutClock;
+	uint8_t sb, sc;
+	uint8_t lcdc;
+	uint8_t stat;
+	uint8_t pending_stat_interrupts;
+	uint8_t scy;
+	uint8_t scx;
+	uint8_t ly;
+	int line_progress;
+	uint8_t lyc;
+	uint8_t last_ly;
+	uint8_t bgp;
+	uint8_t obp0, obp1;
+	uint8_t wx, wy;
+	uint8_t last_line_rendered;
+	int bootRomEnabled;	// 0 = disabled, 1 = enabled
+	int ime;	// set to IME_ENABLED or IME_DISABLED
+	int ie, iflag;
+	int halt;	// 0 = not halted, 1 = halted
+	uint8_t op;
+	uint8_t cb_op;
+	int halt_glitch;
+	int frame_done;
+	int instr_time;
+	uint8_t key1;
+	int cpu_speed;
+
+	//cgb stuff
+	uint8_t bgpi;
+	uint8_t bgpd[0x40];
+	uint8_t obpi;
+	uint8_t obpd[0x40];
+	uint8_t vbk;
+	uint8_t caps;
+	uint8_t svbk;
 #ifdef __BIG_ENDIAN__
-  union {
-    struct {
-      uint8_t hdma1;
-      uint8_t hdma2;
-    } b;
-    uint16_t w;
-  } hdma_source;
-  union {
-    struct {
-      uint8_t hdma3;
-      uint8_t hdma4;
-    } b;
-    uint16_t w;
-  } hdma_destination;
-#else	// __LITTLE_ENDIAN__
-  union {
-    struct {
-      uint8_t hdma2;
-      uint8_t hdma1;
-    } b;
-    uint16_t w;
-  } hdma_source;
-  union {
-    struct {
-      uint8_t hdma4;
-      uint8_t hdma3;
-    } b;
-    uint16_t w;
-  } hdma_destination;
+	union {
+		struct {
+			uint8_t hdma1;
+			uint8_t hdma2;
+		} b;
+		uint16_t w;
+	} hdma_source;
+	union {
+		struct {
+			uint8_t hdma3;
+			uint8_t hdma4;
+		} b;
+		uint16_t w;
+	} hdma_destination;
+#else				// __LITTLE_ENDIAN__
+	union {
+		struct {
+			uint8_t hdma2;
+			uint8_t hdma1;
+		} b;
+		uint16_t w;
+	} hdma_source;
+	union {
+		struct {
+			uint8_t hdma4;
+			uint8_t hdma3;
+		} b;
+		uint16_t w;
+	} hdma_destination;
 #endif
-  uint8_t hdma5;
-}; // state
+	uint8_t hdma5;
+};			// state
 
 extern struct state_s state;
-
 
 /*
  * Flags register masks
  */
-#define FLAGS_NOTUSED_0		0x01
-#define FLAGS_NOTUSED_1		0x02
-#define FLAGS_NOTUSED_2		0x04
-#define FLAGS_NOTUSED_3		0x08
-#define FLAGS_C			0x10
-#define FLAGS_H			0x20
-#define FLAGS_N			0x40
-#define FLAGS_Z			0x80
+#define FLAGS_NOTUSED_0	0x01
+#define FLAGS_NOTUSED_1	0x02
+#define FLAGS_NOTUSED_2	0x04
+#define FLAGS_NOTUSED_3	0x08
+#define FLAGS_C		0x10
+#define FLAGS_H		0x20
+#define FLAGS_N		0x40
+#define FLAGS_Z		0x80
 
 /*
  * Flag (re)set macros
  */
-#define SET_Z()                 (state.flag_z = 0)
-#define RESET_Z()               (state.flag_z = 1)
-#define ISSET_Z()               (state.flag_z == 0)
+#define SET_Z()		(state.flag_z = 0)
+#define RESET_Z()	(state.flag_z = 1)
+#define ISSET_Z()	(state.flag_z == 0)
 
-#define SET_N()                 (state.flag_n = 1)
-#define RESET_N()               (state.flag_n = 0)
-#define ISSET_N()               (state.flag_n != 0)
+#define SET_N()		(state.flag_n = 1)
+#define RESET_N()	(state.flag_n = 0)
+#define ISSET_N()	(state.flag_n != 0)
 
-#define SET_H()                 (state.flag_h1 = state.flag_h2 = 0xff)
-#define RESET_H()               (state.flag_h1 = state.flag_h2 = 0x00)
-#define ISSET_H()               (((state.flag_h1&0xf)+(state.flag_h2&0x0f))&0xf0)
+#define SET_H()		(state.flag_h1 = state.flag_h2 = 0xff)
+#define RESET_H()	(state.flag_h1 = state.flag_h2 = 0x00)
+#define ISSET_H()	(((state.flag_h1&0xf)+(state.flag_h2&0x0f))&0xf0)
 
-#define SET_C()                 (state.flag_c = 0x100)
-#define RESET_C()               (state.flag_c = 0)
-#define ISSET_C()               (state.flag_c & 0x100)
+#define SET_C()		(state.flag_c = 0x100)
+#define RESET_C()	(state.flag_c = 0)
+#define ISSET_C()	(state.flag_c & 0x100)
 
 /*
  * Number of cycles for each video mode.
@@ -224,11 +223,11 @@ extern struct state_s state;
  * Interrupt queue message names
  */
 typedef enum {
-  INTERRUPT_VBLANK = 1,
-  INTERRUPT_LCD_STAT,
-  INTERRUPT_TIMER,
-  INTERRUPT_SERIAL,
-  INTERRUPT_JOYPAD
+	INTERRUPT_VBLANK = 1,
+	INTERRUPT_LCD_STAT,
+	INTERRUPT_TIMER,
+	INTERRUPT_SERIAL,
+	INTERRUPT_JOYPAD
 } InterruptMessage_t;
 
 // ops
@@ -339,7 +338,7 @@ void JP_C_ADDR(void);	// DA
 void CALL_C(void);	// DC
 void SBC_A_BYTE(void);	// DE
 void RST_18(void);	// DF
-void LD_FF_BYTE_A(void);// E0
+void LD_FF_BYTE_A(void);	// E0
 void POP_HL(void);	// E1
 void LD_FF_C_A(void);	// E2
 void PUSH_HL(void);	// E5
@@ -350,7 +349,7 @@ void JP_HL(void);	// E9
 void LD_WORD_A(void);	// EA
 void XOR_BYTE(void);	// EE
 void RST_28(void);	// EF
-void LD_A_FF_BYTE(void);// F0
+void LD_A_FF_BYTE(void);	// F0
 void POP_AF(void);	// F1
 void LD_A_FF_C(void);	// F2
 void DI(void);		// F3
@@ -388,12 +387,12 @@ void CB_RES_B_HL(void);	// CB 86,8E,96,9E,A6,AE,B6,BE
 void CB_SET_B_R(void);	// CB C0-FF (except (HL))
 void CB_SET_B_HL(void);	// CB C6,CE,D6,DE,E6,EE,F6,FE
 
-int cpu_init( void );
-void cpu_do_one_instruction( void );
-void cpu_do_one_frame( void );
-uint8_t* cpu_getReg( int );
-uint8_t cpu_get_flags_register( void );
-void cpu_set_flags_register( uint8_t );
+int cpu_init(void);
+void cpu_do_one_instruction(void);
+void cpu_do_one_frame(void);
+uint8_t *cpu_getReg(int);
+uint8_t cpu_get_flags_register(void);
+void cpu_set_flags_register(uint8_t);
 
 extern int stop;
 extern int op_lengths[0x100];
@@ -403,6 +402,4 @@ extern int op_cb_times[0x100];
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif // !_CPU_H_
+#endif				// !_CPU_H_

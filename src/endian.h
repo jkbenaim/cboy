@@ -22,9 +22,9 @@
 #include "types.h"
 
 #if defined (_BIG_ENDIAN) || ( defined (__BYTE_ORDER__) && (__BYTE_ORDER__ == 4321) )
-  #define __BIG_ENDIAN__ 1
+	#define __BIG_ENDIAN__ 1
 #else
-  #define __LITTLE_ENDIAN__ 1
+	#define __LITTLE_ENDIAN__ 1
 #endif
 
 #if defined(__APPLE__)

@@ -19,81 +19,78 @@
 #include "mbc.h"
 #include "types.h"
 
-
 /*
  * int mbc_romSize2numBanks( uint8_t romSize )
  * 
  * Given the romSize byte from the cart header, returns
  * the size of the rom.
  */
-int mbc_romSize2numBanks( uint8_t romSize )
+int mbc_romSize2numBanks(uint8_t romSize)
 {
-  switch( romSize )
-  {
-    case 0x00:
-      return 2;
-      break;
-    case 0x01:
-      return 4;
-      break;
-    case 0x02:
-      return 8;
-      break;
-    case 0x03:
-      return 16;
-      break;
-    case 0x04:
-      return 32;
-      break;
-    case 0x05:
-      return 64;
-      break;
-    case 0x06:
-      return 128;
-      break;
-    case 0x07:
-      return 256;
-      break;
-    case 0x52:
-      return 72;
-      break;
-    case 0x53:
-      return 80;
-      break;
-    case 0x54:
-      return 96;
-      break;
-    default:
-      // uh-oh
-      return 2;
-      break;
-  }
+	switch (romSize) {
+	case 0x00:
+		return 2;
+		break;
+	case 0x01:
+		return 4;
+		break;
+	case 0x02:
+		return 8;
+		break;
+	case 0x03:
+		return 16;
+		break;
+	case 0x04:
+		return 32;
+		break;
+	case 0x05:
+		return 64;
+		break;
+	case 0x06:
+		return 128;
+		break;
+	case 0x07:
+		return 256;
+		break;
+	case 0x52:
+		return 72;
+		break;
+	case 0x53:
+		return 80;
+		break;
+	case 0x54:
+		return 96;
+		break;
+	default:
+		// uh-oh
+		return 2;
+		break;
+	}
 }
 
-int mbc_ramSize2numBytes( uint8_t ramSize )
+int mbc_ramSize2numBytes(uint8_t ramSize)
 {
-  switch( ramSize )
-  {
-    case 0x00:
-      return 0;
-      break;
-    case 0x01:
-      return 2048;
-      break;
-    case 0x02:
-      return 8192;
-      break;
-    case 0x03:
-      return 32768;
-      break;
-    case 0x04:
-      return 131072;
-      break;
-    case 0x05:
-      return 65536;
-      break;
-    default:
-      return 0;
-      break;
-  }
+	switch (ramSize) {
+	case 0x00:
+		return 0;
+		break;
+	case 0x01:
+		return 2048;
+		break;
+	case 0x02:
+		return 8192;
+		break;
+	case 0x03:
+		return 32768;
+		break;
+	case 0x04:
+		return 131072;
+		break;
+	case 0x05:
+		return 65536;
+		break;
+	default:
+		return 0;
+		break;
+	}
 }

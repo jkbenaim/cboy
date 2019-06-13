@@ -21,9 +21,9 @@
 #include "cpu.h"
 #include "serial.h"
 
-int serial_receive_bit( int in, int reset )
+int serial_receive_bit(int in, int reset)
 {
-  return 1;
+	return 1;
 }
 
 // int serial_receive_bit( int in, int reset )

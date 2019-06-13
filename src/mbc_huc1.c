@@ -21,178 +21,185 @@
 #include "mbc_huc1.h"
 #include <stdio.h>
 
-uint8_t huc1_bank_low; // bits 0-4
-uint8_t huc1_bank_high;  // bit 5-6 (stored in bits 0-1)
+uint8_t huc1_bank_low;		// bits 0-4
+uint8_t huc1_bank_high;		// bit 5-6 (stored in bits 0-1)
 uint8_t huc1_ram_bank;
 uint8_t huc1_mode_select;
 uint8_t huc1_ram_enable;
 
 void mbc_huc1_install()
 {
-  int i;
-  // cartrom bank zero
-  for( i=0x00; i<=0x3F; ++i ) {
-    readmem[i] = mbc_huc1_read_bank_0;
-  }
-  // cartrom bank n
-  for( i=0x40; i<=0x7F; ++i ) {
-    readmem[i] = mbc_huc1_read_bank_n;
-  }
-  
-  // write 0000-1FFF: ram enable
-  for( i=0x00; i<=0x1F; ++i ) {
-    writemem[i] = mbc_huc1_write_ram_enable;
-  }
-  // write 2000-3FFF: rom bank select
-  for( i=0x20; i<=0x3F; ++i ) {
-    writemem[i] = mbc_huc1_write_rom_bank_select;
-  }
-  // write 4000-5FFF: ram bank select
-  for( i=0x40; i<=0x5F; ++i ) {
-    writemem[i] = mbc_huc1_write_ram_bank_select;
-  }
-  // write 6000-7FFF: mode select
-  for( i=0x60; i<=0x7F; ++i ) {
-    writemem[i] = mbc_huc1_write_mode_select;
-  }
-  
-  // read A000-BFFF: read extram
-  // calculate the last address where extram is installed
-  int extram_end = 0xA0 + (cart.extram_size>8192?8192:cart.extram_size)/256;
-  for( i=0xA0; i<extram_end; ++i ) {
-    readmem[i] = mbc_huc1_read_extram;
-  }
-  for( i=extram_end; i<=0xBF; ++i ) {
-    readmem[i] = mbc_huc1_read_ff;
-  }
-  
-  // write A000-BFFF: write extram
-  for( i=0xA0; i<extram_end; ++i ) {
-    writemem[i] = mbc_huc1_write_extram;
-  }
-  for( i=extram_end; i<=0xBF; ++i ) {
-    writemem[i] = mbc_huc1_write_dummy;
-  }
-  
-  // set up cart params
-  cart.cartrom_bank_zero = cart.cartrom;
-  cart.cartrom_bank_n = cart.cartrom + 0x4000;
-  huc1_bank_low = 0x01;
-  huc1_bank_high = 0x00;
-  huc1_ram_bank = 0x00;
-  huc1_mode_select = 0x00;
-  cart.extram_bank = cart.extram;
+	int i;
+	// cartrom bank zero
+	for (i = 0x00; i <= 0x3F; ++i) {
+		readmem[i] = mbc_huc1_read_bank_0;
+	}
+	// cartrom bank n
+	for (i = 0x40; i <= 0x7F; ++i) {
+		readmem[i] = mbc_huc1_read_bank_n;
+	}
+
+	// write 0000-1FFF: ram enable
+	for (i = 0x00; i <= 0x1F; ++i) {
+		writemem[i] = mbc_huc1_write_ram_enable;
+	}
+	// write 2000-3FFF: rom bank select
+	for (i = 0x20; i <= 0x3F; ++i) {
+		writemem[i] = mbc_huc1_write_rom_bank_select;
+	}
+	// write 4000-5FFF: ram bank select
+	for (i = 0x40; i <= 0x5F; ++i) {
+		writemem[i] = mbc_huc1_write_ram_bank_select;
+	}
+	// write 6000-7FFF: mode select
+	for (i = 0x60; i <= 0x7F; ++i) {
+		writemem[i] = mbc_huc1_write_mode_select;
+	}
+
+	// read A000-BFFF: read extram
+	// calculate the last address where extram is installed
+	int extram_end =
+	    0xA0 + (cart.extram_size > 8192 ? 8192 : cart.extram_size) / 256;
+	for (i = 0xA0; i < extram_end; ++i) {
+		readmem[i] = mbc_huc1_read_extram;
+	}
+	for (i = extram_end; i <= 0xBF; ++i) {
+		readmem[i] = mbc_huc1_read_ff;
+	}
+
+	// write A000-BFFF: write extram
+	for (i = 0xA0; i < extram_end; ++i) {
+		writemem[i] = mbc_huc1_write_extram;
+	}
+	for (i = extram_end; i <= 0xBF; ++i) {
+		writemem[i] = mbc_huc1_write_dummy;
+	}
+
+	// set up cart params
+	cart.cartrom_bank_zero = cart.cartrom;
+	cart.cartrom_bank_n = cart.cartrom + 0x4000;
+	huc1_bank_low = 0x01;
+	huc1_bank_high = 0x00;
+	huc1_ram_bank = 0x00;
+	huc1_mode_select = 0x00;
+	cart.extram_bank = cart.extram;
 }
 
 void mbc_huc1_regs_changed()
 {
-  int rambank;
-  int rombank = huc1_bank_low;
-  if( rombank == 0 )
-    rombank++;
-  
+	int rambank;
+	int rombank = huc1_bank_low;
+	if (rombank == 0)
+		rombank++;
+
 //   if( huc1_mode_select == 0 )
 //   {
 //     ROM mode
 //     rombank += (huc1_bank_high & 0x03) << 5;
-    rambank = 0;
+	rambank = 0;
 //   } else {
-    // RAM mode
-    rambank = huc1_bank_high & 0x03;
+	// RAM mode
+	rambank = huc1_bank_high & 0x03;
 //   }
-  //printf( "rombank: %x, rambank: %x\n", rombank, rambank );
-  size_t cartoffset;
-  cartoffset = (rombank*16384) % cart.cartromsize;
-  cart.cartrom_bank_n = cart.cartrom + cartoffset;
-  cart.extram_bank = cart.extram + rambank * 8192;
+	//printf( "rombank: %x, rambank: %x\n", rombank, rambank );
+	size_t cartoffset;
+	cartoffset = (rombank * 16384) % cart.cartromsize;
+	cart.cartrom_bank_n = cart.cartrom + cartoffset;
+	cart.extram_bank = cart.extram + rambank * 8192;
 }
 
-uint8_t mbc_huc1_read_bank_0( uint16_t address )
+uint8_t mbc_huc1_read_bank_0(uint16_t address)
 {
-  return cart.cartrom_bank_zero[address];
+	return cart.cartrom_bank_zero[address];
 }
 
-uint8_t mbc_huc1_read_bank_n( uint16_t address ) {
-  return cart.cartrom_bank_n[address&0x3fff];
+uint8_t mbc_huc1_read_bank_n(uint16_t address)
+{
+	return cart.cartrom_bank_n[address & 0x3fff];
 }
 
 // write 0000-1FFF
-void mbc_huc1_write_ram_enable( uint16_t address, uint8_t data ) {
-  //printf( "Wrote %04X:%02X\n", address, data );
-  int i;
-  if( /*data == 0x0A*/ 1 )
-  {
-    // enable extram access
-    for( i=0xA0; i<=0xBF; ++i ) {
-      readmem[i] = mbc_huc1_read_extram;
-    }
-    for( i=0xA0; i<=0xBF; ++i ) {
-      writemem[i] = mbc_huc1_write_extram;
-    }
-  }
-  else
-  {
-    // disable extram access
-    for( i=0xA0; i<=0xBF; ++i ) {
-      readmem[i] = mbc_huc1_read_extram_disabled;
-    }
-    for( i=0xA0; i<=0xBF; ++i ) {
-      writemem[i] = mbc_huc1_write_extram_disabled;
-    }
-  }
+void mbc_huc1_write_ram_enable(uint16_t address, uint8_t data)
+{
+	//printf( "Wrote %04X:%02X\n", address, data );
+	int i;
+	if ( /*data == 0x0A */ 1) {
+		// enable extram access
+		for (i = 0xA0; i <= 0xBF; ++i) {
+			readmem[i] = mbc_huc1_read_extram;
+		}
+		for (i = 0xA0; i <= 0xBF; ++i) {
+			writemem[i] = mbc_huc1_write_extram;
+		}
+	} else {
+		// disable extram access
+		for (i = 0xA0; i <= 0xBF; ++i) {
+			readmem[i] = mbc_huc1_read_extram_disabled;
+		}
+		for (i = 0xA0; i <= 0xBF; ++i) {
+			writemem[i] = mbc_huc1_write_extram_disabled;
+		}
+	}
 }
 
-uint8_t mbc_huc1_read_ff( uint16_t address )
+uint8_t mbc_huc1_read_ff(uint16_t address)
 {
-  return 0xff;
+	return 0xff;
 }
 
-void mbc_huc1_write_dummy( uint16_t address, uint8_t data )
+void mbc_huc1_write_dummy(uint16_t address, uint8_t data)
 {
-  //printf( "Wrote %04X:%02X\n", address, data );
+	//printf( "Wrote %04X:%02X\n", address, data );
 }
 
 // write 2000-3FFF
-void mbc_huc1_write_rom_bank_select( uint16_t address, uint8_t data ) {
-  //if( address != 0x2000 || data > 0x1F )
-  //  printf( "Wrote %04X:%02X\n", address, data );
-  huc1_bank_low = data;
-  mbc_huc1_regs_changed();
+void mbc_huc1_write_rom_bank_select(uint16_t address, uint8_t data)
+{
+	//if( address != 0x2000 || data > 0x1F )
+	//  printf( "Wrote %04X:%02X\n", address, data );
+	huc1_bank_low = data;
+	mbc_huc1_regs_changed();
 }
 
 // write 4000-5FFF
-void mbc_huc1_write_ram_bank_select( uint16_t address, uint8_t data ) {
-  //printf( "Wrote %04X:%02X\n", address, data );
-  huc1_bank_high = data;
-  mbc_huc1_regs_changed();
+void mbc_huc1_write_ram_bank_select(uint16_t address, uint8_t data)
+{
+	//printf( "Wrote %04X:%02X\n", address, data );
+	huc1_bank_high = data;
+	mbc_huc1_regs_changed();
 }
 
 // write 6000-7FFF
-void mbc_huc1_write_mode_select( uint16_t address, uint8_t data ) {
-  //printf( "Wrote %04X:%02X\n", address, data );
-  huc1_mode_select = data;
-  mbc_huc1_regs_changed();
+void mbc_huc1_write_mode_select(uint16_t address, uint8_t data)
+{
+	//printf( "Wrote %04X:%02X\n", address, data );
+	huc1_mode_select = data;
+	mbc_huc1_regs_changed();
 }
 
 // read A000-BFFF
-uint8_t mbc_huc1_read_extram( uint16_t address ) {
-  //printf( "Read extram %04X:%02X\n", address, cart.extram_bank[address&0x1fff] );
-  return cart.extram_bank[address&0x1fff];
+uint8_t mbc_huc1_read_extram(uint16_t address)
+{
+	//printf( "Read extram %04X:%02X\n", address, cart.extram_bank[address&0x1fff] );
+	return cart.extram_bank[address & 0x1fff];
 }
 
 // write A000-BFFF
-void mbc_huc1_write_extram( uint16_t address, uint8_t data ) {
-  //printf( "Wrote %04X:%02X\n", address, data );
-  cart.extram_bank[address&0x1fff] = data;
+void mbc_huc1_write_extram(uint16_t address, uint8_t data)
+{
+	//printf( "Wrote %04X:%02X\n", address, data );
+	cart.extram_bank[address & 0x1fff] = data;
 }
 
 // read A000-BFFF when extram is disabled
-uint8_t mbc_huc1_read_extram_disabled( uint16_t address ) {
-  //printf( "Read %04X:%02X while extram disabled\n", address, 0xff );
-  return 0xFF;
+uint8_t mbc_huc1_read_extram_disabled(uint16_t address)
+{
+	//printf( "Read %04X:%02X while extram disabled\n", address, 0xff );
+	return 0xFF;
 }
 
 // write A000-BFFF when extram is disabled
-void mbc_huc1_write_extram_disabled( uint16_t address, uint8_t data ) {
-  //printf( "Wrote %04X:%02X while extram disabled\n", address, data );
+void mbc_huc1_write_extram_disabled(uint16_t address, uint8_t data)
+{
+	//printf( "Wrote %04X:%02X while extram disabled\n", address, data );
 }

@@ -224,7 +224,7 @@ void vid_render_line()
 
     // Render the background.
     if( state.lcdc & LCDC_BG_ENABLE )
-        for( i=-1; i<21; ++i )
+        for( i= -1; i<21; ++i )
         {
             tileNum = backTileRow*32 + (i + (state.scx >> 3))%32;
 

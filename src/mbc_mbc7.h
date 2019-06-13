@@ -19,14 +19,14 @@
 #ifndef _MBC_MBC7_H_
 #define _MBC_MBC7_H_
 extern void mbc_mbc7_install();
-uint8_t mbc_mbc7_read_ff( uint16_t address );
-uint8_t mbc_mbc7_read_bank_0( uint16_t address );
-uint8_t mbc_mbc7_read_bank_n( uint16_t address );
-uint8_t mbc_mbc7_read_extram( uint16_t address );
-void mbc_mbc7_write_dummy( uint16_t address, uint8_t data );
-void mbc_mbc7_write_ram_enable( uint16_t address, uint8_t data );
-void mbc_mbc7_write_rom_bank_select( uint16_t address, uint8_t data );
-void mbc_mbc7_write_ram_bank_select( uint16_t address, uint8_t data );
-void mbc_mbc7_write_extram( uint16_t address, uint8_t data );
+uint8_t mbc_mbc7_read_ff(uint16_t address);
+uint8_t mbc_mbc7_read_bank_0(uint16_t address);
+uint8_t mbc_mbc7_read_bank_n(uint16_t address);
+uint8_t mbc_mbc7_read_extram(uint16_t address);
+void mbc_mbc7_write_dummy(uint16_t address, uint8_t data);
+void mbc_mbc7_write_ram_enable(uint16_t address, uint8_t data);
+void mbc_mbc7_write_rom_bank_select(uint16_t address, uint8_t data);
+void mbc_mbc7_write_ram_bank_select(uint16_t address, uint8_t data);
+void mbc_mbc7_write_extram(uint16_t address, uint8_t data);
 void mbc_mbc7_cleanup();
-#endif // _MBC_MBC7_H_
+#endif				// _MBC_MBC7_H_

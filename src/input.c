@@ -23,135 +23,135 @@
 #include "cpu.h"
 #include <SDL.h>
 
-int input_event_filter(void *dontcare, SDL_Event *event)
+int input_event_filter(void *dontcare, SDL_Event * event)
 {
-  switch( event->type ) {
-    // close button clicked
-    case SDL_QUIT:
-      stop = 1;
-      break;
-    
-    // handle the keyboard
-    case SDL_KEYDOWN:
-      switch (event->key.keysym.sym) {
-	case SDLK_ESCAPE:
-	case SDLK_q:
-	  stop = 1;
-	  break;
-	case SDLK_p:
-	  if(pause)
-	    pause = 0;
-	  else
-	    pause = 1;
-	  break;
-	case SDLK_RETURN:
-	  state.joyp_buttons &= ~INPUT_BUTTONS_START;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_TAB:
-	  state.joyp_buttons &= ~INPUT_BUTTONS_SELECT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_s:
-	  state.joyp_buttons &= ~INPUT_BUTTONS_A;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_a:
-	  state.joyp_buttons &= ~INPUT_BUTTONS_B;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_UP:
-	  state.joyp_directions &= ~INPUT_DIRECTIONS_UP;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_DOWN:
-	  state.joyp_directions &= ~INPUT_DIRECTIONS_DOWN;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_LEFT:
-	  state.joyp_directions &= ~INPUT_DIRECTIONS_LEFT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_RIGHT:
-	  state.joyp_directions &= ~INPUT_DIRECTIONS_RIGHT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	default:
-	  break;
-      }
-      break;
-    case SDL_KEYUP:
-      switch (event->key.keysym.sym) {
-	case SDLK_RETURN:
-	  state.joyp_buttons |= INPUT_BUTTONS_START;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_TAB:
-	  state.joyp_buttons |= INPUT_BUTTONS_SELECT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_s:
-	  state.joyp_buttons |= INPUT_BUTTONS_A;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_a:
-	  state.joyp_buttons |= INPUT_BUTTONS_B;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_UP:
-	  state.joyp_directions |= INPUT_DIRECTIONS_UP;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_DOWN:
-	  state.joyp_directions |= INPUT_DIRECTIONS_DOWN;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_LEFT:
-	  state.joyp_directions |= INPUT_DIRECTIONS_LEFT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	case SDLK_RIGHT:
-	  state.joyp_directions |= INPUT_DIRECTIONS_RIGHT;
-	  state.iflag |= IMASK_JOYPAD;
-	  state.halt = 0;
-	  break;
-	default:
-	  break;
-      }
-      break;
-  }
-  
-  return 0;
+	switch (event->type) {
+		// close button clicked
+	case SDL_QUIT:
+		stop = 1;
+		break;
+
+		// handle the keyboard
+	case SDL_KEYDOWN:
+		switch (event->key.keysym.sym) {
+		case SDLK_ESCAPE:
+		case SDLK_q:
+			stop = 1;
+			break;
+		case SDLK_p:
+			if (pause)
+				pause = 0;
+			else
+				pause = 1;
+			break;
+		case SDLK_RETURN:
+			state.joyp_buttons &= ~INPUT_BUTTONS_START;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_TAB:
+			state.joyp_buttons &= ~INPUT_BUTTONS_SELECT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_s:
+			state.joyp_buttons &= ~INPUT_BUTTONS_A;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_a:
+			state.joyp_buttons &= ~INPUT_BUTTONS_B;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_UP:
+			state.joyp_directions &= ~INPUT_DIRECTIONS_UP;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_DOWN:
+			state.joyp_directions &= ~INPUT_DIRECTIONS_DOWN;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_LEFT:
+			state.joyp_directions &= ~INPUT_DIRECTIONS_LEFT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_RIGHT:
+			state.joyp_directions &= ~INPUT_DIRECTIONS_RIGHT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		default:
+			break;
+		}
+		break;
+	case SDL_KEYUP:
+		switch (event->key.keysym.sym) {
+		case SDLK_RETURN:
+			state.joyp_buttons |= INPUT_BUTTONS_START;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_TAB:
+			state.joyp_buttons |= INPUT_BUTTONS_SELECT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_s:
+			state.joyp_buttons |= INPUT_BUTTONS_A;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_a:
+			state.joyp_buttons |= INPUT_BUTTONS_B;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_UP:
+			state.joyp_directions |= INPUT_DIRECTIONS_UP;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_DOWN:
+			state.joyp_directions |= INPUT_DIRECTIONS_DOWN;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_LEFT:
+			state.joyp_directions |= INPUT_DIRECTIONS_LEFT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		case SDLK_RIGHT:
+			state.joyp_directions |= INPUT_DIRECTIONS_RIGHT;
+			state.iflag |= IMASK_JOYPAD;
+			state.halt = 0;
+			break;
+		default:
+			break;
+		}
+		break;
+	}
+
+	return 0;
 }
 
 void input_init()
 {
-  // set up event filtering
-  // TODO
-  SDL_SetEventFilter( input_event_filter, NULL );
-  state.joyp = 0xFF;
-  state.joyp_buttons = 0xFF;
-  state.joyp_directions = 0xFF;
-  state.joyp_select = INPUT_SELECT_BUTTONS;
+	// set up event filtering
+	// TODO
+	SDL_SetEventFilter(input_event_filter, NULL);
+	state.joyp = 0xFF;
+	state.joyp_buttons = 0xFF;
+	state.joyp_directions = 0xFF;
+	state.joyp_select = INPUT_SELECT_BUTTONS;
 }
 
 void input_handle()
 {
-  // Pump events through the filter.
-  SDL_PumpEvents();
+	// Pump events through the filter.
+	SDL_PumpEvents();
 }

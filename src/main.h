@@ -24,4 +24,4 @@
 extern int stop;
 extern int pause;
 
-#endif // _MAIN_H_
+#endif				// _MAIN_H_

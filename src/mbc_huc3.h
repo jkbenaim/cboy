@@ -18,16 +18,16 @@
 
 #ifndef _MBC_HUC3_H_
 #define _MBC_HUC3_H_
-extern void mbc_huc3_install( void );
-uint8_t mbc_huc3_read_ff( uint16_t address );
-uint8_t mbc_huc3_read_bank_0( uint16_t address );
-uint8_t mbc_huc3_read_bank_n( uint16_t address );
-uint8_t mbc_huc3_read_extram( uint16_t address );
-void mbc_huc3_write_dummy( uint16_t address, uint8_t data );
-void mbc_huc3_write_ram_enable( uint16_t address, uint8_t data );
-void mbc_huc3_write_rom_bank_select_low( uint16_t address, uint8_t data );
-void mbc_huc3_write_rom_bank_select_high( uint16_t address, uint8_t data );
-void mbc_huc3_write_ram_bank_select( uint16_t address, uint8_t data );
-void mbc_huc3_write_extram( uint16_t address, uint8_t data );
+extern void mbc_huc3_install(void);
+uint8_t mbc_huc3_read_ff(uint16_t address);
+uint8_t mbc_huc3_read_bank_0(uint16_t address);
+uint8_t mbc_huc3_read_bank_n(uint16_t address);
+uint8_t mbc_huc3_read_extram(uint16_t address);
+void mbc_huc3_write_dummy(uint16_t address, uint8_t data);
+void mbc_huc3_write_ram_enable(uint16_t address, uint8_t data);
+void mbc_huc3_write_rom_bank_select_low(uint16_t address, uint8_t data);
+void mbc_huc3_write_rom_bank_select_high(uint16_t address, uint8_t data);
+void mbc_huc3_write_ram_bank_select(uint16_t address, uint8_t data);
+void mbc_huc3_write_extram(uint16_t address, uint8_t data);
 void mbc_huc3_cleanup();
-#endif // _MBC_HUC3_H_
+#endif				// _MBC_HUC3_H_

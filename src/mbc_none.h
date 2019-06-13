@@ -19,13 +19,13 @@
 #ifndef _MBC_NONE_H_
 #define _MBC_NONE_H_
 extern void mbc_none_install();
-uint8_t mbc_none_read_ff( uint16_t address );
-uint8_t mbc_none_read_bank_0( uint16_t address );
-uint8_t mbc_none_read_bank_n( uint16_t address );
-uint8_t mbc_none_read_extram( uint16_t address );
-void mbc_none_write_dummy( uint16_t address, uint8_t data );
-void mbc_none_write_bank_0( uint16_t address, uint8_t data );
-void mbc_none_write_bank_n( uint16_t address, uint8_t data );
-void mbc_none_write_extram( uint16_t address, uint8_t data );
+uint8_t mbc_none_read_ff(uint16_t address);
+uint8_t mbc_none_read_bank_0(uint16_t address);
+uint8_t mbc_none_read_bank_n(uint16_t address);
+uint8_t mbc_none_read_extram(uint16_t address);
+void mbc_none_write_dummy(uint16_t address, uint8_t data);
+void mbc_none_write_bank_0(uint16_t address, uint8_t data);
+void mbc_none_write_bank_n(uint16_t address, uint8_t data);
+void mbc_none_write_extram(uint16_t address, uint8_t data);
 void mbc_none_cleanup();
-#endif // _MBC_NONE_H_
+#endif				// _MBC_NONE_H_

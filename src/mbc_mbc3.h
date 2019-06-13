@@ -18,18 +18,18 @@
 
 #ifndef _MBC_MBC3_H_
 #define _MBC_MBC3_H_
-extern void mbc_mbc3_install( void );
-uint8_t mbc_mbc3_read_ff( uint16_t address );
-void mbc_mbc3_write_dummy( uint16_t address, uint8_t data );
-uint8_t mbc_mbc3_read_bank_0( uint16_t address );
-uint8_t mbc_mbc3_read_bank_n( uint16_t address );
-void mbc_mbc3_write_ram_enable( uint16_t address, uint8_t data );
-void mbc_mbc3_write_rom_bank_select( uint16_t address, uint8_t data );
-void mbc_mbc3_write_ram_bank_select( uint16_t address, uint8_t data );
-void mbc_mbc3_write_clock_data_latch( uint16_t address, uint8_t data );
-uint8_t mbc_mbc3_read_extram( uint16_t address );
-void mbc_mbc3_write_extram( uint16_t address, uint8_t data );
-uint8_t mbc_mbc3_read_rtc( uint16_t address );
-void mbc_mbc3_write_rtc( uint16_t address, uint8_t data );
+extern void mbc_mbc3_install(void);
+uint8_t mbc_mbc3_read_ff(uint16_t address);
+void mbc_mbc3_write_dummy(uint16_t address, uint8_t data);
+uint8_t mbc_mbc3_read_bank_0(uint16_t address);
+uint8_t mbc_mbc3_read_bank_n(uint16_t address);
+void mbc_mbc3_write_ram_enable(uint16_t address, uint8_t data);
+void mbc_mbc3_write_rom_bank_select(uint16_t address, uint8_t data);
+void mbc_mbc3_write_ram_bank_select(uint16_t address, uint8_t data);
+void mbc_mbc3_write_clock_data_latch(uint16_t address, uint8_t data);
+uint8_t mbc_mbc3_read_extram(uint16_t address);
+void mbc_mbc3_write_extram(uint16_t address, uint8_t data);
+uint8_t mbc_mbc3_read_rtc(uint16_t address);
+void mbc_mbc3_write_rtc(uint16_t address, uint8_t data);
 void mbc_mbc3_cleanup();
-#endif // _MBC_MBC3_H_
+#endif				// _MBC_MBC3_H_

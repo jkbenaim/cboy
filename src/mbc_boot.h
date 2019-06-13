@@ -19,9 +19,9 @@
 #ifndef _MBC_BOOT_H_
 #define _MBC_BOOT_H_
 void mbc_boot_install();
-extern uint8_t mbc_boot_read_bank_0( uint16_t address );
-extern void mbc_boot_write_bank_0( uint16_t address, uint8_t data );
-extern uint8_t mbc_boot_read_bank_n( uint16_t address );
-extern void mbc_boot_write_bank_n( uint16_t address, uint8_t data );
+extern uint8_t mbc_boot_read_bank_0(uint16_t address);
+extern void mbc_boot_write_bank_0(uint16_t address, uint8_t data);
+extern uint8_t mbc_boot_read_bank_n(uint16_t address);
+extern void mbc_boot_write_bank_n(uint16_t address, uint8_t data);
 
-#endif // _MBC_BOOT_H_
+#endif				// _MBC_BOOT_H_

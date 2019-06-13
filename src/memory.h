@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-extern uint8_t  read_byte( uint16_t address );
-extern uint16_t read_word( uint16_t address );
-extern void     write_byte( uint16_t address, uint8_t  data );
-extern void     write_word( uint16_t address, uint16_t data );
+extern uint8_t read_byte(uint16_t address);
+extern uint16_t read_word(uint16_t address);
+extern void write_byte(uint16_t address, uint8_t data);
+extern void write_word(uint16_t address, uint16_t data);
 
 extern pixel_t visual_memory[65536];
 
@@ -93,8 +93,8 @@ extern pixel_t visual_memory[65536];
 #define ADDR_WY		0xFF4A
 #define ADDR_WX		0xFF4B
 #define ADDR_CAPS	0xFF4C	// CGB bios writes here to indicate compatibility level.
-				// 04h=regular gameboy, 80h=cgb compatible, C0h=cgb required
-				// I'm not sure if this is correct.
+	// 04h=regular gameboy, 80h=cgb compatible, C0h=cgb required
+	// I'm not sure if this is correct.
 #define ADDR_KEY1	0xFF4D	// cpu speed switch (cgb only)
 #define ADDR_VBK	0xFF4F	// select VRAM bank (cgb only)
 #define ADDR_ROM_DISABLE	0xFF50
@@ -121,19 +121,18 @@ extern pixel_t visual_memory[65536];
 #define LCDC_OBJ_DISPLAY		0x02	// 0=Off, 1=On
 #define LCDC_BG_ENABLE			0x01	// 0=Off, 1=On
 
-#define LCD_STAT_LYC_INT_ENABLED        0x40    // 0=Off, 1=On (R/W)
-#define LCD_STAT_OAM_INT_ENABLED        0x20    // 0=Off, 1=On (R/W)
-#define LCD_STAT_VBLANK_INT_ENABLED     0x10    // 0=Off, 1=On (R/W)
-#define LCD_STAT_HBLANK_INT_ENABLED     0x08    // 0=Off, 1=On (R/W)
-#define LCD_STAT_COINCIDENCE            0x04    // 1=(LYC==LY) (R  )
-#define LCD_STAT_MODE_BITMASK           0x03    // mode number (R  )
-
+#define LCD_STAT_LYC_INT_ENABLED        0x40	// 0=Off, 1=On (R/W)
+#define LCD_STAT_OAM_INT_ENABLED        0x20	// 0=Off, 1=On (R/W)
+#define LCD_STAT_VBLANK_INT_ENABLED     0x10	// 0=Off, 1=On (R/W)
+#define LCD_STAT_HBLANK_INT_ENABLED     0x08	// 0=Off, 1=On (R/W)
+#define LCD_STAT_COINCIDENCE            0x04	// 1=(LYC==LY) (R  )
+#define LCD_STAT_MODE_BITMASK           0x03	// mode number (R  )
 
 #define SC_TRANSFER		0x80	// 0=No Transfer, 1=Start
 #define SC_CLOCK_SPEED		0x02	// 0=Normal, 1=Fast (CGB only)
 #define SC_SHIFT_CLOCK		0x01	// 0=External Clock, 1=Internal Clock
 
-extern uint8_t (*readmem[0x101])(uint16_t address);
+extern uint8_t(*readmem[0x101]) (uint16_t address);
 extern void (*writemem[0x101])(uint16_t address, uint8_t data);
 
 extern uint8_t vram_bank_zero[0x2000];
@@ -141,58 +140,56 @@ extern uint8_t vram_bank_one[0x2000];
 extern uint8_t oam[0xA0];
 extern uint8_t hram[0x7F];
 
-
-void mem_init( void );
+void mem_init(void);
 
 // nothing
-uint8_t read_nothing( uint16_t address );
-void write_nothing( uint16_t address, uint8_t data );
+uint8_t read_nothing(uint16_t address);
+void write_nothing(uint16_t address, uint8_t data);
 
 // cart bank zero
-uint8_t read_cart_bank_zero( uint16_t address );
-void write_cart_bank_zero( uint16_t address );
+uint8_t read_cart_bank_zero(uint16_t address);
+void write_cart_bank_zero(uint16_t address);
 
 // cart bank n
-uint8_t read_cart_bank_n( uint16_t address );
-void write_cart_bank_n( uint16_t address, uint8_t data );
+uint8_t read_cart_bank_n(uint16_t address);
+void write_cart_bank_n(uint16_t address, uint8_t data);
 
 // vram
-void select_vram_bank( uint8_t num );
-uint8_t read_vram_bank_zero( uint16_t address );
-void write_vram_bank_zero( uint16_t address, uint8_t data );
-uint8_t read_vram_bank_one( uint16_t address );
-void write_vram_bank_one( uint16_t address, uint8_t data );
+void select_vram_bank(uint8_t num);
+uint8_t read_vram_bank_zero(uint16_t address);
+void write_vram_bank_zero(uint16_t address, uint8_t data);
+uint8_t read_vram_bank_one(uint16_t address);
+void write_vram_bank_one(uint16_t address, uint8_t data);
 
 // ram
-uint8_t read_ram( uint16_t address );
-void write_ram( uint16_t address, uint8_t data );
+uint8_t read_ram(uint16_t address);
+void write_ram(uint16_t address, uint8_t data);
 
 // wram bank zero
-uint8_t read_wram_bank_zero( uint16_t address );
-void write_wram_bank_zero( uint16_t address, uint8_t data );
+uint8_t read_wram_bank_zero(uint16_t address);
+void write_wram_bank_zero(uint16_t address, uint8_t data);
 
 // wram bank n
-uint8_t read_wram_bank_n( uint16_t address );
-void write_wram_bank_n( uint16_t address, uint8_t data );
+uint8_t read_wram_bank_n(uint16_t address);
+void write_wram_bank_n(uint16_t address, uint8_t data);
 
 // echo ram
-uint8_t read_echoram( uint16_t address );
-void write_echoram( uint16_t address, uint8_t data );
+uint8_t read_echoram(uint16_t address);
+void write_echoram(uint16_t address, uint8_t data);
 
 // oam
-uint8_t read_oam( uint16_t address );
-void write_oam( uint16_t address, uint8_t data );
+uint8_t read_oam(uint16_t address);
+void write_oam(uint16_t address, uint8_t data);
 
 // special
-uint8_t read_special( uint16_t address );
-void write_special( uint16_t address, uint8_t data );
+uint8_t read_special(uint16_t address);
+void write_special(uint16_t address, uint8_t data);
 
 // out of bounds
-uint8_t read_out_of_bounds( uint16_t address );
-void write_out_of_bounds( uint16_t address, uint8_t data );
+uint8_t read_out_of_bounds(uint16_t address);
+void write_out_of_bounds(uint16_t address, uint8_t data);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // !_MEMORY_H_
+#endif				// !_MEMORY_H_
