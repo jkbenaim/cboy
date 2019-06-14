@@ -2,8 +2,8 @@ target = cboy
 csources = $(wildcard *.c)
 cppsources = $(wildcard *.cpp)
 objects = $(csources:.c=.o) $(cppsources:.cpp=.o) bootrom.o gb_apu/libgb_apu.a
-CFLAGS= -std=c99 -Os -ggdb -Wall -Werror `sdl2-config --cflags`
-CXXFLAGS= -Os -ggdb -Wall -Werror `sdl2-config --cflags`
+CFLAGS= -std=c99 -Os -ggdb -Wall -Werror -fwrapv `sdl2-config --cflags`
+CXXFLAGS= -Os -ggdb -Wall -Werror -fwrapv `sdl2-config --cflags`
 
 .PHONY: all
 all: $(target)
