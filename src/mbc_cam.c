@@ -19,6 +19,7 @@
 #include "memory.h"
 #include "cart.h"
 #include "mbc_cam.h"
+#include "cpu.h"
 #include <stdio.h>
 
 int cam_mode;   // 0=RAM accessible, 1=CAM registers accessible
@@ -69,34 +70,56 @@ void mbc_cam_install()
 	cam_mode = 0;
 }
 
+void _camwrite(uint16_t address, uint8_t data)
+{
+	if((address & 0x0ff0) == 0x0ff0)
+	printf("cam write: (ROM %02x RAM %02x) (%04x) %04x <-- %02x\n", cart.cart_bank_num, cart.extram_bank_num, state.pc, address, data);
+}
+
+void _camread(uint16_t address, uint8_t data)
+{
+	if((address & 0x0ff0) == 0x0ff0)
+	printf("cam read : (ROM %02x RAM %02x) (%04x) %04x --> %02x\n", cart.cart_bank_num, cart.extram_bank_num, state.pc, address, data);
+}
+
 void mbc_cam_write_dummy(uint16_t address, uint8_t data)
 {
+	_camwrite(address, data);
 }
 
 uint8_t mbc_cam_read_bank_0(uint16_t address)
 {
-	return cart.cartrom_bank_zero[address];
+	uint8_t data = cart.cartrom_bank_zero[address];
+	//_camread(address, data);
+	return data;
 }
 
 uint8_t mbc_cam_read_bank_n(uint16_t address) {
-	return cart.cartrom_bank_n[address&0x3fff];
+	uint8_t data = cart.cartrom_bank_n[address&0x3fff];
+	//_camread(address, data);
+	return data;
 }
 
 // write 0000-1FFF
 void mbc_cam_write_ram_enable(uint16_t address, uint8_t data) {
+	_camwrite(address, data);
 	// TODO
 }
 
 // write 2000-3FFF
 void mbc_cam_write_rom_bank_select(uint16_t address, uint8_t data) {
+	//_camwrite(address, data);
 	size_t cartoffset;
 	int rombank = (data==0)?1:data;
+	cart.cart_bank_num = rombank;
 	cartoffset = (rombank*16384) % cart.cartromsize;
 	cart.cartrom_bank_n = cart.cartrom + cartoffset;
 }
 
 // write 4000-5FFF
 void mbc_cam_write_extram_bank_select(uint16_t address, uint8_t data) {
+	_camwrite(address, data);
+	cart.extram_bank_num = data;
 	if( data == 0x10 )
 	{
 		// CAM mode
@@ -115,24 +138,29 @@ void mbc_cam_write_extram_bank_select(uint16_t address, uint8_t data) {
 
 // write 6000-7FFF
 void mbc_cam_write_mode_select(uint16_t address, uint8_t data) {
+	//_camwrite(address, data);
 }
 
 // read A000-BFFF
 uint8_t mbc_cam_read_extram(uint16_t address) {
+	uint8_t data;
 	if( cam_mode == 0 )
 	{
 		// access RAM like normal
-		return cart.extram_bank[address&0x1fff];
+		data = cart.extram_bank[address&0x1fff];
 	}
 	else
 	{
 		// access CAM registers
-		return 0; //TODO
+		data = 0; //TODO
 	}
+	_camread(address, data);
+	return data;
 }
 
 // write A000-BFFF
 void mbc_cam_write_extram(uint16_t address, uint8_t data) {
+	_camwrite(address, data);
 	if(cam_mode == 0) {
 		// access RAM like normal
 		cart.extram_bank[address&0x1fff] = data;
